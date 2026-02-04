@@ -17,6 +17,7 @@ import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { authStorage } from "./storage";
+import { authRateLimiter } from "../../security";
 
 const getOidcConfig = memoize(
   async () => {
@@ -112,7 +113,8 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-  app.get("/api/login", (req, res, next) => {
+  // AI-NOTE: Rate limiting on login to prevent brute force attacks
+  app.get("/api/login", authRateLimiter, (req, res, next) => {
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
@@ -120,7 +122,7 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  app.get("/api/callback", (req, res, next) => {
+  app.get("/api/callback", authRateLimiter, (req, res, next) => {
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
