@@ -77,7 +77,8 @@ export function corsPolicy(req: Request, res: Response, next: NextFunction) {
   // Check if origin matches allowlist (simple wildcard support)
   const isAllowed = origin && allowedOrigins.some(allowed => {
     if (allowed.includes('*')) {
-      const pattern = allowed.replace('*', '.*');
+      // Escape special regex characters except *, then replace * with .*
+      const pattern = allowed.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
       return new RegExp(`^${pattern}$`).test(origin);
     }
     return allowed === origin;
