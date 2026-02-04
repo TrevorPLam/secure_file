@@ -16,6 +16,7 @@ import { registerObjectStorageRoutes, ObjectStorageService } from "./replit_inte
 import { insertFolderSchema, insertFileSchema, insertShareLinkSchema } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { authRateLimiter, shareLinkRateLimiter } from "./security";
 
 const objectStorageService = new ObjectStorageService();
 
@@ -222,9 +223,10 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/shares/info/:token", async (req, res) => {
+  app.get("/api/shares/info/:token", shareLinkRateLimiter, async (req, res) => {
     try {
-      const shareLink = await storage.getShareLinkByToken(req.params.token);
+      const token = typeof req.params.token === 'string' ? req.params.token : req.params.token[0];
+      const shareLink = await storage.getShareLinkByToken(token);
       if (!shareLink || !shareLink.isActive) {
         return res.status(404).json({ message: "Share link not found" });
       }
@@ -252,9 +254,10 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/shares/:token/download", async (req, res) => {
+  app.post("/api/shares/:token/download", shareLinkRateLimiter, async (req, res) => {
     try {
-      const shareLink = await storage.getShareLinkByToken(req.params.token);
+      const token = typeof req.params.token === 'string' ? req.params.token : req.params.token[0];
+      const shareLink = await storage.getShareLinkByToken(token);
       if (!shareLink || !shareLink.isActive) {
         return res.status(404).json({ message: "Share link not found" });
       }
