@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Share link download page - public file download with optional password protection and expiration
+// OWNERSHIP: client/pages
+// ENTRYPOINTS: Rendered by App.tsx on "/share/:token" route for anonymous users
+// DEPENDENCIES: @tanstack/react-query (data fetching), wouter (routing params), @/lib/queryClient (API), date-fns (date formatting)
+// DANGER: Password validation happens server-side - client shows error after bcrypt comparison; expired links return 410 Gone
+// CHANGE-SAFETY: Safe to modify UI styling, unsafe to change download flow or password handling without server coordination
+// TESTS: Manual testing with valid/invalid passwords, expired links, and various file types
+// AI-META-END
+
 import { useState } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";

@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Google Cloud Storage service wrapper - provides presigned URLs, file operations, and ACL integration for Replit sidecar
+// OWNERSHIP: server/replit_integrations/object_storage
+// ENTRYPOINTS: ObjectStorageService instantiated in server/routes.ts and ./routes.ts
+// DEPENDENCIES: @google-cloud/storage (GCS SDK), express (Response types), crypto (UUID generation), ./objectAcl (ACL policy management)
+// DANGER: Sidecar endpoint hardcoded to localhost:1106 - must be available; presigned URLs have 15min expiration; ACL policies stored in object metadata
+// CHANGE-SAFETY: Safe to adjust expiration times or add new methods, unsafe to change credential source or bucket access patterns without testing
+// TESTS: Manual testing with file uploads, verify presigned URL generation and ACL enforcement
+// AI-META-END
+
 import { Storage, File } from "@google-cloud/storage";
 import { Response } from "express";
 import { randomUUID } from "crypto";

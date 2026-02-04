@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Theme provider context - manages light/dark theme state with localStorage persistence and system preference detection
+// OWNERSHIP: client/components
+// ENTRYPOINTS: Wraps entire app in App.tsx to provide theme context
+// DEPENDENCIES: React context, localStorage, window.matchMedia
+// DANGER: Direct DOM manipulation via classList - must sync with Tailwind dark mode; localStorage read on mount
+// CHANGE-SAFETY: Safe to add theme variants, unsafe to change context structure or localStorage keys without migration
+// TESTS: Manual testing with theme toggle and browser preference changes
+// AI-META-END
+
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "light" | "dark";

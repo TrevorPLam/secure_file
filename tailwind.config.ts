@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Tailwind CSS configuration - theme tokens, color system, and plugin setup
+// OWNERSHIP: config/styling
+// ENTRYPOINTS: Used by Tailwind CLI and PostCSS during build
+// DEPENDENCIES: tailwindcss, tailwindcss-animate, @tailwindcss/typography
+// DANGER: darkMode="class" requires .dark class on html; CSS custom properties (--background, etc) defined in globals.css; content paths must include all components
+// CHANGE-SAFETY: Safe to add new colors or utilities, unsafe to change existing color tokens without updating CSS variables
+// TESTS: Visual inspection after theme changes, verify dark mode toggle
+// AI-META-END
+
 import type { Config } from "tailwindcss";
 
 export default {

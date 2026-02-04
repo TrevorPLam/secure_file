@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Replit OpenID Connect authentication - configures passport strategy, session management, and auth middleware
+// OWNERSHIP: server/replit_integrations/auth
+// ENTRYPOINTS: setupAuth called from server/routes.ts at app startup; isAuthenticated used as route guard
+// DEPENDENCIES: openid-client (OIDC), passport (auth framework), express-session (session management), connect-pg-simple (session store), memoizee (config caching), ./storage (user persistence)
+// DANGER: SESSION_SECRET and REPL_ID must be set; OIDC config cached for 1 hour; session cookies secure flag requires HTTPS; passport serialization stores full user in session
+// CHANGE-SAFETY: Safe to adjust session TTL or cookie settings, unsafe to change passport strategy or serialization without testing login flows
+// TESTS: Manual testing via login flow, verify session persistence across requests
+// AI-META-END
+
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
 

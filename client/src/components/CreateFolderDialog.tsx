@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Create folder dialog - modal for creating new folders with name validation
+// OWNERSHIP: client/components
+// ENTRYPOINTS: Opened from dashboard page via state-controlled open prop
+// DEPENDENCIES: @tanstack/react-query (mutations), @/components/ui/* (dialog, button, input), @/hooks/use-toast, @/lib/queryClient, lucide-react (icons)
+// DANGER: Folder creation scoped to current parentFolderId - must invalidate folders query to refresh UI
+// CHANGE-SAFETY: Safe to add validation rules, unsafe to change mutation logic or query invalidation
+// TESTS: Manual testing with empty names, special characters, and nested folder creation
+// AI-META-END
+
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import {

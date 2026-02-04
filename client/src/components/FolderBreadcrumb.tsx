@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Folder breadcrumb navigation - displays folder path from root to current with clickable navigation
+// OWNERSHIP: client/components
+// ENTRYPOINTS: Rendered by dashboard page above file list
+// DEPENDENCIES: @/components/ui/button, lucide-react (icons), @shared/schema (Folder type)
+// DANGER: Navigation callback triggers query param updates and data refetch
+// CHANGE-SAFETY: Safe to modify styling and truncation behavior
+// TESTS: Manual testing with nested folder navigation
+// AI-META-END
+
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Home } from "lucide-react";
 import type { Folder } from "@shared/schema";

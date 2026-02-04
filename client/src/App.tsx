@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Root App component - router setup, auth gating, and global provider wrapping
+// OWNERSHIP: client/root
+// ENTRYPOINTS: Rendered by main.tsx as application root
+// DEPENDENCIES: wouter (routing), @tanstack/react-query (QueryClientProvider), @/hooks/use-auth (auth state), @/components/* (providers, pages)
+// DANGER: Auth gate redirects unauthenticated users to landing page; loading state shows spinner; route matching is order-dependent
+// CHANGE-SAFETY: Safe to add new routes, unsafe to change auth gating logic or provider order without testing
+// TESTS: Manual testing with authenticated/unauthenticated states, verify all routes
+// AI-META-END
+
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";

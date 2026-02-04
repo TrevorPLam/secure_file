@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: File and folder list display - grid view with file type icons, actions menu (download, share, delete), and empty states
+// OWNERSHIP: client/components
+// ENTRYPOINTS: Rendered by dashboard page to display current folder contents
+// DEPENDENCIES: @tanstack/react-query (mutations), @/components/ui/* (cards, buttons, dialogs), @/hooks/use-toast, @/lib/queryClient, @shared/schema (types), lucide-react (file type icons)
+// DANGER: Delete operations are permanent and cascade to children; download triggers presigned URL generation; share opens modal
+// CHANGE-SAFETY: Safe to add new file type icons or action menu items, unsafe to change delete behavior or query invalidation without testing
+// TESTS: Manual testing with various file types, test delete confirmations and share flows
+// AI-META-END
+
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";

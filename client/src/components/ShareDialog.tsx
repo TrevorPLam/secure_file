@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Share link management dialog - create, view, copy, and delete share links with password and expiration options
+// OWNERSHIP: client/components
+// ENTRYPOINTS: Opened from FileList component when user clicks share action on a file
+// DEPENDENCIES: @tanstack/react-query (data fetching/mutations), @/components/ui/* (dialog, form controls), @/hooks/use-toast, @/lib/queryClient, @shared/schema (types), lucide-react (icons)
+// DANGER: Share links are permanent URLs with optional password/expiry; copy to clipboard requires user interaction; delete is immediate
+// CHANGE-SAFETY: Safe to add new sharing options, unsafe to change token format or share URL structure without server coordination
+// TESTS: Manual testing with password-protected and time-limited shares, verify copy functionality
+// AI-META-END
+
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {

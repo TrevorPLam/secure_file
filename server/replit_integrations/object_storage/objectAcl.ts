@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Object ACL policy management - provides fine-grained access control for stored objects via metadata
+// OWNERSHIP: server/replit_integrations/object_storage
+// ENTRYPOINTS: Used by objectStorage.ts for access control checks and policy management
+// DEPENDENCIES: @google-cloud/storage (File operations)
+// DANGER: ACL policies stored in GCS metadata - must parse JSON carefully; access checks are synchronous and must be efficient
+// CHANGE-SAFETY: Safe to extend ObjectAccessGroupType enum, unsafe to change policy format without migration path
+// TESTS: Unit tests for canAccessObject logic, integration tests for policy CRUD
+// AI-META-END
+
 import { File } from "@google-cloud/storage";
 
 const ACL_POLICY_METADATA_KEY = "custom:aclPolicy";

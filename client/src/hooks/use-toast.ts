@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Toast notification hook - global toast state management with reducer pattern
+// OWNERSHIP: client/hooks
+// ENTRYPOINTS: Used throughout app via useToast() to show success/error messages
+// DEPENDENCIES: React (reducer pattern), @/components/ui/toast (Toast types)
+// DANGER: TOAST_LIMIT=1 shows only one toast at a time; TOAST_REMOVE_DELAY=1000000ms for auto-dismiss; global state via listeners
+// CHANGE-SAFETY: Safe to adjust limits and delays, unsafe to change action types or reducer logic without testing all toast consumers
+// TESTS: Manual testing with various toast scenarios (success, error, multiple toasts)
+// AI-META-END
+
 import * as React from "react"
 
 import type {

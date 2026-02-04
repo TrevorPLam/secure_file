@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Auth model schema - user and session table definitions required for Replit Auth
+// OWNERSHIP: shared/models/auth
+// ENTRYPOINTS: Imported by @shared/schema (re-exported) and auth integration code
+// DEPENDENCIES: drizzle-orm (ORM table definitions)
+// DANGER: sessions and users tables are mandatory for Replit Auth - DO NOT DROP; session expiry indexed for cleanup performance
+// CHANGE-SAFETY: Safe to add new user fields, unsafe to change session table structure without breaking auth
+// TESTS: Verify auth flows after schema changes
+// AI-META-END
+
 import { sql } from "drizzle-orm";
 import { index, jsonb, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 
