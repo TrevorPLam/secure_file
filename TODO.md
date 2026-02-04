@@ -1,6 +1,402 @@
-# CloudVault - Testing & Quality TODO
+# CloudVault - TODO & Improvements
 
 **Last Updated:** February 4, 2026  
+**Current Test Coverage:** 64.33% (211 passing tests)  
+**DIAMOND Grade:** A (91.4% - Excellent)  
+**Status:** Production-ready with optional improvements available
+
+---
+
+## 🎯 Priority Tasks from DIAMOND Analysis
+
+**DIAMOND Assessment:** CloudVault scored **402/440 (91.4%)** across all categories. The following tasks address identified gaps to achieve A+ rating (95%+).
+
+---
+
+### 🔴 CRITICAL - Quick Wins (1-2 Days)
+
+#### 1. Add Dedicated LICENSE File (30 minutes)
+**Current:** 8/10 - License declared in package.json only  
+**Target:** 10/10 - Standard LICENSE file present  
+**DIAMOND Reference:** Basics #7
+
+**Action:**
+```bash
+# Create LICENSE file in project root
+```
+
+**Content:**
+```text
+MIT License
+
+Copyright (c) 2026 CloudVault Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+- [ ] Create LICENSE file with full MIT license text
+- [ ] Commit to repository
+
+**Impact:** +2 points in Basics category
+
+---
+
+#### 2. Add ESLint + Prettier (4-8 hours)
+**Current:** 9/10 - Consistent code style without formal linter  
+**Target:** 10/10 - Enforced code style  
+**DIAMOND Reference:** Best Practices #3
+
+**Action:**
+```bash
+npm install --save-dev eslint prettier eslint-config-prettier eslint-plugin-react @typescript-eslint/eslint-plugin @typescript-eslint/parser
+```
+
+**Files to create:**
+- [ ] `.eslintrc.json` - ESLint configuration
+- [ ] `.prettierrc.json` - Prettier configuration
+- [ ] `.eslintignore` - Exclude patterns
+- [ ] Add `lint` and `format` scripts to package.json
+- [ ] Add pre-commit hook (optional: husky + lint-staged)
+- [ ] Run `npm run format` to fix existing files
+- [ ] Add ESLint check to CI/CD (.github/workflows/test-coverage.yml)
+
+**Impact:** +1 point in Best Practices, prevents future style drift
+
+---
+
+#### 3. Add CODEOWNERS File (15 minutes)
+**Current:** 9/10 - No automatic reviewer assignment  
+**Target:** 10/10 - Clear code ownership  
+**DIAMOND Reference:** Best Practices #8
+
+**Action:**
+```bash
+# Create .github/CODEOWNERS file
+```
+
+**Content:**
+```text
+# Default owners for everything
+* @your-username
+
+# Security-related files
+/docs/security/** @security-team
+/server/security.ts @security-team
+/.github/workflows/security.yml @security-team
+
+# Testing infrastructure
+/test/** @qa-team
+/.github/workflows/test-coverage.yml @qa-team
+
+# Documentation
+/docs/** @docs-team
+```
+
+- [ ] Create `.github/CODEOWNERS` file
+- [ ] Define ownership for key areas
+- [ ] Commit to repository
+
+**Impact:** +1 point in Best Practices, improves review workflow
+
+---
+
+### 🟠 HIGH PRIORITY - Production Readiness (2-4 Weeks)
+
+#### 4. Structured Audit Logging (32 hours / 1 week)
+**Current:** 7/10 - Basic console logging only  
+**Target:** 9/10 - Tamper-proof audit logging  
+**DIAMOND Reference:** Fundamentals #6, Highest Standards #5
+
+**Requirements (From Security Posture Report T-R-01):**
+- [ ] Migrate logs to PostgreSQL (append-only table)
+- [ ] Add cryptographic log signing (HMAC-SHA256 per entry)
+- [ ] Implement log retention policy (1 year minimum)
+- [ ] Create audit events enum (LOGIN, UPLOAD, DOWNLOAD, SHARE_CREATE, etc.)
+- [ ] Log all security-relevant events
+- [ ] Add log query API endpoint (`/api/admin/audit-logs`)
+- [ ] Create admin UI for audit log viewing
+
+**Files to create/modify:**
+- `shared/schema.ts` - Add `audit_logs` table
+- `server/audit-logger.ts` - Logging service with HMAC signing
+- `server/routes.ts` - Integrate audit logging into all endpoints
+- `client/src/pages/admin-audit-logs.tsx` - Admin log viewer
+
+**Impact:** +3 points in Fundamentals, required for SOC 2 compliance
+
+---
+
+#### 5. Deploy Monitoring & Observability (80 hours / 2 weeks)
+**Current:** 6/10 - No monitoring infrastructure  
+**Target:** 9/10 - Full observability stack  
+**DIAMOND Reference:** Highest Standards #5
+
+**Options:**
+- **Option A:** Datadog (Recommended - $15-31/host/month)
+- **Option B:** Self-hosted (Prometheus + Grafana + Loki)
+- **Option C:** AWS CloudWatch (if migrating to AWS)
+
+**Implementation Steps:**
+- [ ] Choose monitoring platform (Datadog recommended)
+- [ ] Install APM agent in server/index.ts
+- [ ] Configure log forwarding from PostgreSQL
+- [ ] Create dashboards:
+  - API response times (p50, p95, p99)
+  - Error rate by endpoint
+  - Active users
+  - Storage usage trends
+  - Database query performance
+- [ ] Set up alerting:
+  - Error rate >1% for 5 minutes
+  - Response time p95 >500ms for 10 minutes
+  - Database connection failures
+  - Disk usage >80%
+- [ ] Configure on-call rotation (PagerDuty integration)
+- [ ] Document runbooks in `docs/operations/`
+
+**Impact:** +3 points in Highest Standards, critical for production operations
+
+---
+
+#### 6. Implement Disaster Recovery (56 hours / 1.5 weeks)
+**Current:** 7/10 - Plan documented, not implemented  
+**Target:** 9/10 - Tested backup/recovery procedures  
+**DIAMOND Reference:** Highest Standards #6
+
+**Steps:**
+- [ ] Set up automated PostgreSQL backups:
+  - Daily full backups to separate storage bucket
+  - Retain 30 days of backups
+  - Enable Point-In-Time Recovery (PITR)
+- [ ] Create backup monitoring:
+  - Alert if backup fails
+  - Weekly backup integrity checks
+- [ ] Document restoration procedures:
+  - Step-by-step runbook in `docs/operations/DISASTER_RECOVERY.md`
+  - Include RTO (4 hours) and RPO (24 hours) targets
+- [ ] Test restoration quarterly:
+  - Restore to test environment
+  - Verify data integrity
+  - Measure actual recovery time
+- [ ] Set up GCS replication (multi-region):
+  - Primary: us-central1
+  - Secondary: us-east1
+- [ ] Create failover procedures for Replit outage
+
+**Files to create:**
+- `docs/operations/DISASTER_RECOVERY.md` - Runbook
+- `script/backup-database.sh` - Backup script
+- `script/restore-database.sh` - Restoration script
+- `.github/workflows/backup-test.yml` - Quarterly backup testing
+
+**Impact:** +2 points in Highest Standards, required for SOC 2 compliance
+
+---
+
+#### 7. Add Performance Monitoring (32 hours / 1 week)
+**Current:** 7/10 - Optimized code, no monitoring  
+**Target:** 9/10 - Performance tracked and alerted  
+**DIAMOND Reference:** Highest Standards #7
+
+**Implementation:**
+- [ ] Add slow query logging to PostgreSQL:
+  - Log queries taking >100ms
+  - Alert if >10 slow queries/minute
+- [ ] Implement database query performance tracking:
+  - Add query timing middleware
+  - Create dashboard in monitoring tool
+- [ ] Add client-side performance monitoring:
+  - Integrate Lighthouse CI in GitHub Actions
+  - Track Core Web Vitals (LCP, FID, CLS)
+  - Set performance budgets (LCP <2.5s, FID <100ms)
+- [ ] Create performance baselines:
+  - Document current p50/p95/p99 response times
+  - Set SLAs (p95 <200ms for listings, <500ms for uploads)
+- [ ] Add load testing:
+  - Install k6 or Artillery
+  - Create test scenarios (100 concurrent uploads)
+  - Run load tests monthly
+
+**Files to create:**
+- `test/performance/load-tests.js` - k6 test scenarios
+- `.github/workflows/performance.yml` - Lighthouse CI
+- `docs/operations/PERFORMANCE_BASELINES.md` - SLA documentation
+
+**Impact:** +2 points in Highest Standards
+
+---
+
+### 🟡 MEDIUM PRIORITY - Quality Improvements (1-2 Months)
+
+#### 8. Conduct Accessibility Audit (24 hours / 3 days)
+**Current:** 7/10 - Framework support, needs validation  
+**Target:** 9/10 - WCAG 2.1 AA compliant  
+**DIAMOND Reference:** Highest Standards #8
+
+**Steps:**
+- [ ] Install axe-core testing library:
+  ```bash
+  npm install --save-dev @axe-core/react jest-axe
+  ```
+- [ ] Add accessibility tests to component tests:
+  - Test all form inputs have labels
+  - Test keyboard navigation
+  - Test focus management
+- [ ] Run Lighthouse accessibility audit:
+  - Audit all pages (login, dashboard, file view, settings)
+  - Fix identified issues (aim for 95+ score)
+- [ ] Manual testing with screen readers:
+  - NVDA (Windows) or JAWS
+  - VoiceOver (macOS)
+  - Test critical user flows (upload, share, download)
+- [ ] Verify color contrast (WCAG AA: 4.5:1 for normal text)
+- [ ] Add skip navigation links
+- [ ] Document accessibility statement in `docs/ACCESSIBILITY.md`
+
+**Impact:** +2 points in Highest Standards, improves UX for all users
+
+---
+
+#### 9. Implement API Versioning (16 hours / 2 days)
+**Current:** 7/10 - Implicit v1, no explicit versioning  
+**Target:** 9/10 - Explicit versioning with deprecation policy  
+**DIAMOND Reference:** Highest Standards #10
+
+**Steps:**
+- [ ] Add `/api/v1/` namespace to all routes
+- [ ] Update client to use versioned endpoints
+- [ ] Create API changelog (`docs/api/CHANGELOG.md`)
+- [ ] Document deprecation policy:
+  - New versions announced 90 days in advance
+  - Old versions supported for 6 months minimum
+  - Breaking changes only in major versions
+- [ ] Add `X-API-Version` response header
+- [ ] Create endpoint to list supported versions: `GET /api/versions`
+
+**Files to modify:**
+- `server/routes.ts` - Wrap routes in `/v1` router
+- `client/src/lib/api.ts` - Update base URL to `/api/v1`
+- `docs/api/VERSIONING.md` - Document policy
+
+**Impact:** +2 points in Highest Standards, enables future breaking changes
+
+---
+
+#### 10. Add Dependabot for Automated Updates (1 hour)
+**Current:** 10/10 - Manual dependency management  
+**Target:** 10/10 - Automated dependency PRs  
+**DIAMOND Reference:** Best Practices #9
+
+**Action:**
+```yaml
+# Create .github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "your-username"
+    labels:
+      - "dependencies"
+      - "automated"
+```
+
+- [ ] Create `.github/dependabot.yml` file
+- [ ] Configure update schedule (weekly recommended)
+- [ ] Set PR limits to avoid spam
+- [ ] Add approval workflow in GitHub settings
+
+**Impact:** Reduces security vulnerabilities, keeps dependencies current
+
+---
+
+### 🔵 LOW PRIORITY - Nice-to-Have (3-6 Months)
+
+#### 11. Implement Internationalization (i18n) (40 hours)
+**Current:** 3/10 - English only  
+**Target:** 8/10 - Multi-language support  
+**DIAMOND Reference:** Highest Standards #9
+
+**Note:** Only pursue if targeting non-English markets.
+
+**Steps:**
+- [ ] Install react-intl or i18next
+- [ ] Extract all hardcoded strings to translation files
+- [ ] Create translation files (`locales/en.json`, `locales/es.json`, etc.)
+- [ ] Add language picker in settings
+- [ ] Translate error messages on server
+- [ ] Add locale detection (browser language)
+
+**Impact:** +5 points in Highest Standards, enables global expansion
+
+---
+
+## 📊 DIAMOND Score Tracker
+
+**Current Score:** 402/440 (91.4%) - Grade A
+
+**After Quick Wins (Tasks 1-3):**
+- Basics: 98/100 → 100/100 (+2)
+- Best Practices: 115/120 → 117/120 (+2)
+- **Total:** 406/440 (92.3%)
+
+**After High Priority (Tasks 4-7):**
+- Fundamentals: 96/100 → 99/100 (+3)
+- Highest Standards: 93/120 → 103/120 (+10)
+- **Total:** 419/440 (95.2%) - **Grade A+**
+
+**After Medium Priority (Tasks 8-10):**
+- Highest Standards: 103/120 → 109/120 (+6)
+- **Total:** 425/440 (96.6%) - **Grade A+**
+
+---
+
+## 🎯 Recommended Implementation Order
+
+**Phase 1 (Week 1):** Quick Wins
+1. Add LICENSE file (30 min)
+2. Add CODEOWNERS (15 min)
+3. Set up ESLint + Prettier (8 hours)
+4. *Remaining time:* Start audit logging research
+
+**Phase 2 (Weeks 2-3):** Critical Infrastructure
+1. Implement audit logging (1 week)
+2. Deploy monitoring & observability (2 weeks, parallel if possible)
+
+**Phase 3 (Weeks 4-5):** Resilience
+1. Implement disaster recovery (1.5 weeks)
+2. Add performance monitoring (1 week)
+
+**Phase 4 (Weeks 6-7):** Quality Polish
+1. Accessibility audit (3 days)
+2. API versioning (2 days)
+3. Dependabot setup (1 hour)
+
+**Total Timeline:** 7 weeks to achieve A+ rating (95%+)
+
+---
+
+# CloudVault - Testing & Quality TODO
+
 **Current Test Coverage:** 64.33% (211 passing tests)  
 **Status:** Production-ready with optional improvements available
 
