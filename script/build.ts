@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Production build script - orchestrates Vite client build and esbuild server bundle with selective dependency bundling
+// OWNERSHIP: scripts/build
+// ENTRYPOINTS: Executed via `npm run build` command
+// DEPENDENCIES: esbuild (server bundling), vite (client bundling), fs/promises (file operations)
+// DANGER: Allowlist determines which deps are bundled vs external - affects cold start performance; dist/ cleared before build; server minified for production
+// CHANGE-SAFETY: Safe to adjust allowlist, unsafe to change entry points or output paths without coordinating with server startup
+// TESTS: Run `npm run build` and verify dist/ output, test `npm start` with production bundle
+// AI-META-END
+
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
 import { rm, readFile } from "fs/promises";

@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Upload hook - presigned URL upload workflow with metadata extraction
+// OWNERSHIP: client/hooks
+// ENTRYPOINTS: Used by ObjectUploader component for file uploads
+// DEPENDENCIES: React (useState, useCallback), @uppy/core (UppyFile type)
+// DANGER: Two-step upload: 1) request presigned URL with metadata, 2) PUT file to URL; assumes /api/uploads/request-url endpoint
+// CHANGE-SAFETY: Safe to add metadata fields, unsafe to change API contract without server coordination
+// TESTS: Manual testing with file uploads, verify presigned URL flow
+// AI-META-END
+
 import { useState, useCallback } from "react";
 import type { UppyFile } from "@uppy/core";
 

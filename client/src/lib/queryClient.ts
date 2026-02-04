@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: React Query client configuration - global query/mutation settings with custom fetch wrapper
+// OWNERSHIP: client/lib
+// ENTRYPOINTS: Wrapped around App.tsx via QueryClientProvider
+// DEPENDENCIES: @tanstack/react-query (QueryClient)
+// DANGER: Default on401 behavior is "throw" - can customize per query; credentials: "include" for cookie auth; no retry, no refetch, staleTime=Infinity for manual cache control
+// CHANGE-SAFETY: Safe to adjust default options, unsafe to change on401 behavior or queryFn signature without auditing all queries
+// TESTS: Manual testing with authenticated/unauthenticated requests
+// AI-META-END
+
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {

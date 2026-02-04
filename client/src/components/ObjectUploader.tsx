@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Uppy-based object uploader - modal UI for multi-file uploads via presigned URLs to GCS
+// OWNERSHIP: client/components
+// ENTRYPOINTS: Used by UploadDialog component to handle actual file uploads
+// DEPENDENCIES: @uppy/core (upload engine), @uppy/react (React bindings), @uppy/aws-s3 (S3-compatible uploader), @/components/ui/button
+// DANGER: onGetUploadParameters callback must request per-file presigned URLs from backend; Uppy instance must be cleaned up to prevent memory leaks
+// CHANGE-SAFETY: Safe to adjust file size limits and restrictions, unsafe to change Uppy plugin configuration without testing upload flow
+// TESTS: Manual testing with various file sizes and types, verify presigned URL upload to GCS
+// AI-META-END
+
 import { useState } from "react";
 import type { ReactNode } from "react";
 import Uppy from "@uppy/core";

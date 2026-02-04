@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Shared database schema - Drizzle ORM table definitions, relations, and Zod validation schemas for folders, files, and share links
+// OWNERSHIP: shared/schema
+// ENTRYPOINTS: Imported by server (db.ts, storage.ts, routes.ts) and client (types only)
+// DEPENDENCIES: drizzle-orm (ORM), drizzle-zod (schema-to-Zod conversion), zod (validation), ./models/auth (user tables)
+// DANGER: UUIDs auto-generated via gen_random_uuid(); indexes on userId, parentId, folderId for query performance; relations define cascade behavior
+// CHANGE-SAFETY: Safe to add new tables or columns, unsafe to change existing column types or remove indexes without migration
+// TESTS: Run `npm run db:push` to sync schema with database, verify migrations
+// AI-META-END
+
 import { sql, relations } from "drizzle-orm";
 import { pgTable, text, varchar, timestamp, bigint, boolean, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";

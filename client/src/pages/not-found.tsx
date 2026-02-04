@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: 404 error page - displayed for invalid routes
+// OWNERSHIP: client/pages
+// ENTRYPOINTS: Rendered by App.tsx catch-all route for unmatched paths
+// DEPENDENCIES: @/components/ui/card, lucide-react (icons)
+// DANGER: None - static error page
+// CHANGE-SAFETY: Safe to modify error message and styling
+// TESTS: Manual testing by navigating to invalid route
+// AI-META-END
+
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 

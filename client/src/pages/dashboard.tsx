@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Main dashboard - authenticated file/folder browser with upload, create folder, search, and user menu
+// OWNERSHIP: client/pages
+// ENTRYPOINTS: Rendered by App.tsx on "/dashboard" route for authenticated users
+// DEPENDENCIES: @tanstack/react-query (data fetching), wouter (routing), @/hooks/use-auth (auth state), @/components/* (FileList, FolderBreadcrumb, dialogs), @shared/schema (types)
+// DANGER: User state fetched from /api/auth/user - logout deletes all user data permanently; folder navigation via query params
+// CHANGE-SAFETY: Safe to add new UI features, unsafe to change query keys or mutation logic without auditing cache invalidation
+// TESTS: Manual testing with authenticated session, verify CRUD operations on files/folders
+// AI-META-END
+
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";

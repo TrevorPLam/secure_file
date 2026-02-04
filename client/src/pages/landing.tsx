@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Landing page - marketing site with features, security info, and login CTA
+// OWNERSHIP: client/pages
+// ENTRYPOINTS: Rendered by App.tsx on "/" route for unauthenticated users
+// DEPENDENCIES: @/components/ui/* (shadcn components), @/components/ThemeToggle, lucide-react (icons)
+// DANGER: Login redirects to /api/login OAuth flow - must not be client-side route
+// CHANGE-SAFETY: Safe to modify marketing copy and styling, unsafe to change login URL without coordinating with auth routes
+// TESTS: Manual UI testing for responsive layout and theme toggle
+// AI-META-END
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ThemeToggle";

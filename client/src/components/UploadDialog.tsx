@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: File upload dialog - multi-file upload with progress tracking, presigned URL requests, and database persistence
+// OWNERSHIP: client/components
+// ENTRYPOINTS: Opened from dashboard page when user clicks upload button
+// DEPENDENCIES: @tanstack/react-query (mutations), @/components/ui/* (dialog, progress), @/hooks/use-toast, @/lib/queryClient, lucide-react (icons)
+// DANGER: Presigned URLs fetched per file from /api/uploads/request-url; XMLHttpRequest for upload progress tracking; files persisted to DB after successful upload
+// CHANGE-SAFETY: Safe to adjust progress UI, unsafe to change upload flow or API contract without server coordination
+// TESTS: Manual testing with multiple files, large files, and upload errors
+// AI-META-END
+
 import { useState, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import {
