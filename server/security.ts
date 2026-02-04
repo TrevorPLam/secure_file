@@ -164,7 +164,7 @@ export function createRateLimiter(options: {
     const key = keyGenerator(req);
     const { count, resetTime } = rateLimitStore.increment(key, windowMs);
     
-    // Set rate limit headers
+    // Set rate limit headers (count is already incremented, so remaining is max - count)
     res.setHeader('X-RateLimit-Limit', maxRequests.toString());
     res.setHeader('X-RateLimit-Remaining', Math.max(0, maxRequests - count).toString());
     res.setHeader('X-RateLimit-Reset', new Date(resetTime).toISOString());
