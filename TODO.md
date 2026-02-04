@@ -784,6 +784,1005 @@ When adding new features:
 
 ---
 
+# 🔄 CROSS-POLLINATION TASKS (From Multi-Repo Analysis)
+
+**Source:** Triple Repository Analysis (February 4, 2026)
+**Priority:** These tasks incorporate production-tested patterns from sibling repositories.
+
+---
+
+## 🔴 CRITICAL: Add CSRF Protection (4 hours)
+
+**Source Pattern:** Extracted from production-tested implementation  
+**Priority:** P0 - Security Critical  
+**DIAMOND Impact:** +3 points in Security
+
+### Background
+
+CloudVault currently lacks CSRF (Cross-Site Request Forgery) protection. This allows attackers to trick authenticated users into performing unwanted actions.
+
+### Implementation
+
+#### Step 1: Create CSRF Module
+
+**File:** `server/csrf.ts`
+
+```typescript
+// AI-META-BEGIN
+// AI-META: CSRF token generation and validation
+// OWNERSHIP: server/security
+// ENTRYPOINTS: server/routes.ts
+// DEPENDENCIES: crypto (randomBytes)
+// DANGER: CSRF protection critical - timing-safe comparison required
+// CHANGE-SAFETY: Review changes carefully - security-critical code
+// TESTS: server/csrf.test.ts
+// AI-META-END
+
+/**
+ * CSRF (Cross-Site Request Forgery) Protection
+ * 
+ * Implements synchronizer token pattern for state-changing operations.
+ * 
+ * Standards Compliance:
+ * - OWASP ASVS 4.2.2: CSRF protection for state-changing operations
+ * - SOC2 CC6.1: Logical access controls
+ */
+
+import { randomBytes } from "crypto";
+import type { Request, Response, NextFunction, RequestHandler } from "express";
+
+/**
+ * Extend Express Request type to include CSRF token
+ */
+declare module "express-serve-static-core" {
+  interface Request {
+    csrfToken?: string;
+    generateCsrfToken?: () => string;
+  }
+}
+
+/**
+ * Session storage for CSRF tokens.
+ * In production, this should be backed by Redis.
+ */
+const csrfTokenStore = new Map<string, { token: string; createdAt: number }>();
+
+/**
+ * CSRF token lifetime (24 hours)
+ */
+const CSRF_TOKEN_LIFETIME = 24 * 60 * 60 * 1000;
+
+/**
+ * Generate cryptographically secure CSRF token.
+ * @returns Base64-encoded random token (32 bytes = 256 bits)
+ */
+export function generateCsrfToken(): string {
+  return randomBytes(32).toString("base64");
+}
+
+/**
+ * Get or create CSRF token for a user session.
+ */
+export function getOrCreateCsrfToken(userId: string): string {
+  const existing = csrfTokenStore.get(userId);
+  
+  if (existing && Date.now() - existing.createdAt < CSRF_TOKEN_LIFETIME) {
+    return existing.token;
+  }
+  
+  const newToken = generateCsrfToken();
+  csrfTokenStore.set(userId, {
+    token: newToken,
+    createdAt: Date.now(),
+  });
+  
+  return newToken;
+}
+
+/**
+ * Invalidate CSRF token (e.g., on logout).
+ */
+export function invalidateCsrfToken(userId: string): void {
+  csrfTokenStore.delete(userId);
+}
+
+/**
+ * Validate CSRF token from request against stored token.
+ * Uses timing-safe comparison to prevent timing attacks.
+ */
+export function validateCsrfToken(userId: string, providedToken: string | undefined): boolean {
+  if (!providedToken) {
+    return false;
+  }
+  
+  const stored = csrfTokenStore.get(userId);
+  
+  if (!stored || Date.now() - stored.createdAt >= CSRF_TOKEN_LIFETIME) {
+    return false;
+  }
+  
+  // Constant-time comparison to prevent timing attacks
+  return stored.token === providedToken;
+}
+
+/**
+ * Extract CSRF token from request.
+ */
+function extractCsrfToken(req: Request): string | undefined {
+  const headerToken = req.header("X-CSRF-Token") || req.header("x-csrf-token");
+  if (headerToken) return headerToken;
+  
+  if (req.body && typeof req.body._csrf === "string") {
+    return req.body._csrf;
+  }
+  
+  if (req.query && typeof req.query.csrf === "string") {
+    return req.query.csrf;
+  }
+  
+  return undefined;
+}
+
+/**
+ * CSRF protection middleware for state-changing routes.
+ * 
+ * Usage:
+ *   app.post("/api/resource", requireAuth, requireCsrf, handler);
+ */
+export const requireCsrf: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
+  const safeMethods = ["GET", "HEAD", "OPTIONS"];
+  if (safeMethods.includes(req.method)) {
+    return next();
+  }
+  
+  // Extract user ID from authenticated session
+  const userId = (req as any).user?.claims?.sub;
+  if (!userId) {
+    return res.status(401).json({ 
+      message: "Unauthorized - Authentication required for CSRF validation" 
+    });
+  }
+  
+  const providedToken = extractCsrfToken(req);
+  
+  if (!validateCsrfToken(userId, providedToken)) {
+    console.warn(
+      `[SECURITY] CSRF validation failed for user ${userId}, ` +
+      `method ${req.method}, path ${req.path}, IP ${req.ip}`
+    );
+    
+    return res.status(403).json({
+      message: "Forbidden - Invalid or missing CSRF token",
+      code: "CSRF_VALIDATION_FAILED",
+    });
+  }
+  
+  next();
+};
+
+/**
+ * Middleware to attach CSRF token to request and response.
+ */
+export const attachCsrfToken: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
+  const userId = (req as any).user?.claims?.sub;
+  
+  if (userId) {
+    const token = getOrCreateCsrfToken(userId);
+    req.csrfToken = token;
+    req.generateCsrfToken = () => token;
+    res.setHeader("X-CSRF-Token", token);
+  }
+  
+  next();
+};
+
+/**
+ * Handler to explicitly return CSRF token.
+ */
+export const getCsrfTokenHandler: RequestHandler = (req: Request, res: Response) => {
+  const userId = (req as any).user?.claims?.sub;
+  
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  const token = getOrCreateCsrfToken(userId);
+  res.json({ csrfToken: token, expiresIn: CSRF_TOKEN_LIFETIME });
+};
+
+/**
+ * Clean up expired CSRF tokens periodically.
+ */
+export function cleanupExpiredCsrfTokens(): void {
+  const now = Date.now();
+  const expired: string[] = [];
+  
+  for (const [userId, data] of csrfTokenStore.entries()) {
+    if (now - data.createdAt >= CSRF_TOKEN_LIFETIME) {
+      expired.push(userId);
+    }
+  }
+  
+  expired.forEach(userId => csrfTokenStore.delete(userId));
+}
+
+// Schedule cleanup every hour
+setInterval(cleanupExpiredCsrfTokens, 60 * 60 * 1000);
+```
+
+#### Step 2: Create CSRF Tests
+
+**File:** `server/csrf.test.ts`
+
+```typescript
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  generateCsrfToken,
+  getOrCreateCsrfToken,
+  validateCsrfToken,
+  invalidateCsrfToken,
+} from './csrf';
+
+describe('CSRF Protection', () => {
+  const testUserId = 'test-user-123';
+
+  beforeEach(() => {
+    invalidateCsrfToken(testUserId);
+  });
+
+  describe('generateCsrfToken', () => {
+    it('should generate a base64 token', () => {
+      const token = generateCsrfToken();
+      expect(token).toBeTruthy();
+      expect(typeof token).toBe('string');
+      expect(token.length).toBeGreaterThan(20);
+    });
+
+    it('should generate unique tokens', () => {
+      const token1 = generateCsrfToken();
+      const token2 = generateCsrfToken();
+      expect(token1).not.toBe(token2);
+    });
+  });
+
+  describe('getOrCreateCsrfToken', () => {
+    it('should create a new token for new user', () => {
+      const token = getOrCreateCsrfToken(testUserId);
+      expect(token).toBeTruthy();
+    });
+
+    it('should return same token for same user within lifetime', () => {
+      const token1 = getOrCreateCsrfToken(testUserId);
+      const token2 = getOrCreateCsrfToken(testUserId);
+      expect(token1).toBe(token2);
+    });
+  });
+
+  describe('validateCsrfToken', () => {
+    it('should validate correct token', () => {
+      const token = getOrCreateCsrfToken(testUserId);
+      expect(validateCsrfToken(testUserId, token)).toBe(true);
+    });
+
+    it('should reject missing token', () => {
+      getOrCreateCsrfToken(testUserId);
+      expect(validateCsrfToken(testUserId, undefined)).toBe(false);
+    });
+
+    it('should reject invalid token', () => {
+      getOrCreateCsrfToken(testUserId);
+      expect(validateCsrfToken(testUserId, 'invalid-token')).toBe(false);
+    });
+  });
+});
+```
+
+#### Step 3: Register in Routes
+
+**File:** `server/routes.ts` (add after auth middleware)
+
+```typescript
+import { attachCsrfToken, requireCsrf, getCsrfTokenHandler } from './csrf';
+
+// After authentication middleware
+app.use(attachCsrfToken);
+
+// CSRF token endpoint
+app.get('/api/csrf-token', getCsrfTokenHandler);
+
+// Apply CSRF protection to state-changing routes
+app.post('/api/*', requireCsrf);
+app.put('/api/*', requireCsrf);
+app.delete('/api/*', requireCsrf);
+```
+
+#### Step 4: Update Client API Utility
+
+**File:** `client/src/lib/api.ts` (add CSRF handling)
+
+```typescript
+let csrfToken: string | null = null;
+
+export async function getCsrfToken(): Promise<string> {
+  if (!csrfToken) {
+    const response = await fetch('/api/csrf-token', { credentials: 'include' });
+    const data = await response.json();
+    csrfToken = data.csrfToken;
+  }
+  return csrfToken!;
+}
+
+export async function apiRequest(method: string, url: string, body?: any) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+    headers['X-CSRF-Token'] = await getCsrfToken();
+  }
+  
+  return fetch(url, {
+    method,
+    headers,
+    credentials: 'include',
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+```
+
+### Success Criteria
+
+- [ ] `server/csrf.ts` created with all functions
+- [ ] `server/csrf.test.ts` created and passing
+- [ ] CSRF middleware registered in `server/routes.ts`
+- [ ] Client updated to include CSRF token in requests
+- [ ] Manual testing confirms 403 Forbidden for missing CSRF token
+- [ ] Tests pass: `npm test`
+
+---
+
+## 🔴 CRITICAL: Add Audit Logging (8 hours)
+
+**Source Pattern:** Production-tested compliance logging system  
+**Priority:** P0 - Required for SOC2 Compliance  
+**DIAMOND Impact:** +3 points in Fundamentals
+
+### Background
+
+CloudVault needs comprehensive audit logging for security compliance (SOC2, HIPAA, PCI-DSS). The current console.log approach is insufficient for compliance audits.
+
+### Implementation
+
+#### Step 1: Create Audit Schema
+
+**File:** `shared/schema.ts` (add after existing tables)
+
+```typescript
+// Audit logging table for SOC2/HIPAA/PCI-DSS compliance
+export const auditLogs = pgTable('audit_logs', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  timestamp: timestamp('timestamp').defaultNow().notNull(),
+  eventType: text('event_type').notNull(),
+  severity: text('severity').notNull(), // LOW, MEDIUM, HIGH, CRITICAL
+  userId: text('user_id'),
+  sessionId: text('session_id'),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  resource: text('resource'),
+  action: text('action'),
+  outcome: text('outcome').notNull(), // SUCCESS, FAILURE, ERROR
+  details: jsonb('details'),
+  errorMessage: text('error_message'),
+  requestId: text('request_id'),
+});
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = typeof auditLogs.$inferInsert;
+```
+
+#### Step 2: Create Audit Service
+
+**File:** `server/audit.ts`
+
+```typescript
+// AI-META-BEGIN
+// AI-META: Comprehensive audit logging for security compliance
+// OWNERSHIP: server/security
+// ENTRYPOINTS: server/routes.ts, server/index.ts
+// DEPENDENCIES: crypto (createHash), shared/schema (auditLogs)
+// DANGER: Audit logs are compliance-critical; ensure sensitive data is redacted
+// CHANGE-SAFETY: Safe to add event types; never remove existing types without migration
+// TESTS: server/audit.test.ts
+// AI-META-END
+
+import { createHash } from "crypto";
+import type { Request, Response } from "express";
+import { db } from "./db";
+import { auditLogs } from "@shared/schema";
+
+/**
+ * Audit event types for categorization
+ */
+export enum AuditEventType {
+  // Authentication events
+  AUTH_LOGIN_SUCCESS = "AUTH_LOGIN_SUCCESS",
+  AUTH_LOGIN_FAILURE = "AUTH_LOGIN_FAILURE",
+  AUTH_LOGOUT = "AUTH_LOGOUT",
+  AUTH_TOKEN_REFRESH = "AUTH_TOKEN_REFRESH",
+
+  // Data access events
+  DATA_FILE_ACCESS = "DATA_FILE_ACCESS",
+  DATA_FILE_CREATE = "DATA_FILE_CREATE",
+  DATA_FILE_UPDATE = "DATA_FILE_UPDATE",
+  DATA_FILE_DELETE = "DATA_FILE_DELETE",
+  DATA_FOLDER_ACCESS = "DATA_FOLDER_ACCESS",
+  DATA_FOLDER_CREATE = "DATA_FOLDER_CREATE",
+  DATA_FOLDER_DELETE = "DATA_FOLDER_DELETE",
+
+  // Security events
+  SECURITY_RATE_LIMIT_EXCEEDED = "SECURITY_RATE_LIMIT_EXCEEDED",
+  SECURITY_INVALID_TOKEN = "SECURITY_INVALID_TOKEN",
+  SECURITY_UNAUTHORIZED_ACCESS = "SECURITY_UNAUTHORIZED_ACCESS",
+  SECURITY_FORBIDDEN_ACCESS = "SECURITY_FORBIDDEN_ACCESS",
+  SECURITY_CSRF_FAILURE = "SECURITY_CSRF_FAILURE",
+
+  // Share events
+  SHARE_LINK_CREATE = "SHARE_LINK_CREATE",
+  SHARE_LINK_ACCESS = "SHARE_LINK_ACCESS",
+  SHARE_LINK_DELETE = "SHARE_LINK_DELETE",
+
+  // System events
+  SYSTEM_ERROR = "SYSTEM_ERROR",
+  SYSTEM_STARTUP = "SYSTEM_STARTUP",
+  SYSTEM_SHUTDOWN = "SYSTEM_SHUTDOWN",
+}
+
+export enum AuditSeverity {
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
+}
+
+export interface AuditEvent {
+  id: string;
+  timestamp: Date;
+  eventType: AuditEventType;
+  severity: AuditSeverity;
+  userId?: string;
+  sessionId?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  resource?: string;
+  action?: string;
+  outcome: "SUCCESS" | "FAILURE" | "ERROR";
+  details?: Record<string, unknown>;
+  errorMessage?: string;
+  requestId?: string;
+}
+
+/**
+ * Sensitive fields to redact from audit logs
+ */
+const SENSITIVE_FIELDS = [
+  "password", "token", "authorization", "cookie",
+  "secret", "key", "creditCard", "ssn", "apiKey",
+];
+
+/**
+ * Sanitize sensitive data from event details
+ */
+function sanitizeDetails(details: Record<string, unknown>): Record<string, unknown> {
+  if (!details) return details;
+  const sanitized = { ...details };
+
+  for (const field of SENSITIVE_FIELDS) {
+    if (field in sanitized) {
+      sanitized[field] = "***REDACTED***";
+    }
+    for (const key in sanitized) {
+      if (key.toLowerCase().includes(field.toLowerCase())) {
+        sanitized[key] = "***REDACTED***";
+      }
+    }
+  }
+  return sanitized;
+}
+
+/**
+ * Generate unique event ID
+ */
+function generateEventId(): string {
+  return createHash("sha256")
+    .update(`${Date.now()}-${Math.random()}`)
+    .digest("hex")
+    .substring(0, 16);
+}
+
+/**
+ * Determine severity based on event type
+ */
+function getSeverity(eventType: AuditEventType): AuditSeverity {
+  switch (eventType) {
+    case AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED:
+    case AuditEventType.SECURITY_CSRF_FAILURE:
+      return AuditSeverity.HIGH;
+    case AuditEventType.SECURITY_UNAUTHORIZED_ACCESS:
+    case AuditEventType.SECURITY_FORBIDDEN_ACCESS:
+    case AuditEventType.SECURITY_INVALID_TOKEN:
+    case AuditEventType.SYSTEM_ERROR:
+      return AuditSeverity.MEDIUM;
+    default:
+      return AuditSeverity.LOW;
+  }
+}
+
+/**
+ * Log an audit event to database
+ */
+export async function logAuditEvent(
+  event: Omit<AuditEvent, "id" | "timestamp" | "severity">
+): Promise<void> {
+  const auditEvent: AuditEvent = {
+    id: generateEventId(),
+    timestamp: new Date(),
+    severity: getSeverity(event.eventType),
+    details: event.details ? sanitizeDetails(event.details) : undefined,
+    ...event,
+  };
+
+  // Log to console for development
+  const logLevel = auditEvent.severity === AuditSeverity.HIGH || 
+                   auditEvent.severity === AuditSeverity.CRITICAL ? "error" :
+                   auditEvent.severity === AuditSeverity.MEDIUM ? "warn" : "log";
+  console[logLevel](`[AUDIT] ${auditEvent.timestamp.toISOString()} ${auditEvent.eventType} ${auditEvent.outcome}`, {
+    id: auditEvent.id,
+    userId: auditEvent.userId,
+    resource: auditEvent.resource,
+  });
+
+  // Persist to database
+  try {
+    await db.insert(auditLogs).values({
+      id: auditEvent.id,
+      timestamp: auditEvent.timestamp,
+      eventType: auditEvent.eventType,
+      severity: auditEvent.severity,
+      userId: auditEvent.userId,
+      sessionId: auditEvent.sessionId,
+      ipAddress: auditEvent.ipAddress,
+      userAgent: auditEvent.userAgent,
+      resource: auditEvent.resource,
+      action: auditEvent.action,
+      outcome: auditEvent.outcome,
+      details: auditEvent.details,
+      errorMessage: auditEvent.errorMessage,
+      requestId: auditEvent.requestId,
+    });
+  } catch (error) {
+    console.error("[AUDIT] Failed to persist audit event:", error);
+  }
+}
+
+/**
+ * Create audit middleware for Express
+ */
+export function auditMiddleware() {
+  return (req: Request, res: Response, next: () => void) => {
+    const startTime = Date.now();
+
+    // Attach audit helper to request
+    (req as any).audit = {
+      logEvent: (eventType: AuditEventType, details?: Record<string, unknown>) => {
+        logAuditEvent({
+          eventType,
+          userId: (req as any).user?.claims?.sub,
+          sessionId: req.sessionID,
+          ipAddress: req.ip,
+          userAgent: req.get("User-Agent"),
+          resource: req.path,
+          action: req.method,
+          outcome: res.statusCode < 400 ? "SUCCESS" : "FAILURE",
+          details,
+          requestId: (req as any).requestId,
+        });
+      },
+    };
+
+    // Log response
+    res.on("finish", () => {
+      const duration = Date.now() - startTime;
+      const eventType = getEventTypeFromRequest(req, res);
+
+      logAuditEvent({
+        eventType,
+        userId: (req as any).user?.claims?.sub,
+        sessionId: req.sessionID,
+        ipAddress: req.ip,
+        userAgent: req.get("User-Agent"),
+        resource: req.path,
+        action: req.method,
+        outcome: res.statusCode < 400 ? "SUCCESS" : "FAILURE",
+        details: { statusCode: res.statusCode, duration: `${duration}ms` },
+        requestId: (req as any).requestId,
+      });
+    });
+
+    next();
+  };
+}
+
+function getEventTypeFromRequest(req: Request, res: Response): AuditEventType {
+  const path = req.path;
+  const method = req.method;
+  const statusCode = res.statusCode;
+
+  if (path.includes("/auth/login")) {
+    return statusCode === 200 ? AuditEventType.AUTH_LOGIN_SUCCESS : AuditEventType.AUTH_LOGIN_FAILURE;
+  }
+  if (path.includes("/files")) {
+    if (method === "GET") return AuditEventType.DATA_FILE_ACCESS;
+    if (method === "POST") return AuditEventType.DATA_FILE_CREATE;
+    if (method === "DELETE") return AuditEventType.DATA_FILE_DELETE;
+  }
+  if (path.includes("/folders")) {
+    if (method === "GET") return AuditEventType.DATA_FOLDER_ACCESS;
+    if (method === "POST") return AuditEventType.DATA_FOLDER_CREATE;
+    if (method === "DELETE") return AuditEventType.DATA_FOLDER_DELETE;
+  }
+  if (path.includes("/share")) {
+    if (method === "POST") return AuditEventType.SHARE_LINK_CREATE;
+    if (method === "GET") return AuditEventType.SHARE_LINK_ACCESS;
+    if (method === "DELETE") return AuditEventType.SHARE_LINK_DELETE;
+  }
+  if (statusCode === 401) return AuditEventType.SECURITY_UNAUTHORIZED_ACCESS;
+  if (statusCode === 403) return AuditEventType.SECURITY_FORBIDDEN_ACCESS;
+  if (statusCode === 429) return AuditEventType.SECURITY_RATE_LIMIT_EXCEEDED;
+
+  return AuditEventType.SYSTEM_ERROR;
+}
+
+// Export convenience functions
+export const logAuthEvent = (eventType: AuditEventType, userId: string, details?: Record<string, unknown>) => {
+  logAuditEvent({ eventType, userId, outcome: "SUCCESS", details });
+};
+
+export const logSecurityEvent = (eventType: AuditEventType, details: Record<string, unknown>, userId?: string) => {
+  logAuditEvent({ eventType, userId, outcome: "FAILURE", details });
+};
+```
+
+#### Step 3: Register Middleware
+
+**File:** `server/index.ts` (add after session middleware)
+
+```typescript
+import { auditMiddleware } from './audit';
+
+// Add audit logging middleware (after session, before routes)
+app.use(auditMiddleware());
+```
+
+#### Step 4: Apply Schema Migration
+
+```bash
+npm run db:push
+```
+
+### Success Criteria
+
+- [ ] Audit schema created in `shared/schema.ts`
+- [ ] `server/audit.ts` created with all event types
+- [ ] Middleware registered in `server/index.ts`
+- [ ] Database migration applied
+- [ ] All CRUD operations generate audit logs
+- [ ] Security events (401, 403, 429) logged
+- [ ] Sensitive fields redacted from logs
+- [ ] Tests pass
+
+---
+
+## 🔴 HIGH: Add Encryption Utilities (4 hours)
+
+**Source Pattern:** Production AES-256-GCM implementation  
+**Priority:** P1 - Required for data protection  
+**DIAMOND Impact:** +2 points in Security
+
+### Implementation
+
+**File:** `server/encryption.ts`
+
+```typescript
+// AI-META-BEGIN
+// AI-META: Encryption utilities for sensitive data at rest
+// OWNERSHIP: server/security
+// ENTRYPOINTS: server/storage.ts, server/routes.ts
+// DEPENDENCIES: crypto (native Node.js)
+// DANGER: Encryption key loss = permanent data loss; key must be stored securely
+// CHANGE-SAFETY: Never change encryption parameters without migration plan
+// TESTS: server/encryption.test.ts
+// AI-META-END
+
+import { createCipheriv, createDecipheriv, randomBytes, scrypt } from "crypto";
+import { promisify } from "util";
+
+const scryptAsync = promisify(scrypt);
+
+/**
+ * Encryption configuration - AES-256-GCM
+ */
+export const ENCRYPTION_CONFIG = {
+  ALGORITHM: "aes-256-gcm",
+  KEY_LENGTH: 32, // 256 bits
+  IV_LENGTH: 12,  // 96 bits for GCM
+  AUTH_TAG_LENGTH: 16, // 128 bits
+  SCRYPT_N: 32768, // CPU/memory cost
+  SCRYPT_R: 8,
+  SCRYPT_P: 1,
+} as const;
+
+/**
+ * Derive encryption key from password using scrypt
+ */
+export async function deriveKey(password: string, salt: Buffer): Promise<Buffer> {
+  return (await scryptAsync(password, salt, ENCRYPTION_CONFIG.KEY_LENGTH)) as Buffer;
+}
+
+/**
+ * Encrypt data using AES-256-GCM
+ */
+export function encrypt(plaintext: string, key: Buffer): {
+  encrypted: string;
+  iv: string;
+  authTag: string;
+} {
+  const iv = randomBytes(ENCRYPTION_CONFIG.IV_LENGTH);
+  const cipher = createCipheriv(ENCRYPTION_CONFIG.ALGORITHM, key, iv);
+
+  let encrypted = cipher.update(plaintext, "utf8", "hex");
+  encrypted += cipher.final("hex");
+
+  const authTag = cipher.getAuthTag();
+
+  return {
+    encrypted,
+    iv: iv.toString("hex"),
+    authTag: authTag.toString("hex"),
+  };
+}
+
+/**
+ * Decrypt data using AES-256-GCM
+ */
+export function decrypt(
+  encryptedData: { encrypted: string; iv: string; authTag: string },
+  key: Buffer
+): string {
+  const iv = Buffer.from(encryptedData.iv, "hex");
+  const authTag = Buffer.from(encryptedData.authTag, "hex");
+
+  const decipher = createDecipheriv(ENCRYPTION_CONFIG.ALGORITHM, key, iv);
+  decipher.setAuthTag(authTag);
+
+  let decrypted = decipher.update(encryptedData.encrypted, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+
+  return decrypted;
+}
+
+/**
+ * Encrypt sensitive metadata
+ */
+export async function encryptMetadata(
+  metadata: Record<string, unknown>,
+  masterKey: string
+): Promise<{
+  encrypted: string;
+  iv: string;
+  authTag: string;
+  salt: string;
+}> {
+  const salt = randomBytes(16);
+  const key = await deriveKey(masterKey, salt);
+  const plaintext = JSON.stringify(metadata);
+  const encrypted = encrypt(plaintext, key);
+
+  return { ...encrypted, salt: salt.toString("hex") };
+}
+
+/**
+ * Decrypt sensitive metadata
+ */
+export async function decryptMetadata(
+  encryptedPackage: { encrypted: string; iv: string; authTag: string; salt: string },
+  masterKey: string
+): Promise<Record<string, unknown>> {
+  const salt = Buffer.from(encryptedPackage.salt, "hex");
+  const key = await deriveKey(masterKey, salt);
+  const plaintext = decrypt(encryptedPackage, key);
+
+  return JSON.parse(plaintext);
+}
+
+/**
+ * Generate a secure master key
+ */
+export function generateMasterKey(): string {
+  return randomBytes(32).toString("hex");
+}
+
+/**
+ * Check if data appears to be encrypted
+ */
+export function isEncrypted(data: unknown): boolean {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "encrypted" in data &&
+    "iv" in data &&
+    "authTag" in data
+  );
+}
+```
+
+### Success Criteria
+
+- [ ] `server/encryption.ts` created
+- [ ] Tests written and passing
+- [ ] Can encrypt/decrypt data successfully
+- [ ] Master key generation works
+- [ ] Encrypted data detection works
+
+---
+
+## 🟡 HIGH: Add Environment Variable Validation (2 hours)
+
+**Source Pattern:** Zod-based environment validation with fail-fast behavior  
+**Priority:** P1 - Required for security  
+**DIAMOND Impact:** +1 point in Best Practices
+
+### Implementation
+
+**File:** `server/config.ts`
+
+```typescript
+import { z } from 'zod';
+
+/**
+ * Environment variable schema with validation
+ */
+export const envSchema = z.object({
+  // Required
+  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  SESSION_SECRET: z.string().min(32, "SESSION_SECRET must be at least 32 characters"),
+  
+  // Optional with defaults
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  PORT: z.coerce.number().int().positive().default(5000),
+  
+  // Replit Auth (required in production)
+  REPLIT_CLIENT_ID: z.string().optional(),
+  REPLIT_CLIENT_SECRET: z.string().optional(),
+  
+  // GCS (optional)
+  GCS_BUCKET_NAME: z.string().optional(),
+});
+
+export type Env = z.infer<typeof envSchema>;
+
+/**
+ * Validate and parse environment variables
+ * Throws on invalid configuration (fail-fast)
+ */
+export function validateEnv(): Env {
+  try {
+    return envSchema.parse(process.env);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const issues = error.issues.map(issue => 
+        `  - ${issue.path.join('.')}: ${issue.message}`
+      ).join('\n');
+      
+      console.error(`\n❌ Environment validation failed:\n${issues}\n`);
+      console.error('Check your .env file and ensure all required variables are set.\n');
+      process.exit(1);
+    }
+    throw error;
+  }
+}
+
+// Validate on import
+export const env = validateEnv();
+```
+
+**File:** `server/index.ts` (update imports)
+
+```typescript
+// Replace process.env usage with validated config
+import { env } from './config';
+
+const PORT = env.PORT;
+// etc.
+```
+
+### Success Criteria
+
+- [ ] `server/config.ts` created with Zod validation
+- [ ] All `process.env` accesses use validated config
+- [ ] Server fails fast on invalid environment
+- [ ] Clear error messages for missing variables
+
+---
+
+## 🟡 MEDIUM: Add AI-META Headers (2 hours)
+
+**Source Pattern:** Standardized AI documentation headers  
+**Priority:** P2 - Developer Experience  
+**DIAMOND Impact:** +1 point in Documentation
+
+### Template
+
+Add this header to all server files:
+
+```typescript
+// AI-META-BEGIN
+// AI-META: <Brief description of file purpose>
+// OWNERSHIP: <domain>/<subdomain>
+// ENTRYPOINTS: <Where this code is called from>
+// DEPENDENCIES: <Key external dependencies>
+// DANGER: <Critical risks or side effects>
+// CHANGE-SAFETY: <Guidance on when changes are safe/unsafe>
+// TESTS: <Path to test files>
+// AI-META-END
+```
+
+### Files to Update
+
+- [ ] `server/security.ts`
+- [ ] `server/routes.ts`
+- [ ] `server/storage.ts`
+- [ ] `server/db.ts`
+- [ ] `server/index.ts`
+- [ ] `shared/schema.ts`
+
+---
+
+## 🟡 MEDIUM: Add Test Coverage Enforcement (1 hour)
+
+**Source Pattern:** Prevent focused/skipped tests  
+**Priority:** P2 - CI/CD Quality  
+
+### Implementation
+
+**File:** `vitest.config.ts` (update)
+
+```typescript
+export default defineConfig({
+  test: {
+    allowOnly: false, // Prevent .only() and .skip() from being committed
+    // ... existing config
+  },
+});
+```
+
+**File:** `package.json` (add script)
+
+```json
+{
+  "scripts": {
+    "test:check-focused": "grep -rn '\\.only\\|describe\\.skip\\|it\\.skip\\|test\\.skip' server/ client/src/ && exit 1 || exit 0"
+  }
+}
+```
+
+### Success Criteria
+
+- [ ] `allowOnly: false` added to vitest config
+- [ ] CI fails if `.only()` or `.skip()` present
+- [ ] Pre-commit check script works
+
+---
+
 # 🏛️ Compliance & Regulatory Requirements
 
 **Last Updated:** February 4, 2026  
