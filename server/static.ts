@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Static file serving for production builds - serves prebuilt client assets and SPA fallback
+// OWNERSHIP: server/static
+// ENTRYPOINTS: Called from server/index.ts in production mode only
+// DEPENDENCIES: express, fs, path
+// DANGER: Missing dist/public directory causes startup failure; catch-all route must be last to avoid shadowing API routes
+// CHANGE-SAFETY: Safe to adjust cache headers, unsafe to change fallback logic or path resolution without testing routing
+// TESTS: Run `npm run build` then `npm start` to test production serving
+// AI-META-END
+
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";

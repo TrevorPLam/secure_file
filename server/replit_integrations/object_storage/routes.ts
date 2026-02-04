@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Object storage route handlers - provides presigned URL generation for client-side uploads
+// OWNERSHIP: server/replit_integrations/object_storage
+// ENTRYPOINTS: registerObjectStorageRoutes called from server/routes.ts during route registration
+// DEPENDENCIES: express, ./objectStorage (ObjectStorageService)
+// DANGER: Presigned URLs bypass auth if not properly scoped; customize routes to add auth middleware and metadata persistence
+// CHANGE-SAFETY: Safe to add auth guards and validation, unsafe to change URL signature without client coordination
+// TESTS: Manual API testing with authenticated sessions, verify presigned URL upload flow
+// AI-META-END
+
 import type { Express } from "express";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 

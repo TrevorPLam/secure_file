@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Central route registration - wires up auth, object storage, and CRUD endpoints for folders/files/share links
+// OWNERSHIP: server/core
+// ENTRYPOINTS: Called from server/index.ts via registerRoutes(httpServer, app)
+// DEPENDENCIES: express, ./storage (DatabaseStorage), ./replit_integrations/auth (setupAuth, isAuthenticated), ./replit_integrations/object_storage (ObjectStorageService), @shared/schema (validation schemas), bcryptjs (password hashing)
+// DANGER: Auth middleware guards most routes - missing isAuthenticated breaks security; share link validation must check expiration and password; bcrypt comparison must be constant-time
+// CHANGE-SAFETY: Safe to add new routes, unsafe to remove auth guards or change validation logic without auditing security implications
+// TESTS: Run `npm run check` for type safety, manual API testing via curl/Postman for auth flows
+// AI-META-END
+
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -36,6 +46,7 @@ export async function registerRoutes(
       if (!folder) {
         return res.status(404).json({ message: "Folder not found" });
       }
+      // AI-NOTE: Authorization check - ensure user owns folder before revealing path to prevent traversal attacks
       if (folder.userId !== userId) {
         return res.status(403).json({ message: "Not authorized" });
       }
@@ -94,6 +105,7 @@ export async function registerRoutes(
     try {
       const userId = req.user.claims.sub;
       
+      // AI-NOTE: Object path normalization prevents directory traversal and ensures consistent storage keys
       const normalizedObjectPath = objectStorageService.normalizeObjectEntityPath(req.body.objectPath);
       
       const data = insertFileSchema.parse({
@@ -170,6 +182,7 @@ export async function registerRoutes(
 
       let hashedPassword = null;
       if (password) {
+        // AI-NOTE: Bcrypt with 10 rounds for password hashing - prevents rainbow table attacks on shared links
         hashedPassword = await bcrypt.hash(password, 10);
       }
 
@@ -246,6 +259,7 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Share link not found" });
       }
 
+      // AI-NOTE: Time-based expiration check - must reject expired links to prevent unauthorized access
       if (shareLink.expiresAt && new Date(shareLink.expiresAt) < new Date()) {
         return res.status(410).json({ message: "Share link has expired" });
       }
@@ -255,6 +269,7 @@ export async function registerRoutes(
         if (!password) {
           return res.status(401).json({ message: "Password required" });
         }
+        // AI-NOTE: Constant-time comparison via bcrypt prevents timing attacks on share link passwords
         const isValid = await bcrypt.compare(password, shareLink.password);
         if (!isValid) {
           return res.status(401).json({ message: "Incorrect password" });

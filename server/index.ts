@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Express server entry point - initializes HTTP server, middleware, routes, and serves both API and frontend
+// OWNERSHIP: server/core
+// ENTRYPOINTS: Application bootstrap - node dist/index.cjs (production) or tsx server/index.ts (development)
+// DEPENDENCIES: express, ./routes (registerRoutes), ./static (serveStatic), ./vite (setupVite in dev), http
+// DANGER: Global error handler - uncaught errors in routes will be caught here; middleware order matters; production/dev branch affects bundle serving
+// CHANGE-SAFETY: Safe to modify logging format, unsafe to change middleware order or port binding logic (firewalled ports)
+// TESTS: Run `npm run build` to validate production bundle, `npm run dev` for development server, `npm run check` for type safety
+// AI-META-END
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
@@ -12,6 +22,7 @@ declare module "http" {
   }
 }
 
+// AI-NOTE: Raw body capture for webhook signature verification or custom parsing
 app.use(
   express.json({
     verify: (req, _res, buf) => {
@@ -62,6 +73,7 @@ app.use((req, res, next) => {
 (async () => {
   await registerRoutes(httpServer, app);
 
+  // AI-NOTE: Global error handler - must be registered after routes to catch downstream errors
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -75,6 +87,7 @@ app.use((req, res, next) => {
     return res.status(status).json({ message });
   });
 
+  // AI-NOTE: Production serves prebuilt static files; dev mode uses Vite HMR - order matters to avoid catch-all conflicts
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes

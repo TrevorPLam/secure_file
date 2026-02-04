@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Vite dev server setup - configures HMR middleware for development hot module replacement
+// OWNERSHIP: server/dev
+// ENTRYPOINTS: Called from server/index.ts in development mode only
+// DEPENDENCIES: vite (dev server), express, ../vite.config (Vite configuration), fs, path, nanoid (cache busting)
+// DANGER: SSR stack trace fixes for debugging; template reloading on every request impacts perf; HMR path must not conflict with API routes
+// CHANGE-SAFETY: Safe to adjust HMR config, unsafe to change template transform logic or middleware order without testing
+// TESTS: Run `npm run dev` to test development server with HMR
+// AI-META-END
+
 import { type Express } from "express";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";

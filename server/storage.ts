@@ -1,3 +1,13 @@
+// AI-META-BEGIN
+// AI-META: Database storage layer - provides CRUD operations for folders, files, and share links with Drizzle ORM
+// OWNERSHIP: server/storage
+// ENTRYPOINTS: Imported as singleton 'storage' in server/routes.ts and other server modules
+// DEPENDENCIES: drizzle-orm (ORM queries), ./db (database connection), @shared/schema (table definitions), crypto (randomBytes for tokens)
+// DANGER: Delete operations cascade to children; getFolderPath recursive query can be slow on deep hierarchies; token generation must be cryptographically secure
+// CHANGE-SAFETY: Safe to add new methods, unsafe to change return types or query filters without auditing all callers
+// TESTS: Run `npm run check` for type safety, integration tests should validate cascade deletes and folder path traversal
+// AI-META-END
+
 import { 
   folders, files, shareLinks,
   type Folder, type InsertFolder,
@@ -48,6 +58,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFolderPath(folderId: string): Promise<Folder[]> {
+    // AI-NOTE: Recursive path traversal up to root - can be slow on deep hierarchies (consider WITH RECURSIVE in future)
     const path: Folder[] = [];
     let currentId: string | null = folderId;
     
@@ -67,6 +78,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteFolder(id: string, userId: string): Promise<void> {
+    // AI-NOTE: Cascade delete - recursively removes all child folders and files; must verify userId to prevent unauthorized deletions
     const childFolders = await db.select().from(folders).where(eq(folders.parentId, id));
     for (const child of childFolders) {
       await this.deleteFolder(child.id, userId);
@@ -107,6 +119,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createShareLink(data: Omit<InsertShareLink, "token">): Promise<ShareLink> {
+    // AI-NOTE: Cryptographically secure token generation - 32 bytes = 256 bits of entropy prevents brute force attacks
     const token = randomBytes(32).toString("hex");
     const [shareLink] = await db.insert(shareLinks).values({
       ...data,
