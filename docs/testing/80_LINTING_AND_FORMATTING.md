@@ -15,7 +15,7 @@
 - ESLint config: `.eslintrc.json`
 - ESLint ignore list: `.eslintignore`
 - Prettier config: `.prettierrc.json`
-- CI workflow integration: `.github/workflows/test-coverage.yml`
+- Planned CI workflow integration location: `.github/workflows/test-coverage.yml` (lint gate not yet enabled).
 
 ## Local Commands
 
