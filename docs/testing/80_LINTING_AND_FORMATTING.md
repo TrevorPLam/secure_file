@@ -6,7 +6,7 @@
 - **Inputs**: TypeScript/React source files in `server/`, `shared/`, and `client/src/`.
 - **Outputs**: Lint diagnostics, optional auto-fixes, and consistent formatting.
 - **Invariants**:
-  - Lint runs in CI before typecheck/tests.
+  - Lint will run in CI before typecheck/tests (pending CI integration and dependency installation).
   - Formatting uses Prettier defaults defined in `.prettierrc.json`.
   - Focus remains on first-party source files.
 
