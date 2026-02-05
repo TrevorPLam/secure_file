@@ -68,13 +68,13 @@ npm install --save-dev eslint prettier eslint-config-prettier eslint-plugin-reac
 ```
 
 **Files to create:**
-- [ ] `.eslintrc.json` - ESLint configuration
-- [ ] `.prettierrc.json` - Prettier configuration
-- [ ] `.eslintignore` - Exclude patterns
-- [ ] Add `lint` and `format` scripts to package.json
+- [x] `.eslintrc.json` - ESLint configuration
+- [x] `.prettierrc.json` - Prettier configuration
+- [x] `.eslintignore` - Exclude patterns
+- [x] Add `lint` and `format` scripts to package.json
 - [ ] Add pre-commit hook (optional: husky + lint-staged)
-- [ ] Run `npm run format` to fix existing files
-- [ ] Add ESLint check to CI/CD (.github/workflows/test-coverage.yml)
+- [ ] Run `npm run format` to fix existing files *(blocked in this environment until npm registry access allows installing ESLint/Prettier dependencies)*
+- [ ] Add ESLint check to CI/CD (.github/workflows/test-coverage.yml) *(blocked until lint dependencies can be installed and lockfile updated)*
 
 **Impact:** +1 point in Best Practices, prevents future style drift
 
