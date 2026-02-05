@@ -14,7 +14,11 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:coverage-fail": "vitest run --coverage --coverage.thresholds.autoUpdate=false",
-    "test:check-focused": "grep -E -r -n '\\b(it|test|describe)\\.(only|skip)\\b' server/ client/src/ && exit 1 || exit 0"
+    "test:check-focused": "grep -E -r -n '\\b(it|test|describe)\\.(only|skip)\\b' server/ client/src/ && exit 1 || exit 0",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.18.0",
@@ -116,12 +120,18 @@
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.31.8",
     "esbuild": "^0.25.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
     "happy-dom": "^20.5.0",
     "postcss": "^8.4.47",
     "supertest": "^7.2.2",
     "tailwindcss": "^3.4.17",
+    "prettier": "^3.6.2",
     "tsx": "^4.20.5",
     "typescript": "5.6.3",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
     "vite": "^7.3.0",
     "vitest": "^4.0.18"
   },

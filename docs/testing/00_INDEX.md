@@ -11,6 +11,7 @@ This directory contains comprehensive testing documentation for the CloudVault p
 - **[Performance Testing](./50_PERFORMANCE_TESTING.md)** - Baselines and load testing setup
 - **[CI/CD Debugging](./60_CI_DEBUGGING.md)** - Troubleshooting CI failures
 - **[Test Data Management](./70_TEST_DATA_MANAGEMENT.md)** - Fixtures and deterministic test data
+- **[Linting and Formatting](./80_LINTING_AND_FORMATTING.md)** - ESLint and Prettier workflow
 - **[Exceptions](./99_EXCEPTIONS.md)** - Documented coverage exceptions
 
 ## Testing Philosophy
