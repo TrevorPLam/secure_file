@@ -11,6 +11,7 @@
 ## 📋 Purpose of This Document
 
 This document provides AI coding assistants with:
+
 - **Project context** and architecture overview
 - **Prioritized task list** from TODO.md
 - **Development guidelines** and best practices
@@ -26,6 +27,7 @@ This document provides AI coding assistants with:
 ### What is CloudVault?
 
 CloudVault is a secure file sharing and storage application that enables users to:
+
 - Upload and organize files in hierarchical folders
 - Share files via password-protected, time-limited links
 - Track download counts and access analytics
@@ -68,14 +70,16 @@ secure_file/
 
 ### 🔴 CRITICAL - Quick Wins (1-2 Days)
 
-#### 1. Add Dedicated LICENSE File (30 minutes)
-**Current:** 8/10 - License in package.json only  
+#### 1. Add Dedicated LICENSE File (30 minutes) ✅ COMPLETED
+
+**Current:** 10/10 - Standard LICENSE file created  
 **Target:** 10/10 - Standard LICENSE file  
 **Impact:** +2 DIAMOND points
 
 **Task:**
-- [ ] Create `LICENSE` file in project root
-- [ ] Copy MIT license text with 2026 copyright
+
+- [x] Create `LICENSE` file in project root
+- [x] Copy MIT license text with 2026 copyright
 - [ ] Commit to repository
 
 ```text
@@ -104,34 +108,36 @@ SOFTWARE.
 
 ---
 
-#### 2. Add ESLint + Prettier (4-8 hours)
-**Current:** 9/10 - Consistent style without linter  
+#### 2. Add ESLint + Prettier (4-8 hours) ✅ COMPLETED
+**Current:** 10/10 - Enforced code style  
 **Target:** 10/10 - Enforced code style  
 **Impact:** +1 DIAMOND point
 
 **Task:**
-- [ ] Install dependencies: `eslint`, `prettier`, `eslint-config-prettier`, `eslint-plugin-react`, `@typescript-eslint/*`
-- [ ] Create `.eslintrc.json` with TypeScript/React config
-- [ ] Create `.prettierrc.json` with formatting rules
-- [ ] Add lint/format scripts to package.json
-- [ ] Run format on existing codebase
-- [ ] Add ESLint check to CI (.github/workflows/test-coverage.yml)
+- [x] Install dependencies: `eslint`, `prettier`, `eslint-config-prettier`, `eslint-plugin-react`, `@typescript-eslint/*`
+- [x] Create `.eslintrc.json` with TypeScript/React config
+- [x] Create `.prettierrc.json` with formatting rules
+- [x] Add lint/format scripts to package.json
+- [x] Run format on existing codebase
+- [x] Add ESLint check to CI (.github/workflows/test-coverage.yml)
 
 **Files to create:**
-- `.eslintrc.json`
-- `.prettierrc.json`
-- `.eslintignore`
+- [x] `.eslintrc.json`
+- [x] `.prettierrc.json`
+- [x] `.eslintignore`
 
 ---
 
-#### 3. Add CODEOWNERS File (15 minutes)
-**Current:** 9/10 - No automatic reviewer assignment  
+#### 3. Add CODEOWNERS File (15 minutes) ✅ COMPLETED
+
+**Current:** 10/10 - Clear code ownership established  
 **Target:** 10/10 - Clear code ownership  
 **Impact:** +1 DIAMOND point
 
 **Task:**
-- [ ] Create `.github/CODEOWNERS`
-- [ ] Define ownership for security, testing, docs areas
+
+- [x] Create `.github/CODEOWNERS`
+- [x] Define ownership for security, testing, docs areas
 - [ ] Commit to repository
 
 ---
@@ -139,10 +145,12 @@ SOFTWARE.
 ### 🔴 HIGH PRIORITY - Security & Compliance (2-4 Weeks)
 
 #### 4. Implement CSRF Protection (4 hours)
+
 **Priority:** P0 - Security Critical  
 **Impact:** +3 DIAMOND points in Security
 
 **Task:**
+
 - [ ] Create `server/csrf.ts` with token generation/validation
 - [ ] Add CSRF middleware to routes
 - [ ] Update client API to include CSRF token in requests
@@ -150,12 +158,14 @@ SOFTWARE.
 - [ ] Test manually: Verify 403 on missing token
 
 **Key Functions:**
+
 - `generateCsrfToken()` - Cryptographically secure token
 - `validateCsrfToken(userId, token)` - Timing-safe comparison
 - `requireCsrf` middleware - Protect state-changing routes
 - `attachCsrfToken` middleware - Add token to requests
 
 **Safety Notes:**
+
 - Use constant-time comparison to prevent timing attacks
 - Token lifetime: 24 hours
 - Store tokens in session or Redis (not in-memory for production)
@@ -163,12 +173,14 @@ SOFTWARE.
 ---
 
 #### 5. Structured Audit Logging (32 hours / 1 week)
+
 **Priority:** P0 - Required for SOC 2  
 **Current:** 7/10 - Console logging only  
 **Target:** 9/10 - Tamper-proof audit logs  
 **Impact:** +3 DIAMOND points
 
 **Task:**
+
 - [ ] Add `audit_logs` table to `shared/schema.ts`
 - [ ] Create `server/audit.ts` with event types enum
 - [ ] Implement HMAC-SHA256 log signing
@@ -178,12 +190,14 @@ SOFTWARE.
 - [ ] Test: Verify all CRUD operations generate logs
 
 **Audit Event Types:**
+
 - AUTH_LOGIN_SUCCESS, AUTH_LOGOUT
 - DATA_FILE_CREATE, DATA_FILE_ACCESS, DATA_FILE_DELETE
 - SECURITY_RATE_LIMIT_EXCEEDED, SECURITY_CSRF_FAILURE
 - SHARE_LINK_CREATE, SHARE_LINK_ACCESS
 
 **Compliance Requirements:**
+
 - Retain logs for 1 year minimum
 - Redact sensitive fields (password, token, apiKey)
 - Log all security-relevant events
@@ -192,10 +206,12 @@ SOFTWARE.
 ---
 
 #### 6. Environment Variable Validation (2 hours)
+
 **Priority:** P1 - Required for security  
 **Impact:** +1 DIAMOND point
 
 **Task:**
+
 - [ ] Create `server/config.ts` with Zod schema
 - [ ] Validate required: `DATABASE_URL`, `SESSION_SECRET`
 - [ ] Set defaults for optional vars
@@ -203,22 +219,25 @@ SOFTWARE.
 - [ ] Test: Server fails fast on invalid environment
 
 **Example Schema:**
+
 ```typescript
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   SESSION_SECRET: z.string().min(32),
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().int().positive().default(5000),
-});
+})
 ```
 
 ---
 
 #### 7. Add Encryption Utilities (4 hours)
+
 **Priority:** P1 - Data protection  
 **Impact:** +2 DIAMOND points
 
 **Task:**
+
 - [ ] Create `server/encryption.ts` with AES-256-GCM functions
 - [ ] Implement: `encrypt(plaintext, key)`, `decrypt(encrypted, key)`
 - [ ] Implement: `deriveKey(password, salt)` using scrypt
@@ -227,11 +246,13 @@ const envSchema = z.object({
 - [ ] Document encryption key management
 
 **Algorithms:**
+
 - Encryption: AES-256-GCM
 - Key derivation: scrypt (N=32768, r=8, p=1)
 - Auth tag: 128 bits
 
 **Safety Notes:**
+
 - NEVER change encryption parameters without migration plan
 - Encryption key loss = permanent data loss
 - Store master key securely (environment variable + key rotation)
@@ -240,23 +261,29 @@ const envSchema = z.object({
 
 ### 🟡 MEDIUM PRIORITY - Quality Improvements (1-2 Months)
 
-#### 8. Complete use-toast.ts Coverage (30 min)
-**Current:** 69.81% | **Target:** 100%
+#### 8. Complete use-toast.ts Coverage (30 min) ✅ COMPLETED
+
+**Current:** 100% | **Target:** 100%
 
 **Task:**
-- [ ] Add test for `onOpenChange` edge case (toast reopens before removal)
-- [ ] Test timeout cleanup on rapid open/close
-- [ ] Verify duplicate timeout prevention
+
+- [x] Add test for `onOpenChange` edge case (toast reopens before removal)
+- [x] Test timeout cleanup on rapid open/close
+- [x] Verify duplicate timeout prevention
 
 **File:** `client/src/hooks/use-toast.test.ts`
+
+**Result:** 29 tests passing (3 new edge case tests added)
 
 ---
 
 #### 9. Expand db.test.ts Coverage (1 hour)
+
 **Current:** 80%, 2 basic tests  
 **Target:** 100%, 8-10 tests
 
 **Suggested Tests:**
+
 - Connection validation (missing DATABASE_URL)
 - Connection pool exhaustion
 - Retry logic on transient failures
@@ -269,10 +296,12 @@ const envSchema = z.object({
 ---
 
 #### 10. Add Integration Tests (2-3 hours)
+
 **Current:** Unit tests only  
 **Target:** 5-10 integration tests
 
 **Test Flows:**
+
 - Full file upload → share → download workflow
 - Folder navigation and nested structure
 - Concurrent file operations (race conditions)
@@ -284,41 +313,44 @@ const envSchema = z.object({
 ---
 
 #### 11. Improve Security Test Coverage (1-2 hours)
+
 **Current:** Basic security tests  
 **Target:** Comprehensive security validation
 
 **Suggested Tests:**
+
 ```typescript
 // File: server/security.test.ts (additions)
 
-describe("Security Hardening", () => {
-  it("should prevent SQL injection in all endpoints", () => {
+describe('Security Hardening', () => {
+  it('should prevent SQL injection in all endpoints', () => {
     // Test with malicious input
-  });
-  
-  it("should sanitize file names", () => {
+  })
+
+  it('should sanitize file names', () => {
     // Test path traversal attempts: ../../../etc/passwd
-  });
-  
-  it("should rate limit by IP address", () => {
+  })
+
+  it('should rate limit by IP address', () => {
     // Test IP-based throttling
-  });
-  
-  it("should reject oversized payloads", () => {
+  })
+
+  it('should reject oversized payloads', () => {
     // Test payload size limits
-  });
-  
-  it("should prevent CSRF attacks", () => {
+  })
+
+  it('should prevent CSRF attacks', () => {
     // Test CSRF token validation
-  });
-  
-  it("should enforce strong password requirements on share links", () => {
+  })
+
+  it('should enforce strong password requirements on share links', () => {
     // Test password complexity
-  });
-});
+  })
+})
 ```
 
 **Action Items:**
+
 - [ ] Add SQL injection prevention tests
 - [ ] Test path traversal prevention
 - [ ] Add CSRF protection tests
@@ -329,19 +361,23 @@ describe("Security Hardening", () => {
 ---
 
 #### 12. Test Replit Integration Code (2-4 hours)
+
 **Current:** 0-33% coverage  
 **Target:** 70%+
 
 **Files Needing Tests:**
+
 - `server/replit_integrations/auth/*.ts` (0% coverage)
 - `server/replit_integrations/object_storage/*.ts` (33% coverage)
 
 **Challenges:**
+
 - Platform-specific code (requires Replit environment)
 - External service dependencies
 - OAuth flow complexity
 
 **Action Items:**
+
 - [ ] Mock Replit sidecar API
 - [ ] Test OAuth authentication flow
 - [ ] Test object storage ACL policies
@@ -352,33 +388,36 @@ describe("Security Hardening", () => {
 ---
 
 #### 13. Add Performance Tests (2-3 hours)
+
 **Current:** None  
 **Target:** Basic load/stress tests
 
 **Suggested Tests:**
+
 ```typescript
 // File: test/performance/load-tests.test.ts
 
-describe("Performance Tests", () => {
-  it("should handle 100 concurrent uploads", async () => {
+describe('Performance Tests', () => {
+  it('should handle 100 concurrent uploads', async () => {
     // Test throughput
-  });
-  
-  it("should respond within 100ms for file listing", async () => {
+  })
+
+  it('should respond within 100ms for file listing', async () => {
     // Test response time
-  });
-  
-  it("should handle 1000 files in a folder", async () => {
+  })
+
+  it('should handle 1000 files in a folder', async () => {
     // Test scalability
-  });
-  
-  it("should maintain performance under rate limiting", async () => {
+  })
+
+  it('should maintain performance under rate limiting', async () => {
     // Test degradation
-  });
-});
+  })
+})
 ```
 
 **Action Items:**
+
 - [ ] Set up performance testing framework (k6 or Artillery)
 - [ ] Define performance baselines
 - [ ] Add load tests for critical endpoints
@@ -389,10 +428,12 @@ describe("Performance Tests", () => {
 ---
 
 #### 14. Enhance Test Documentation (1 hour)
+
 **Current:** Good documentation  
 **Target:** Excellent with examples
 
 **Additions Needed:**
+
 - [ ] Add troubleshooting section to `docs/testing/10_RUNNING_TESTS.md`
 - [ ] Create `docs/testing/40_INTEGRATION_TESTS.md`
 - [ ] Add more examples to `docs/testing/30_TEST_PATTERNS.md`
@@ -403,21 +444,24 @@ describe("Performance Tests", () => {
 ---
 
 #### 15. Add Test Coverage Enforcement (1 hour)
+
 **Priority:** P2 - CI/CD Quality
 
 **Implementation:**
 
 **File:** `vitest.config.ts` (update)
+
 ```typescript
 export default defineConfig({
   test: {
     allowOnly: false, // Prevent .only() and .skip() from being committed
     // ... existing config
   },
-});
+})
 ```
 
 **File:** `package.json` (add script)
+
 ```json
 {
   "scripts": {
@@ -427,6 +471,7 @@ export default defineConfig({
 ```
 
 **Success Criteria:**
+
 - [ ] `allowOnly: false` added to vitest config
 - [ ] CI fails if `.only()` or `.skip()` present
 - [ ] Pre-commit check script works
@@ -434,7 +479,9 @@ export default defineConfig({
 ---
 
 #### 16. Add Dependabot (1 hour)
+
 **Task:**
+
 - [ ] Create `.github/dependabot.yml`
 - [ ] Configure weekly update schedule
 - [ ] Set PR limits (max 5 open)
@@ -443,9 +490,11 @@ export default defineConfig({
 ---
 
 #### 17. Add AI-META Headers (2 hours)
+
 **Task:** Add standardized documentation headers to all server files
 
 **Template:**
+
 ```typescript
 // AI-META-BEGIN
 // AI-META: <Brief description of file purpose>
@@ -459,6 +508,7 @@ export default defineConfig({
 ```
 
 **Files to update:**
+
 - `server/security.ts`
 - `server/routes.ts`
 - `server/storage.ts`
@@ -469,6 +519,7 @@ export default defineConfig({
 ---
 
 #### 18. Implement Internationalization (i18n) (40 hours / 1 week)
+
 **Current:** 3/10 - English only  
 **Target:** 8/10 - Multi-language support  
 **Impact:** +5 DIAMOND points
@@ -476,6 +527,7 @@ export default defineConfig({
 **Note:** Only pursue if targeting non-English markets.
 
 **Steps:**
+
 - [ ] Install react-intl or i18next
 - [ ] Extract all hardcoded strings to translation files
 - [ ] Create translation files (`locales/en.json`, `locales/es.json`, etc.)
@@ -490,9 +542,11 @@ export default defineConfig({
 ### 🔵 LOW PRIORITY - Future Enhancements (3-6 Months)
 
 #### 19. E2E Testing with Playwright (40 hours / 1 week)
+
 **Benefit:** Browser automation, visual regression
 
 **Setup Tasks:**
+
 - [ ] Install Playwright and dependencies
 - [ ] Create `e2e/` test directory
 - [ ] Write E2E test for login flow
@@ -506,11 +560,13 @@ export default defineConfig({
 ---
 
 #### 20. Mutation Testing (16 hours / 2 days)
+
 **Benefit:** Validate test quality by introducing code mutations
 
 **Tools:** Stryker Mutator
 
 **Action Items:**
+
 - [ ] Install Stryker Mutator
 - [ ] Configure mutation testing
 - [ ] Run baseline mutation tests
@@ -522,11 +578,13 @@ export default defineConfig({
 ---
 
 #### 21. Contract Testing (24 hours / 3 days)
+
 **Benefit:** Ensure API contracts don't break
 
 **Tools:** Pact or similar
 
 **Action Items:**
+
 - [ ] Define API contracts
 - [ ] Set up contract testing framework
 - [ ] Generate consumer contracts
@@ -538,16 +596,19 @@ export default defineConfig({
 ---
 
 #### 22. Deploy Monitoring & Observability (80 hours / 2 weeks)
+
 **Current:** 6/10 - No monitoring  
 **Target:** 9/10 - Full observability  
 **Impact:** +3 DIAMOND points
 
 **Options:**
+
 - Datadog (recommended - $15-31/host/month)
 - Self-hosted (Prometheus + Grafana + Loki)
 - AWS CloudWatch
 
 **Deliverables:**
+
 - APM integration in server/index.ts
 - Dashboards: Response times, error rates, storage usage
 - Alerts: Error rate >1%, response time p95 >500ms
@@ -557,11 +618,13 @@ export default defineConfig({
 ---
 
 #### 23. Implement Disaster Recovery (56 hours / 1.5 weeks)
+
 **Current:** 7/10 - Plan documented, not implemented  
 **Target:** 9/10 - Tested backup/recovery  
 **Impact:** +2 DIAMOND points
 
 **Requirements:**
+
 - Daily PostgreSQL backups (retain 30 days)
 - Point-In-Time Recovery (PITR)
 - Backup monitoring and alerts
@@ -570,6 +633,7 @@ export default defineConfig({
 - GCS multi-region replication
 
 **Deliverables:**
+
 - `docs/operations/DISASTER_RECOVERY.md`
 - `script/backup-database.sh`
 - `script/restore-database.sh`
@@ -578,11 +642,13 @@ export default defineConfig({
 ---
 
 #### 24. Accessibility Audit (24 hours / 3 days)
+
 **Current:** 7/10 - Framework support  
 **Target:** 9/10 - WCAG 2.1 AA compliant  
 **Impact:** +2 DIAMOND points
 
 **Tasks:**
+
 - [ ] Install axe-core testing library
 - [ ] Add accessibility tests to components
 - [ ] Run Lighthouse audit (target: 95+ score)
@@ -598,6 +664,7 @@ export default defineConfig({
 ### P0: Critical for Enterprise (Next 3 Months)
 
 #### 1. Advanced Sharing & Permissions (4-6 weeks)
+
 - [ ] Share files to specific users (not just public links)
 - [ ] Role-based access control (Viewer, Editor, Owner)
 - [ ] Folder-level permissions with inheritance
@@ -610,6 +677,7 @@ export default defineConfig({
 ---
 
 #### 2. Search Functionality (2-3 weeks)
+
 - [ ] Full-text search on file names (PostgreSQL FTS)
 - [ ] Filter by type, size, date
 - [ ] Fuzzy search (typo tolerance with pg_trgm)
@@ -621,6 +689,7 @@ export default defineConfig({
 ---
 
 #### 3. Admin Dashboard (2-3 weeks)
+
 - [ ] User management UI (list, deactivate, view files)
 - [ ] Storage analytics dashboard
 - [ ] Activity reporting (most active users, most shared files)
@@ -634,6 +703,7 @@ export default defineConfig({
 ### P1: High Value (Months 4-6)
 
 #### 4. PDF Viewer & Tools (3-4 weeks)
+
 - [ ] In-browser PDF viewer (react-pdf)
 - [ ] PDF annotations (comments, highlights)
 - [ ] Merge, split, rotate, compress PDFs
@@ -643,6 +713,7 @@ export default defineConfig({
 ---
 
 #### 5. File Request Portal (3-4 weeks)
+
 - [ ] Upload-only links (no auth required)
 - [ ] File request forms (structured intake)
 - [ ] Intake checklists (multi-step forms)
@@ -653,6 +724,7 @@ export default defineConfig({
 ---
 
 #### 6. Collaboration Features (4-6 weeks)
+
 - [ ] Comment threads on files
 - [ ] @mentions with notifications
 - [ ] Activity feed inside file
@@ -717,6 +789,7 @@ export default defineConfig({
    - [ ] Evidence collection repository
 
 **Cost Estimate:**
+
 - Implementation: $48,000 (320 hours)
 - Audit: $25,000 (Type I + Type II)
 - Annual Maintenance: $15,000
@@ -729,6 +802,7 @@ export default defineConfig({
 **WARNING:** CloudVault is **NOT currently HIPAA compliant**. Do not store PHI without implementing these controls.
 
 **Requirements:**
+
 - Security risk analysis
 - Workforce security (background checks, training)
 - Business Associate Agreements (BAAs)
@@ -745,6 +819,7 @@ export default defineConfig({
 **WARNING:** CloudVault does **NOT** currently process payments.
 
 **Critical Requirements:**
+
 - Network segmentation
 - Firewall configuration
 - Encrypt cardholder data (never store CVV)
@@ -759,6 +834,7 @@ export default defineConfig({
 ### GDPR (For EU Users)
 
 **Requirements:**
+
 - Privacy policy and consent management
 - User rights endpoints:
   - Right to access (`GET /api/users/me/export`)
@@ -777,6 +853,7 @@ export default defineConfig({
 ### Code Safety Constraints
 
 #### 🚨 NEVER Change Without Approval:
+
 1. **Encryption parameters** (AES-256-GCM, scrypt settings)
 2. **Database schema** (always use migrations, never direct ALTER)
 3. **Authentication flows** (Replit OIDC integration)
@@ -784,12 +861,14 @@ export default defineConfig({
 5. **Rate limiting thresholds** (security-sensitive)
 
 #### ⚠️ High-Risk Areas (Extra Caution):
+
 - `server/security.ts` - Security middleware
 - `server/replit_integrations/auth/` - Authentication logic
 - `shared/schema.ts` - Database schema
 - `server/routes.ts` - API authorization checks
 
 #### ✅ Safe to Modify:
+
 - UI components (client/src/components/)
 - Frontend hooks (client/src/hooks/)
 - Documentation (docs/, README.md)
@@ -801,12 +880,14 @@ export default defineConfig({
 ### Code Quality Standards
 
 #### TypeScript
+
 - **All code must be TypeScript** (no `any` types without justification)
 - Use shared types from `shared/` directory
 - Prefer type inference where possible
 - Document complex types with JSDoc
 
 #### Testing
+
 - **Minimum 80% coverage** for new code
 - **100% coverage required** for:
   - Security features
@@ -817,6 +898,7 @@ export default defineConfig({
 - Run `npm run test:coverage` to verify coverage
 
 #### API Design
+
 - **RESTful conventions:**
   - `GET /api/resource` - List/read
   - `POST /api/resource` - Create
@@ -830,6 +912,7 @@ export default defineConfig({
 - **Input validation** with Zod schemas
 
 #### Security
+
 - **All endpoints require authentication** (except share links)
 - **Validate all user input** (never trust client data)
 - **Sanitize file names** (prevent path traversal)
@@ -842,6 +925,7 @@ export default defineConfig({
 ### File Modification Patterns
 
 #### When Modifying `shared/schema.ts`:
+
 1. Add new table/column
 2. Run `npm run db:push` to update database
 3. Update affected routes in `server/routes.ts`
@@ -850,6 +934,7 @@ export default defineConfig({
 6. Document in `docs/data/`
 
 #### When Modifying API Routes:
+
 1. Update `server/routes.ts` (add/modify endpoint)
 2. Add authentication/authorization checks
 3. Add input validation (Zod schema)
@@ -859,6 +944,7 @@ export default defineConfig({
 7. Consider rate limiting
 
 #### When Adding New Features:
+
 1. **Create task in TODO.md** with priority and effort estimate
 2. **Update AGENTS.md** with task details
 3. **Write tests first** (TDD approach)
@@ -872,6 +958,7 @@ export default defineConfig({
 ### Common Pitfalls to Avoid
 
 ❌ **Don't:**
+
 - Use `any` type without justification
 - Skip input validation ("trust the client")
 - Store sensitive data in logs (passwords, tokens)
@@ -883,6 +970,7 @@ export default defineConfig({
 - Hardcode configuration (use environment variables)
 
 ✅ **Do:**
+
 - Use TypeScript strict mode
 - Validate all inputs with Zod
 - Redact sensitive data in logs
@@ -919,14 +1007,14 @@ describe("ComponentName or FunctionName", () => {
     it("should do expected behavior when condition", () => {
       // Arrange
       const input = ...;
-      
+
       // Act
       const result = functionUnderTest(input);
-      
+
       // Assert
       expect(result).toBe(expected);
     });
-    
+
     it("should throw error when invalid input", () => {
       expect(() => functionUnderTest(null)).toThrow();
     });
@@ -936,14 +1024,14 @@ describe("ComponentName or FunctionName", () => {
 
 ### Coverage Requirements
 
-| Code Type | Minimum Coverage | Notes |
-|-----------|------------------|-------|
-| Security features | 100% | Auth, authorization, validation |
-| API endpoints | 100% | All routes and error cases |
-| Business logic | 90% | Core functionality |
-| UI components | 70% | Focus on logic, not presentation |
-| Utilities | 90% | Pure functions, data transformations |
-| Integration code | 30% | External services (mock at boundaries) |
+| Code Type         | Minimum Coverage | Notes                                  |
+| ----------------- | ---------------- | -------------------------------------- |
+| Security features | 100%             | Auth, authorization, validation        |
+| API endpoints     | 100%             | All routes and error cases             |
+| Business logic    | 90%              | Core functionality                     |
+| UI components     | 70%              | Focus on logic, not presentation       |
+| Utilities         | 90%              | Pure functions, data transformations   |
+| Integration code  | 30%              | External services (mock at boundaries) |
 
 ### Running Tests
 
@@ -970,21 +1058,22 @@ npm run test:ui
 
 ### Critical Files to Reference
 
-| File | Purpose |
-|------|---------|
-| [README.md](./README.md) | Project overview, quick start |
-| [docs/README.md](./docs/README.md) | Documentation hub |
-| [docs/architecture/10_OVERVIEW.md](./docs/architecture/10_OVERVIEW.md) | System architecture |
-| [docs/architecture/30_MODULES_AND_DEPENDENCIES.md](./docs/architecture/30_MODULES_AND_DEPENDENCIES.md) | Code organization |
-| [docs/architecture/40_KEY_FLOWS.md](./docs/architecture/40_KEY_FLOWS.md) | User flows and data flows |
-| [docs/api/00_INDEX.md](./docs/api/00_INDEX.md) | REST API reference |
-| [docs/security/10_THREAT_MODEL.md](./docs/security/10_THREAT_MODEL.md) | Security architecture |
-| [docs/testing/30_TEST_PATTERNS.md](./docs/testing/30_TEST_PATTERNS.md) | Testing examples |
-| [TODO.md](./TODO.md) | Complete task list |
+| File                                                                                                   | Purpose                       |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------- |
+| [README.md](./README.md)                                                                               | Project overview, quick start |
+| [docs/README.md](./docs/README.md)                                                                     | Documentation hub             |
+| [docs/architecture/10_OVERVIEW.md](./docs/architecture/10_OVERVIEW.md)                                 | System architecture           |
+| [docs/architecture/30_MODULES_AND_DEPENDENCIES.md](./docs/architecture/30_MODULES_AND_DEPENDENCIES.md) | Code organization             |
+| [docs/architecture/40_KEY_FLOWS.md](./docs/architecture/40_KEY_FLOWS.md)                               | User flows and data flows     |
+| [docs/api/00_INDEX.md](./docs/api/00_INDEX.md)                                                         | REST API reference            |
+| [docs/security/10_THREAT_MODEL.md](./docs/security/10_THREAT_MODEL.md)                                 | Security architecture         |
+| [docs/testing/30_TEST_PATTERNS.md](./docs/testing/30_TEST_PATTERNS.md)                                 | Testing examples              |
+| [TODO.md](./TODO.md)                                                                                   | Complete task list            |
 
 ### When to Update Documentation
 
 **Always update docs when:**
+
 - Adding new API endpoint → `docs/api/`
 - Changing architecture → `docs/architecture/`
 - Adding new module → `docs/architecture/30_MODULES_AND_DEPENDENCIES.md`
@@ -999,47 +1088,58 @@ npm run test:ui
 ### Add New API Endpoint
 
 1. **Define route** in `server/routes.ts`:
+
    ```typescript
-   app.post("/api/resource", requireAuth, async (req, res) => {
-     const schema = z.object({ name: z.string() });
-     const data = schema.parse(req.body);
+   app.post('/api/resource', requireAuth, async (req, res) => {
+     const schema = z.object({ name: z.string() })
+     const data = schema.parse(req.body)
      // ... implementation
-   });
+   })
    ```
 
 2. **Add data access** in `server/storage.ts`:
+
    ```typescript
    export async function createResource(userId: string, data: any) {
-     return await db.insert(resources).values({ ...data, userId });
+     return await db.insert(resources).values({ ...data, userId })
    }
    ```
 
 3. **Write tests** in `server/routes.test.ts`:
+
    ```typescript
-   it("should create resource when authenticated", async () => {
+   it('should create resource when authenticated', async () => {
      const response = await request(app)
-       .post("/api/resource")
-       .set("Cookie", authCookie)
-       .send({ name: "Test" });
-     
-     expect(response.status).toBe(201);
-   });
+       .post('/api/resource')
+       .set('Cookie', authCookie)
+       .send({ name: 'Test' })
+
+     expect(response.status).toBe(201)
+   })
    ```
 
 4. **Update docs** in `docs/api/`:
-   ```markdown
+
+   ````markdown
    ### POST /api/resource
+
    Create a new resource.
-   
+
    **Request:**
+
    ```json
    { "name": "string" }
    ```
-   
+   ````
+
    **Response (201):**
+
    ```json
    { "id": "uuid", "name": "string" }
    ```
+
+   ```
+
    ```
 
 ---
@@ -1047,23 +1147,28 @@ npm run test:ui
 ### Add Database Table
 
 1. **Update schema** in `shared/schema.ts`:
+
    ```typescript
    export const newTable = pgTable('new_table', {
-     id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+     id: text('id')
+       .primaryKey()
+       .$defaultFn(() => crypto.randomUUID()),
      createdAt: timestamp('created_at').defaultNow(),
      // ... columns
-   });
+   })
    ```
 
 2. **Push to database**:
+
    ```bash
    npm run db:push
    ```
 
 3. **Update types**:
+
    ```typescript
-   export type NewTable = typeof newTable.$inferSelect;
-   export type InsertNewTable = typeof newTable.$inferInsert;
+   export type NewTable = typeof newTable.$inferSelect
+   export type InsertNewTable = typeof newTable.$inferInsert
    ```
 
 4. **Add queries** in `server/storage.ts`
@@ -1077,6 +1182,7 @@ npm run test:ui
 ### Add React Component
 
 1. **Create component** in `client/src/components/`:
+
    ```typescript
    export function MyComponent({ prop }: { prop: string }) {
      return <div>{prop}</div>;
@@ -1086,6 +1192,7 @@ npm run test:ui
 2. **Add styles** with Tailwind classes
 
 3. **Write tests** (if component has logic):
+
    ```typescript
    it("should render prop", () => {
      render(<MyComponent prop="test" />);
@@ -1100,25 +1207,28 @@ npm run test:ui
 ### Add Security Middleware
 
 1. **Create middleware** in `server/security.ts`:
+
    ```typescript
    export function mySecurityCheck(req: Request, res: Response, next: NextFunction) {
      if (!validateSomething(req)) {
-       return res.status(403).json({ error: "Forbidden" });
+       return res.status(403).json({ error: 'Forbidden' })
      }
-     next();
+     next()
    }
    ```
 
 2. **Write comprehensive tests**:
+
    ```typescript
-   it("should reject invalid requests", () => {
+   it('should reject invalid requests', () => {
      // Test all edge cases
-   });
+   })
    ```
 
 3. **Apply to routes** in `server/routes.ts`:
+
    ```typescript
-   app.post("/api/sensitive", requireAuth, mySecurityCheck, handler);
+   app.post('/api/sensitive', requireAuth, mySecurityCheck, handler)
    ```
 
 4. **Document** in `docs/security/`
@@ -1138,6 +1248,7 @@ npm run test:ui
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation only
@@ -1147,6 +1258,7 @@ npm run test:ui
 - `chore`: Maintain, dependencies
 
 **Examples:**
+
 ```
 feat(api): add CSRF protection to all routes
 
@@ -1193,14 +1305,14 @@ npm run format
 
 ### Should I implement this task?
 
-| Question | Answer |
-|----------|--------|
-| Is this in the priority task list? | ✅ Yes → Proceed with confidence |
+| Question                            | Answer                                     |
+| ----------------------------------- | ------------------------------------------ |
+| Is this in the priority task list?  | ✅ Yes → Proceed with confidence           |
 | Is this a security-critical change? | ⚠️ Yes → Extra caution, 100% test coverage |
-| Does this modify authentication? | ⚠️ Yes → Discuss with team first |
-| Does this change database schema? | ⚠️ Yes → Create migration, test thoroughly |
-| Is this a UI-only change? | ✅ Yes → Safe to implement |
-| Does this add dependencies? | ⚠️ Moderate → Check license, security |
+| Does this modify authentication?    | ⚠️ Yes → Discuss with team first           |
+| Does this change database schema?   | ⚠️ Yes → Create migration, test thoroughly |
+| Is this a UI-only change?           | ✅ Yes → Safe to implement                 |
+| Does this add dependencies?         | ⚠️ Moderate → Check license, security      |
 
 ### When to ask for human input:
 
@@ -1231,12 +1343,12 @@ npm run format
 
 ### For Specific Topics
 
-| Topic | Resource |
-|-------|----------|
-| Drizzle ORM | [docs/data/00_INDEX.md](./docs/data/00_INDEX.md) |
-| Replit Auth | [docs/integrations/00_INDEX.md](./docs/integrations/00_INDEX.md) |
-| Threat Model | [docs/security/10_THREAT_MODEL.md](./docs/security/10_THREAT_MODEL.md) |
-| Key Flows | [docs/architecture/40_KEY_FLOWS.md](./docs/architecture/40_KEY_FLOWS.md) |
+| Topic        | Resource                                                                 |
+| ------------ | ------------------------------------------------------------------------ |
+| Drizzle ORM  | [docs/data/00_INDEX.md](./docs/data/00_INDEX.md)                         |
+| Replit Auth  | [docs/integrations/00_INDEX.md](./docs/integrations/00_INDEX.md)         |
+| Threat Model | [docs/security/10_THREAT_MODEL.md](./docs/security/10_THREAT_MODEL.md)   |
+| Key Flows    | [docs/architecture/40_KEY_FLOWS.md](./docs/architecture/40_KEY_FLOWS.md) |
 
 ---
 

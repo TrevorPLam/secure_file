@@ -11,6 +11,7 @@ This document establishes security practices for the **entire development lifecy
 ### Mandatory Checks (Before Merge)
 
 **For ALL Pull Requests**:
+
 - [ ] **No secrets committed** (run `git diff main | grep -i "secret\|password\|token"`)
 - [ ] **Tests pass** (CI must be green)
 - [ ] **Type checking passes** (`npm run check`)
@@ -18,12 +19,14 @@ This document establishes security practices for the **entire development lifecy
 - [ ] **No merge conflicts**
 
 **For Security-Sensitive Changes** (auth, validation, crypto):
+
 - [ ] **Threat model updated** (if attack surface changes)
 - [ ] **Security regression test added** (test for vulnerability fix)
 - [ ] **Documentation updated** (security docs in `docs/security/`)
 - [ ] **Reviewed by security champion** (designated team member)
 
 **For Dependency Changes**:
+
 - [ ] **`npm audit` passes** (no HIGH or CRITICAL vulnerabilities)
 - [ ] **Lockfile updated** (`package-lock.json` committed)
 - [ ] **Change log reviewed** (check for breaking security changes)
@@ -95,22 +98,23 @@ A test that **specifically validates a security fix** to ensure the vulnerabilit
 **Fix**: Switch to Drizzle ORM parameterization
 
 **Regression Test**:
+
 ```typescript
 describe('SQL Injection Prevention', () => {
   it('should reject malicious folder ID', async () => {
-    const maliciousId = "'; DROP TABLE folders; --";
-    
+    const maliciousId = "'; DROP TABLE folders; --"
+
     const response = await request(app)
       .get(`/api/folders/${maliciousId}`)
-      .set('Cookie', mockSessionCookie());
-    
-    expect(response.status).toBe(404); // Not found (ID invalid format)
-    
+      .set('Cookie', mockSessionCookie())
+
+    expect(response.status).toBe(404) // Not found (ID invalid format)
+
     // Verify tables still exist
-    const folders = await db.query.folders.findMany();
-    expect(folders).toBeDefined();
-  });
-});
+    const folders = await db.query.folders.findMany()
+    expect(folders).toBeDefined()
+  })
+})
 ```
 
 ---
@@ -122,6 +126,7 @@ describe('SQL Injection Prevention', () => {
 **Fix**: Add `normalizeObjectEntityPath()` validation
 
 **Regression Test**:
+
 ```typescript
 describe('Path Traversal Prevention', () => {
   it('should reject path traversal attempts', () => {
@@ -129,24 +134,21 @@ describe('Path Traversal Prevention', () => {
       '/objects/../admin/secrets.txt',
       '/admin/config.json',
       '../../etc/passwd',
-    ];
-    
+    ]
+
     for (const path of maliciousPaths) {
-      expect(() => normalizeObjectEntityPath(path)).toThrow('Invalid object path');
+      expect(() => normalizeObjectEntityPath(path)).toThrow('Invalid object path')
     }
-  });
-  
+  })
+
   it('should accept valid object paths', () => {
-    const validPaths = [
-      '/objects/abc-123-def-456',
-      'gs://bucket/objects/file.txt',
-    ];
-    
+    const validPaths = ['/objects/abc-123-def-456', 'gs://bucket/objects/file.txt']
+
     for (const path of validPaths) {
-      expect(() => normalizeObjectEntityPath(path)).not.toThrow();
+      expect(() => normalizeObjectEntityPath(path)).not.toThrow()
     }
-  });
-});
+  })
+})
 ```
 
 ---
@@ -154,46 +156,47 @@ describe('Path Traversal Prevention', () => {
 ## Security Testing Requirements
 
 ### Unit Tests (Per Feature)
+
 - **Coverage Target**: 100% (documented exceptions allowed)
 - **Security Focus**: Input validation, authorization checks
 
 ### Integration Tests (Per API Endpoint)
+
 - **Coverage**: All authenticated endpoints
 - **Security Focus**: End-to-end auth flow, permission checks
 
 ### Security-Specific Tests
+
 ```typescript
 describe('Security Controls', () => {
   describe('Authentication', () => {
     it('should reject unauthenticated requests', async () => {
-      const response = await request(app).get('/api/folders');
-      expect(response.status).toBe(401);
-    });
-  });
-  
+      const response = await request(app).get('/api/folders')
+      expect(response.status).toBe(401)
+    })
+  })
+
   describe('Authorization', () => {
     it('should prevent horizontal privilege escalation', async () => {
-      const userA = createMockUser('user-a');
-      const userBFileId = 'file-owned-by-user-b';
-      
+      const userA = createMockUser('user-a')
+      const userBFileId = 'file-owned-by-user-b'
+
       const response = await request(app)
         .post(`/api/files/${userBFileId}/share`)
-        .set('Cookie', mockSessionCookie(userA));
-      
-      expect(response.status).toBe(404); // Not 403 to avoid info disclosure
-    });
-  });
-  
+        .set('Cookie', mockSessionCookie(userA))
+
+      expect(response.status).toBe(404) // Not 403 to avoid info disclosure
+    })
+  })
+
   describe('Input Validation', () => {
     it('should reject invalid file size', async () => {
-      const response = await request(app)
-        .post('/api/files')
-        .send({ size: -1, name: 'test.txt' });
-      
-      expect(response.status).toBe(400);
-    });
-  });
-});
+      const response = await request(app).post('/api/files').send({ size: -1, name: 'test.txt' })
+
+      expect(response.status).toBe(400)
+    })
+  })
+})
 ```
 
 ---
@@ -203,6 +206,7 @@ describe('Security Controls', () => {
 ### External Researchers (Security Bug Bounty)
 
 **Reporting Channel**: Create `SECURITY.md` in repository root
+
 ```markdown
 # Security Policy
 
@@ -219,6 +223,7 @@ describe('Security Controls', () => {
 Email: security@cloudvault.example.com
 
 Include:
+
 - Description of vulnerability
 - Steps to reproduce
 - Potential impact
@@ -232,6 +237,7 @@ We aim to respond within **48 hours** and provide a fix within **7 days** for cr
 ### Internal Vulnerability Discovery
 
 **Process**:
+
 1. **Report**: Developer reports to security team (Slack #security channel)
 2. **Assess**: Security team evaluates severity (use CVSS calculator)
 3. **Track**: Create private GitHub Security Advisory
@@ -244,12 +250,12 @@ We aim to respond within **48 hours** and provide a fix within **7 days** for cr
 
 ### Severity Rubric (CVSS-based)
 
-| Severity | CVSS Score | Response Time | Examples |
-|----------|------------|---------------|----------|
-| **CRITICAL** | 9.0-10.0 | 24 hours | SQL injection with data access, RCE |
-| **HIGH** | 7.0-8.9 | 7 days | Authentication bypass, privilege escalation |
-| **MEDIUM** | 4.0-6.9 | 30 days | XSS (non-stored), CSRF, info disclosure |
-| **LOW** | 0.1-3.9 | 90 days | Verbose error messages, missing security headers |
+| Severity     | CVSS Score | Response Time | Examples                                         |
+| ------------ | ---------- | ------------- | ------------------------------------------------ |
+| **CRITICAL** | 9.0-10.0   | 24 hours      | SQL injection with data access, RCE              |
+| **HIGH**     | 7.0-8.9    | 7 days        | Authentication bypass, privilege escalation      |
+| **MEDIUM**   | 4.0-6.9    | 30 days       | XSS (non-stored), CSRF, info disclosure          |
+| **LOW**      | 0.1-3.9    | 90 days       | Verbose error messages, missing security headers |
 
 **CVSS Calculator**: [https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator](https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator)
 
@@ -260,6 +266,7 @@ We aim to respond within **48 hours** and provide a fix within **7 days** for cr
 ### When to Grant Waivers
 
 Security requirements may be waived if:
+
 - **Risk is accepted** by product owner and security team
 - **Mitigation is documented** (alternative control in place)
 - **Timeline is established** for full fix (technical debt tracked)
@@ -274,6 +281,7 @@ Security requirements may be waived if:
 **Reason for Waiver**: [e.g., "MVP launch deadline; low user count makes brute force impractical"]
 
 **Risk Assessment**:
+
 - Likelihood: LOW (1-10 users in MVP)
 - Impact: MEDIUM (account takeover possible)
 - Overall Risk: LOW
@@ -283,6 +291,7 @@ Security requirements may be waived if:
 **Deadline for Full Fix**: 2025-03-15 (30 days post-launch)
 
 **Approved By**:
+
 - Product Owner: [Name]
 - Security Champion: [Name]
 - Date: 2025-02-04
@@ -297,12 +306,14 @@ Security requirements may be waived if:
 ### Onboarding (New Developers)
 
 **Required Reading** (1-2 hours):
+
 1. `docs/security/00_INDEX.md` - Security program overview
 2. `docs/security/10_THREAT_MODEL.md` - What we're protecting against
 3. `docs/security/11_IDENTITY_AND_ACCESS.md` - Authentication implementation
 4. `docs/security/13_APPSEC_BOUNDARIES.md` - Input validation patterns
 
 **Hands-On Exercise**:
+
 - Review a recent security fix PR
 - Identify potential vulnerability in sample code
 
@@ -311,6 +322,7 @@ Security requirements may be waived if:
 ### Ongoing Training (Quarterly)
 
 **Topics** (rotate each quarter):
+
 - Q1: OWASP Top 10 review
 - Q2: Supply chain security (dependency audits)
 - Q3: Incident response tabletop exercise
@@ -325,6 +337,7 @@ Security requirements may be waived if:
 ### Role Definition
 
 **Security Champion**: Developer with elevated security knowledge who:
+
 - Reviews security-sensitive PRs
 - Represents team in security meetings
 - Advocates for security best practices
@@ -371,6 +384,7 @@ Security requirements may be waived if:
 **Security Debt**: Known security gaps that are accepted temporarily with a plan to fix
 
 **Examples**:
+
 - Missing rate limiting (tracked in `10_THREAT_MODEL.md` as open risk)
 - No MFA support (tracked as future enhancement)
 - Response body logging (tracked as HIGH priority fix)

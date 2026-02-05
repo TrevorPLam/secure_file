@@ -32,6 +32,7 @@ npm test -- path/to/test-file.test.ts
 ```
 
 Examples:
+
 ```bash
 npm test -- client/src/lib/utils.test.ts
 npm test -- server/storage.test.ts
@@ -44,6 +45,7 @@ npm test -- --grep="pattern"
 ```
 
 Examples:
+
 ```bash
 npm test -- --grep="should create"
 npm test -- --grep="auth"
@@ -54,11 +56,11 @@ npm test -- --grep="auth"
 Use `.only` in your test file temporarily:
 
 ```typescript
-describe.only("my suite", () => {
-  it.only("my test", () => {
+describe.only('my suite', () => {
+  it.only('my test', () => {
     // ...
-  });
-});
+  })
+})
 ```
 
 **Remember to remove `.only` before committing!**
@@ -66,17 +68,20 @@ describe.only("my suite", () => {
 ## Understanding Test Output
 
 ### Passing Tests
+
 ```
 ✓ client/src/lib/utils.test.ts (9 tests) 12ms
 ```
 
 ### Failing Tests
+
 ```
 × should do something
   AssertionError: expected 5 to equal 10
 ```
 
 ### Coverage Summary
+
 ```
 Coverage report from v8
 -------------------|---------|----------|---------|---------|
@@ -149,13 +154,13 @@ Add to `.vscode/launch.json`:
 Add `console.log()` statements in your tests or use Vitest's built-in debugging:
 
 ```typescript
-import { it, expect } from "vitest";
+import { it, expect } from 'vitest'
 
-it("should debug", () => {
-  const value = someFunction();
-  console.log("Debug value:", value);
-  expect(value).toBe(expected);
-});
+it('should debug', () => {
+  const value = someFunction()
+  console.log('Debug value:', value)
+  expect(value).toBe(expected)
+})
 ```
 
 ### Browser UI Debugging
@@ -165,6 +170,7 @@ npm run test:ui
 ```
 
 Opens an interactive UI in your browser where you can:
+
 - See test results in real-time
 - Filter and search tests
 - View detailed error messages
@@ -175,6 +181,7 @@ Opens an interactive UI in your browser where you can:
 ### Tests Fail with "Cannot find module"
 
 **Solution**: Ensure all dependencies are installed:
+
 ```bash
 npm install
 ```
@@ -182,26 +189,29 @@ npm install
 ### Tests Timeout
 
 **Solution**: Increase timeout for slow tests:
+
 ```typescript
-it("slow test", async () => {
+it('slow test', async () => {
   // test code
-}, 10000); // 10 second timeout
+}, 10000) // 10 second timeout
 ```
 
 ### Mock Issues
 
 **Solution**: Clear mocks between tests:
+
 ```typescript
-import { beforeEach, vi } from "vitest";
+import { beforeEach, vi } from 'vitest'
 
 beforeEach(() => {
-  vi.clearAllMocks();
-});
+  vi.clearAllMocks()
+})
 ```
 
 ### Coverage Not Updating
 
 **Solution**: Clear coverage cache:
+
 ```bash
 rm -rf coverage/
 npm run test:coverage
@@ -210,11 +220,13 @@ npm run test:coverage
 ## CI/CD Integration
 
 Tests run automatically on:
+
 - Every push to a branch
 - Every pull request
 - Before merging to main
 
 CI will **fail** if:
+
 - Any test fails
 - Coverage drops below 100% (with allowed exceptions)
 - Linting errors are present

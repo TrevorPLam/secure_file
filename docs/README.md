@@ -27,23 +27,23 @@ docs/
 
 The architecture folder contains the main architectural documentation:
 
-| Document | Description |
-|----------|-------------|
-| [00_INDEX.md](./architecture/00_INDEX.md) | Navigation hub and quick reference |
-| [10_OVERVIEW.md](./architecture/10_OVERVIEW.md) | High-level system design and components |
-| [20_RUNTIME_TOPOLOGY.md](./architecture/20_RUNTIME_TOPOLOGY.md) | Deployment, environments, and boot sequence |
-| [30_MODULES_AND_DEPENDENCIES.md](./architecture/30_MODULES_AND_DEPENDENCIES.md) | Code organization and dependency rules |
-| [40_KEY_FLOWS.md](./architecture/40_KEY_FLOWS.md) | Critical user journeys and data paths |
-| [90_GLOSSARY.md](./architecture/90_GLOSSARY.md) | Terms, acronyms, and domain language |
+| Document                                                                        | Description                                 |
+| ------------------------------------------------------------------------------- | ------------------------------------------- |
+| [00_INDEX.md](./architecture/00_INDEX.md)                                       | Navigation hub and quick reference          |
+| [10_OVERVIEW.md](./architecture/10_OVERVIEW.md)                                 | High-level system design and components     |
+| [20_RUNTIME_TOPOLOGY.md](./architecture/20_RUNTIME_TOPOLOGY.md)                 | Deployment, environments, and boot sequence |
+| [30_MODULES_AND_DEPENDENCIES.md](./architecture/30_MODULES_AND_DEPENDENCIES.md) | Code organization and dependency rules      |
+| [40_KEY_FLOWS.md](./architecture/40_KEY_FLOWS.md)                               | Critical user journeys and data paths       |
+| [90_GLOSSARY.md](./architecture/90_GLOSSARY.md)                                 | Terms, acronyms, and domain language        |
 
 ### Deep-Dive Documentation
 
-| Topic | Description |
-|-------|-------------|
-| [Data](./data/00_INDEX.md) | Database schema, migrations, storage patterns |
-| [API](./api/00_INDEX.md) | REST API endpoints and conventions |
-| [Integrations](./integrations/00_INDEX.md) | Third-party services (Replit Auth, GCS) |
-| [ADR](./adr/README.md) | Architecture decision records |
+| Topic                                      | Description                                   |
+| ------------------------------------------ | --------------------------------------------- |
+| [Data](./data/00_INDEX.md)                 | Database schema, migrations, storage patterns |
+| [API](./api/00_INDEX.md)                   | REST API endpoints and conventions            |
+| [Integrations](./integrations/00_INDEX.md) | Third-party services (Replit Auth, GCS)       |
+| [ADR](./adr/README.md)                     | Architecture decision records                 |
 
 ## 🎯 Common Tasks
 
@@ -83,21 +83,25 @@ See [Runtime Topology - Local Development Setup](./architecture/20_RUNTIME_TOPOL
 ### By Role
 
 **Frontend Developer**:
+
 - [System Overview - Frontend](./architecture/10_OVERVIEW.md#1-frontend-client)
 - [Modules - Client Structure](./architecture/30_MODULES_AND_DEPENDENCIES.md#client-module-structure)
 - [API Documentation](./api/00_INDEX.md)
 
 **Backend Developer**:
+
 - [System Overview - Backend](./architecture/10_OVERVIEW.md#2-backend-server)
 - [Modules - Server Structure](./architecture/30_MODULES_AND_DEPENDENCIES.md#server-module-structure)
 - [Data Documentation](./data/00_INDEX.md)
 - [Integrations](./integrations/00_INDEX.md)
 
 **DevOps/SRE**:
+
 - [Runtime Topology](./architecture/20_RUNTIME_TOPOLOGY.md)
 - [Integrations - External Services](./integrations/00_INDEX.md#third-party-services)
 
 **Product Manager**:
+
 - [System Overview](./architecture/10_OVERVIEW.md)
 - [Key Flows](./architecture/40_KEY_FLOWS.md)
 
@@ -115,14 +119,14 @@ All documentation in this repository follows these principles:
 
 ### When to Update Docs
 
-| Code Change | Update These Docs |
-|-------------|-------------------|
-| New feature | [40_KEY_FLOWS.md](./architecture/40_KEY_FLOWS.md) |
-| New module/folder | [30_MODULES_AND_DEPENDENCIES.md](./architecture/30_MODULES_AND_DEPENDENCIES.md) |
-| API changes | [API Documentation](./api/00_INDEX.md) |
-| Database schema | [Data Documentation](./data/00_INDEX.md) |
-| New dependency | [Integrations](./integrations/00_INDEX.md) |
-| Architecture decision | [ADR](./adr/README.md) - Create new ADR |
+| Code Change           | Update These Docs                                                               |
+| --------------------- | ------------------------------------------------------------------------------- |
+| New feature           | [40_KEY_FLOWS.md](./architecture/40_KEY_FLOWS.md)                               |
+| New module/folder     | [30_MODULES_AND_DEPENDENCIES.md](./architecture/30_MODULES_AND_DEPENDENCIES.md) |
+| API changes           | [API Documentation](./api/00_INDEX.md)                                          |
+| Database schema       | [Data Documentation](./data/00_INDEX.md)                                        |
+| New dependency        | [Integrations](./integrations/00_INDEX.md)                                      |
+| Architecture decision | [ADR](./adr/README.md) - Create new ADR                                         |
 
 ### Documentation Maintenance Rules
 
@@ -143,7 +147,7 @@ All documentation in this repository follows these principles:
 ✅ Database schema and patterns  
 ✅ REST API endpoints  
 ✅ External integrations  
-✅ Architecture decisions  
+✅ Architecture decisions
 
 ### What's Not (Yet) Documented
 
@@ -152,7 +156,7 @@ All documentation in this repository follows these principles:
 ⚠️ Monitoring and alerting (not implemented)  
 ⚠️ Disaster recovery procedures  
 ⚠️ Performance benchmarks  
-⚠️ Security audit results  
+⚠️ Security audit results
 
 ## 📊 Documentation Statistics
 
@@ -238,6 +242,7 @@ If you find errors or have questions about the documentation:
 **Architecture**: Monolithic full-stack app on Replit platform
 
 **Key Patterns**:
+
 - Session-based authentication (Replit Auth)
 - Direct file uploads via presigned URLs
 - Type-safe API with Drizzle ORM + Zod
@@ -245,6 +250,7 @@ If you find errors or have questions about the documentation:
 - Monorepo with shared types
 
 **Critical Flows**:
+
 1. Authentication (OIDC)
 2. File upload (presigned URLs)
 3. File sharing (token-based links)

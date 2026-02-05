@@ -30,11 +30,11 @@ CloudVault is a **monolithic full-stack application** with a single Node.js proc
 
 ### Components
 
-| Component | Type | Port | Purpose |
-|-----------|------|------|---------|
-| Express Server | Node.js process | 5000 | HTTP server (API + static files) |
-| PostgreSQL | Database | 5432 | Persistent data storage |
-| Google Cloud Storage | Object store | HTTPS | File blob storage |
+| Component            | Type            | Port  | Purpose                          |
+| -------------------- | --------------- | ----- | -------------------------------- |
+| Express Server       | Node.js process | 5000  | HTTP server (API + static files) |
+| PostgreSQL           | Database        | 5432  | Persistent data storage          |
+| Google Cloud Storage | Object store    | HTTPS | File blob storage                |
 
 **No separate services**: No background workers, queues, or microservices.
 
@@ -53,6 +53,7 @@ $ npm run dev
 ```
 
 **What happens**:
+
 1. `tsx` runs `server/index.ts` with hot reload
 2. Vite dev server embedded in Express (via `setupVite()`)
 3. React hot module replacement (HMR) active
@@ -60,6 +61,7 @@ $ npm run dev
 5. Frontend requests proxied to Vite dev server
 
 **Requirements**:
+
 - Node.js 20+
 - PostgreSQL database running
 - Environment variables set:
@@ -71,6 +73,7 @@ $ npm run dev
   ```
 
 **File watching**:
+
 - Server code: `tsx` auto-restarts on changes
 - Client code: Vite HMR (no page reload)
 - Shared code: Both server and client reload
@@ -80,11 +83,13 @@ $ npm run dev
 **Start command**: `npm run start`
 
 **Build process** (`npm run build`):
+
 1. Vite bundles client code → `dist/public/`
 2. esbuild bundles server code → `dist/index.cjs`
 3. Copies static assets and node_modules
 
 **Runtime**:
+
 - Single Node.js process runs `dist/index.cjs`
 - Express serves static files from `dist/public/`
 - API routes handle `/api/*` requests
@@ -92,6 +97,7 @@ $ npm run dev
 - Google Cloud Storage via Replit sidecar service
 
 **Deployment target**: Replit platform
+
 - Configured in `.replit` file
 - Port 5000 exposed automatically
 - PostgreSQL provisioned by Replit
@@ -102,6 +108,7 @@ $ npm run dev
 **Not currently configured** - no separate staging environment.
 
 To add staging:
+
 1. Create new Replit deployment
 2. Use separate `DATABASE_URL`
 3. Configure separate OIDC app in Replit Auth
@@ -131,6 +138,7 @@ To add staging:
 ```
 
 **Key files in order**:
+
 1. `server/index.ts` - Entry point
 2. `server/routes.ts` - Route registration
 3. `server/replit_integrations/auth/setup.ts` - Auth setup
@@ -139,6 +147,7 @@ To add staging:
 ### Production Boot
 
 Same as development, except:
+
 - Step 5 skipped (no Vite dev server)
 - Step 6 serves pre-built files from `dist/public/`
 
@@ -149,10 +158,12 @@ Same as development, except:
 **File**: `server/index.ts`
 
 **Execution**:
+
 - Development: `tsx server/index.ts`
 - Production: `node dist/index.cjs`
 
 **Responsibilities**:
+
 1. Create Express app and HTTP server
 2. Configure middleware (JSON parser, logging, sessions)
 3. Register routes (auth, API, storage)
@@ -165,11 +176,13 @@ Same as development, except:
 **Execution**: Rendered by Vite dev server or loaded from `dist/public/index.html`
 
 **Responsibilities**:
+
 1. Import React and ReactDOM
 2. Render `<App />` component into DOM
 3. Apply global styles (Tailwind)
 
 **Route flow**:
+
 ```
 main.tsx
   └─> App.tsx (Router + Providers)
@@ -185,6 +198,7 @@ main.tsx
 **Execution**: Imported by `server/db.ts` to create Drizzle instance
 
 **Responsibilities**:
+
 1. Define table schemas (folders, files, shareLinks, users, sessions)
 2. Define relations between tables
 3. Export TypeScript types for tables
@@ -192,10 +206,10 @@ main.tsx
 
 ## Port Allocation
 
-| Port | Service | Environment | Notes |
-|------|---------|-------------|-------|
-| 5000 | Express HTTP | Dev & Prod | Configurable via `process.env.PORT` |
-| 5432 | PostgreSQL | Dev & Prod | Standard PostgreSQL port |
+| Port | Service      | Environment | Notes                               |
+| ---- | ------------ | ----------- | ----------------------------------- |
+| 5000 | Express HTTP | Dev & Prod  | Configurable via `process.env.PORT` |
+| 5432 | PostgreSQL   | Dev & Prod  | Standard PostgreSQL port            |
 
 **Firewall requirements**: Port 5000 must be accessible for web traffic.
 
@@ -220,21 +234,22 @@ main.tsx
 
 ### Required Environment Variables
 
-| Variable | Purpose | Example |
-|----------|---------|---------|
-| `DATABASE_URL` | PostgreSQL connection | `postgresql://user:pass@host:5432/db` |
-| `SESSION_SECRET` | Session encryption key | Random 32+ char string |
-| `ISSUER_URL` | OIDC discovery endpoint | `https://auth.replit.com/...` |
-| `REPL_ID` | Replit application ID | Auto-set on Replit |
-| `NODE_ENV` | Environment mode | `development` or `production` |
+| Variable         | Purpose                 | Example                               |
+| ---------------- | ----------------------- | ------------------------------------- |
+| `DATABASE_URL`   | PostgreSQL connection   | `postgresql://user:pass@host:5432/db` |
+| `SESSION_SECRET` | Session encryption key  | Random 32+ char string                |
+| `ISSUER_URL`     | OIDC discovery endpoint | `https://auth.replit.com/...`         |
+| `REPL_ID`        | Replit application ID   | Auto-set on Replit                    |
+| `NODE_ENV`       | Environment mode        | `development` or `production`         |
 
 ### Optional Variables
 
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `PORT` | HTTP server port | `5000` |
+| Variable | Purpose          | Default |
+| -------- | ---------------- | ------- |
+| `PORT`   | HTTP server port | `5000`  |
 
 **Configuration files**:
+
 - `.replit` - Replit deployment config
 - `vite.config.ts` - Build and dev server config
 - `drizzle.config.ts` - Database migration config
@@ -250,6 +265,7 @@ main.tsx
 5. **Start**: `npm run start` (or click "Run" in Replit)
 
 **First deployment**:
+
 ```bash
 # Push database schema
 npm run db:push
@@ -291,6 +307,7 @@ npm run dev
 - **API logs**: Request method, path, status, duration, response body
 
 Example:
+
 ```
 11:34:56 AM [express] POST /api/files 201 in 45ms :: {"id":"abc123",...}
 ```
@@ -302,6 +319,7 @@ Example:
 - **Retention**: Per Replit plan limits
 
 **Log sources**:
+
 - Express server (API requests)
 - Uncaught exceptions
 - Database errors

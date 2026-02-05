@@ -8,8 +8,8 @@
 // TESTS: Manual API testing with authenticated sessions, verify presigned URL upload flow
 // AI-META-END
 
-import type { Express } from "express";
-import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import type { Express } from 'express'
+import { ObjectStorageService, ObjectNotFoundError } from './objectStorage'
 
 /**
  * Register object storage routes for file uploads.
@@ -24,7 +24,7 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
  * - Add ACL policies for access control
  */
 export function registerObjectStorageRoutes(app: Express): void {
-  const objectStorageService = new ObjectStorageService();
+  const objectStorageService = new ObjectStorageService()
 
   /**
    * Request a presigned URL for file upload.
@@ -45,32 +45,32 @@ export function registerObjectStorageRoutes(app: Express): void {
    * IMPORTANT: The client should NOT send the file to this endpoint.
    * Send JSON metadata only, then upload the file directly to uploadURL.
    */
-  app.post("/api/uploads/request-url", async (req, res) => {
+  app.post('/api/uploads/request-url', async (req, res) => {
     try {
-      const { name, size, contentType } = req.body;
+      const { name, size, contentType } = req.body
 
       if (!name) {
         return res.status(400).json({
-          error: "Missing required field: name",
-        });
+          error: 'Missing required field: name',
+        })
       }
 
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL()
 
       // Extract object path from the presigned URL for later reference
-      const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+      const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL)
 
       res.json({
         uploadURL,
         objectPath,
         // Echo back the metadata for client convenience
         metadata: { name, size, contentType },
-      });
+      })
     } catch (error) {
-      console.error("Error generating upload URL:", error);
-      res.status(500).json({ error: "Failed to generate upload URL" });
+      console.error('Error generating upload URL:', error)
+      res.status(500).json({ error: 'Failed to generate upload URL' })
     }
-  });
+  })
 
   /**
    * Serve uploaded objects.
@@ -80,18 +80,17 @@ export function registerObjectStorageRoutes(app: Express): void {
    * This serves files from object storage. For public files, no auth needed.
    * For protected files, add authentication middleware and ACL checks.
    */
-  app.get("/objects/uploads/:objectId", async (req, res) => {
+  app.get('/objects/uploads/:objectId', async (req, res) => {
     try {
-      const objectPath = `/objects/uploads/${req.params.objectId}`;
-      const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
-      await objectStorageService.downloadObject(objectFile, res);
+      const objectPath = `/objects/uploads/${req.params.objectId}`
+      const objectFile = await objectStorageService.getObjectEntityFile(objectPath)
+      await objectStorageService.downloadObject(objectFile, res)
     } catch (error) {
-      console.error("Error serving object:", error);
+      console.error('Error serving object:', error)
       if (error instanceof ObjectNotFoundError) {
-        return res.status(404).json({ error: "Object not found" });
+        return res.status(404).json({ error: 'Object not found' })
       }
-      return res.status(500).json({ error: "Failed to serve object" });
+      return res.status(500).json({ error: 'Failed to serve object' })
     }
-  });
+  })
 }
-

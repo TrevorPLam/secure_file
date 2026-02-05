@@ -8,7 +8,7 @@
 // TESTS: Visual testing via Storybook or component usage, verify accessibility with screen readers
 // AI-META-END
 
-import * as AspectRatioPrimitive from "@radix-ui/react-aspect-ratio"
+import * as AspectRatioPrimitive from '@radix-ui/react-aspect-ratio'
 
 const AspectRatio = AspectRatioPrimitive.Root
 

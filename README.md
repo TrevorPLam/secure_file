@@ -11,6 +11,7 @@ Secure file sharing and storage application built with React, Express, and Postg
 ## What is CloudVault?
 
 CloudVault enables users to:
+
 - 📁 Upload and organize files in folders
 - 🔗 Share files via password-protected, time-limited links
 - 📊 Track download counts for shared files
@@ -66,14 +67,14 @@ npm run db:push   # Push schema changes to database
 
 Comprehensive documentation is available in the `docs/` directory:
 
-| Document | Description |
-|----------|-------------|
-| [Documentation Hub](./docs/README.md) | Entry point to all documentation |
+| Document                                        | Description                       |
+| ----------------------------------------------- | --------------------------------- |
+| [Documentation Hub](./docs/README.md)           | Entry point to all documentation  |
 | [Architecture](./docs/architecture/00_INDEX.md) | System design, modules, and flows |
-| [API Reference](./docs/api/00_INDEX.md) | REST API endpoints |
-| [Data Model](./docs/data/00_INDEX.md) | Database schema and storage |
-| [Integrations](./docs/integrations/00_INDEX.md) | Third-party services |
-| [ADR](./docs/adr/README.md) | Architecture decisions |
+| [API Reference](./docs/api/00_INDEX.md)         | REST API endpoints                |
+| [Data Model](./docs/data/00_INDEX.md)           | Database schema and storage       |
+| [Integrations](./docs/integrations/00_INDEX.md) | Third-party services              |
+| [ADR](./docs/adr/README.md)                     | Architecture decisions            |
 
 ## Project Structure
 
@@ -104,17 +105,20 @@ See [Modules & Dependencies](./docs/architecture/30_MODULES_AND_DEPENDENCIES.md)
 ## Key Features
 
 ### File Management
+
 - Hierarchical folder structure
 - Drag-and-drop file uploads
 - Direct upload to cloud storage (no server bottleneck)
 
 ### Secure Sharing
+
 - Generate shareable links with unique tokens
 - Optional password protection (bcrypt hashed)
 - Time-limited expiration
 - Download count tracking
 
 ### Authentication
+
 - Replit Auth via OpenID Connect (OIDC)
 - Session-based authentication
 - Secure session storage in PostgreSQL
@@ -136,6 +140,7 @@ RESTful API with JSON payloads. All endpoints (except share links) require authe
 **Base URL**: `/api`
 
 **Example endpoints**:
+
 - `GET /api/folders` - List folders
 - `POST /api/files` - Create file metadata
 - `POST /api/share-links` - Create share link
@@ -155,6 +160,7 @@ See [API Documentation](./docs/api/00_INDEX.md) for complete reference.
 ### Documentation Updates
 
 When you change code, update these docs:
+
 - New feature → [Key Flows](./docs/architecture/40_KEY_FLOWS.md)
 - New module → [Modules & Dependencies](./docs/architecture/30_MODULES_AND_DEPENDENCIES.md)
 - API changes → [API Documentation](./docs/api/00_INDEX.md)

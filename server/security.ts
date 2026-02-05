@@ -8,7 +8,7 @@
 // TESTS: Manual testing via curl, browser DevTools to verify headers
 // AI-META-END
 
-import type { Request, Response, NextFunction, Express } from "express";
+import type { Request, Response, NextFunction, Express } from 'express'
 
 /**
  * Security Headers Middleware
@@ -27,31 +27,31 @@ export function securityHeaders(req: Request, res: Response, next: NextFunction)
     "frame-ancestors 'none'", // Prevent clickjacking
     "base-uri 'self'",
     "form-action 'self'",
-  ].join("; ");
-  
-  res.setHeader("Content-Security-Policy", cspDirectives);
-  
+  ].join('; ')
+
+  res.setHeader('Content-Security-Policy', cspDirectives)
+
   // Strict-Transport-Security - Force HTTPS (only if behind HTTPS proxy)
   if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
-    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
   }
-  
+
   // X-Content-Type-Options - Prevent MIME type sniffing
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  
+  res.setHeader('X-Content-Type-Options', 'nosniff')
+
   // X-Frame-Options - Prevent clickjacking (legacy, CSP frame-ancestors is preferred)
-  res.setHeader("X-Frame-Options", "DENY");
-  
+  res.setHeader('X-Frame-Options', 'DENY')
+
   // X-XSS-Protection - Legacy XSS filter (mostly deprecated, but doesn't hurt)
-  res.setHeader("X-XSS-Protection", "1; mode=block");
-  
+  res.setHeader('X-XSS-Protection', '1; mode=block')
+
   // Referrer-Policy - Control referrer information leakage
-  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+
   // Permissions-Policy - Control browser features
-  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
-  
-  next();
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
+
+  next()
 }
 
 /**
@@ -59,45 +59,43 @@ export function securityHeaders(req: Request, res: Response, next: NextFunction)
  * Implements strict same-origin policy with explicit allowlist for trusted origins
  */
 export function corsPolicy(req: Request, res: Response, next: NextFunction) {
-  const origin = req.headers.origin;
-  
+  const origin = req.headers.origin
+
   // Allowlist of trusted origins (update based on deployment domains)
-  const allowedOrigins = [
-    'https://replit.com',
-    'https://*.repl.co',
-    'https://*.replit.dev',
-  ];
-  
+  const allowedOrigins = ['https://replit.com', 'https://*.repl.co', 'https://*.replit.dev']
+
   // In production, strictly enforce allowlist
   // In development, allow localhost for testing
   if (process.env.NODE_ENV === 'development') {
-    allowedOrigins.push('http://localhost:5000', 'http://localhost:5173');
+    allowedOrigins.push('http://localhost:5000', 'http://localhost:5173')
   }
-  
+
   // Check if origin matches allowlist (simple wildcard support)
-  const isAllowed = origin && allowedOrigins.some(allowed => {
-    if (allowed.includes('*')) {
-      // Escape special regex characters except *, then replace * with .*
-      const pattern = allowed.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-      return new RegExp(`^${pattern}$`).test(origin);
-    }
-    return allowed === origin;
-  });
-  
+  const isAllowed =
+    origin &&
+    allowedOrigins.some(allowed => {
+      if (allowed.includes('*')) {
+        // Escape special regex characters except *, then replace * with .*
+        const pattern = allowed.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')
+        return new RegExp(`^${pattern}$`).test(origin)
+      }
+      return allowed === origin
+    })
+
   if (isAllowed) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader('Access-Control-Allow-Origin', origin)
+    res.setHeader('Access-Control-Allow-Credentials', 'true')
   }
-  
+
   // Handle preflight
   if (req.method === 'OPTIONS') {
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.setHeader("Access-Control-Max-Age", "86400"); // 24 hours
-    return res.status(204).end();
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    res.setHeader('Access-Control-Max-Age', '86400') // 24 hours
+    return res.status(204).end()
   }
-  
-  next();
+
+  next()
 }
 
 /**
@@ -105,90 +103,90 @@ export function corsPolicy(req: Request, res: Response, next: NextFunction) {
  * Simple in-memory store for rate limiting (consider Redis for production clusters)
  */
 class RateLimitStore {
-  private store = new Map<string, { count: number; resetTime: number }>();
-  
+  private store = new Map<string, { count: number; resetTime: number }>()
+
   increment(key: string, windowMs: number): { count: number; resetTime: number } {
-    const now = Date.now();
-    const record = this.store.get(key);
-    
+    const now = Date.now()
+    const record = this.store.get(key)
+
     if (!record || now > record.resetTime) {
-      const newRecord = { count: 1, resetTime: now + windowMs };
-      this.store.set(key, newRecord);
-      return newRecord;
+      const newRecord = { count: 1, resetTime: now + windowMs }
+      this.store.set(key, newRecord)
+      return newRecord
     }
-    
-    record.count++;
-    return record;
+
+    record.count++
+    return record
   }
-  
+
   reset(key: string): void {
-    this.store.delete(key);
+    this.store.delete(key)
   }
-  
+
   // Cleanup old entries periodically
   cleanup(): void {
-    const now = Date.now();
-    const entries = Array.from(this.store.entries());
+    const now = Date.now()
+    const entries = Array.from(this.store.entries())
     for (const [key, record] of entries) {
       if (now > record.resetTime) {
-        this.store.delete(key);
+        this.store.delete(key)
       }
     }
   }
 }
 
-const rateLimitStore = new RateLimitStore();
+const rateLimitStore = new RateLimitStore()
 
 // Cleanup rate limit store every 5 minutes
-setInterval(() => rateLimitStore.cleanup(), 5 * 60 * 1000);
+setInterval(() => rateLimitStore.cleanup(), 5 * 60 * 1000)
 
 /**
  * Rate Limiting Middleware Factory
  * Creates rate limiter with configurable limits
  */
 export function createRateLimiter(options: {
-  windowMs: number;
-  maxRequests: number;
-  skipSuccessfulRequests?: boolean;
-  keyGenerator?: (req: Request) => string;
-  message?: string;
+  windowMs: number
+  maxRequests: number
+  skipSuccessfulRequests?: boolean
+  keyGenerator?: (req: Request) => string
+  message?: string
 }) {
   const {
     windowMs,
     maxRequests,
     skipSuccessfulRequests = false,
-    keyGenerator = (req) => req.ip || req.socket.remoteAddress || 'unknown',
+    keyGenerator = req => req.ip || req.socket.remoteAddress || 'unknown',
     message = 'Too many requests, please try again later.',
-  } = options;
-  
+  } = options
+
   return (req: Request, res: Response, next: NextFunction) => {
-    const key = keyGenerator(req);
-    const { count, resetTime } = rateLimitStore.increment(key, windowMs);
-    
+    const key = keyGenerator(req)
+    const { count, resetTime } = rateLimitStore.increment(key, windowMs)
+
     // Set rate limit headers (count is already incremented, so remaining is max - count)
-    res.setHeader('X-RateLimit-Limit', maxRequests.toString());
-    res.setHeader('X-RateLimit-Remaining', Math.max(0, maxRequests - count).toString());
-    res.setHeader('X-RateLimit-Reset', new Date(resetTime).toISOString());
-    
+    res.setHeader('X-RateLimit-Limit', maxRequests.toString())
+    res.setHeader('X-RateLimit-Remaining', Math.max(0, maxRequests - count).toString())
+    res.setHeader('X-RateLimit-Reset', new Date(resetTime).toISOString())
+
     if (count > maxRequests) {
       res.status(429).json({
         message,
         retryAfter: Math.ceil((resetTime - Date.now()) / 1000),
-      });
-      return;
+      })
+      return
     }
-    
+
     // If skipSuccessfulRequests is true, reset counter on successful responses
     if (skipSuccessfulRequests) {
       res.on('finish', () => {
         if (res.statusCode < 400) {
-          rateLimitStore.reset(key);
+          rateLimitStore.reset(key)
         }
-      });
+      })
     }
-    
-    next();
-  };
+
+    next()
+  }
 }
 
 /**
@@ -199,14 +197,14 @@ export const authRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   maxRequests: 5, // 5 requests per 15 minutes
   skipSuccessfulRequests: true, // Reset on successful login
-  keyGenerator: (req) => {
+  keyGenerator: req => {
     // Rate limit by IP + username if available
-    const ip = req.ip || req.socket.remoteAddress || 'unknown';
-    const username = req.body?.username || req.body?.email || '';
-    return `auth:${ip}:${username}`;
+    const ip = req.ip || req.socket.remoteAddress || 'unknown'
+    const username = req.body?.username || req.body?.email || ''
+    return `auth:${ip}:${username}`
   },
   message: 'Too many authentication attempts. Please try again in 15 minutes.',
-});
+})
 
 /**
  * Share Link Rate Limiter
@@ -216,7 +214,7 @@ export const shareLinkRateLimiter = createRateLimiter({
   windowMs: 5 * 60 * 1000, // 5 minutes
   maxRequests: 20, // 20 requests per 5 minutes
   message: 'Too many download attempts. Please try again in a few minutes.',
-});
+})
 
 /**
  * General API Rate Limiter
@@ -226,21 +224,21 @@ export const apiRateLimiter = createRateLimiter({
   windowMs: 1 * 60 * 1000, // 1 minute
   maxRequests: 100, // 100 requests per minute
   message: 'Rate limit exceeded. Please slow down your requests.',
-});
+})
 
 /**
  * Apply all security middleware to Express app
  */
 export function applySecurityMiddleware(app: Express): void {
   // Apply security headers to all routes
-  app.use(securityHeaders);
-  
+  app.use(securityHeaders)
+
   // Apply CORS policy
-  app.use(corsPolicy);
-  
+  app.use(corsPolicy)
+
   // General API rate limiting (applied to all /api routes)
-  app.use('/api', apiRateLimiter);
-  
+  app.use('/api', apiRateLimiter)
+
   // Note: Specific rate limiters (auth, share) should be applied to individual routes
   // in routes.ts using authRateLimiter and shareLinkRateLimiter exports
 }

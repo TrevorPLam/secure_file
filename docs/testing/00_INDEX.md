@@ -22,18 +22,21 @@ CloudVault maintains **100% line and branch coverage** for all first-party, non-
 ## Testing Layers
 
 ### Unit Tests (Highest Volume)
+
 - Pure logic, utilities, validators, serializers
 - Deterministic, fast, hermetic
 - Must cover edge cases and error paths
 - Examples: `client/src/lib/*.test.ts`, `shared/schema.test.ts`
 
 ### Integration Tests (Critical Seams)
+
 - Database/storage access layers, API clients
 - Uses mocks for external services
 - Verifies contracts between modules
 - Examples: `server/storage.test.ts`
 
 ### E2E / UI Tests (Minimal)
+
 - Only the most critical user journeys
 - Kept minimal; most coverage from Unit + Integration
 - Future: To be implemented for critical flows
@@ -51,6 +54,7 @@ CloudVault maintains **100% line and branch coverage** for all first-party, non-
 **Overall Coverage**: 64.33% (excellent progress)
 
 **Fully Covered Modules**:
+
 - ✅ `client/src/lib/*.ts` - 100% coverage
 - ✅ `client/src/hooks/use-auth.ts` - 100% coverage
 - ✅ `client/src/hooks/use-upload.ts` - 100% coverage
@@ -60,6 +64,7 @@ CloudVault maintains **100% line and branch coverage** for all first-party, non-
 - ✅ `server/storage.ts` - 97.87% coverage
 
 **Partially Covered**:
+
 - 🟡 `client/src/hooks/use-toast.ts` - 69.81%
 - 🟡 `server/db.ts` - 80%
 - 🟡 `server/replit_integrations/*` - 0-33% (platform-specific)

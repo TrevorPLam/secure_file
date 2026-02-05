@@ -13,6 +13,7 @@ CloudVault integrates with external services for authentication, storage, and de
 **Provider**: Replit (https://replit.com)
 
 **Services used**:
+
 1. **Replit Auth** - OIDC-based user authentication
 2. **PostgreSQL** - Managed database hosting
 3. **Object Storage** - Google Cloud Storage via sidecar
@@ -21,6 +22,7 @@ CloudVault integrates with external services for authentication, storage, and de
 **Configuration**: `.replit` file
 
 **Environment variables**:
+
 - `REPL_ID` - Replit application identifier
 - `ISSUER_URL` - OIDC discovery endpoint
 
@@ -43,6 +45,7 @@ CloudVault integrates with external services for authentication, storage, and de
 **Discovery URL**: `https://auth.replit.com/.well-known/openid-configuration`
 
 **Required env vars**:
+
 - `ISSUER_URL` - OIDC issuer URL
 - `REPL_ID` - Replit application ID (auto-set)
 - `SESSION_SECRET` - Session encryption key
@@ -54,31 +57,31 @@ CloudVault integrates with external services for authentication, storage, and de
 ```
 1. User clicks "Sign in with Replit"
    → Redirect to Replit Auth
-   
+
 2. User authenticates on Replit
    → Replit validates credentials
-   
+
 3. Replit redirects to /api/auth/callback with code
    → Authorization code in URL params
-   
+
 4. Server exchanges code for ID token
    → POST to token endpoint
-   
+
 5. Server validates ID token
    → Verify signature, issuer, audience
-   
+
 6. Server extracts claims
    → sub (user ID), name, email, username
-   
+
 7. Server upserts user to database
    → Sync Replit user to local users table
-   
+
 8. Server creates session
    → Store session in PostgreSQL
-   
+
 9. Server sets session cookie
    → connect.sid cookie
-   
+
 10. Redirect to dashboard
 ```
 
@@ -87,13 +90,14 @@ CloudVault integrates with external services for authentication, storage, and de
 #### User Claims
 
 **ID token contains**:
+
 ```typescript
 {
-  sub: string;        // User ID (unique identifier)
-  name: string;       // Display name
-  email: string;      // Email address
-  username: string;   // Replit username
-  picture: string;    // Profile image URL
+  sub: string // User ID (unique identifier)
+  name: string // Display name
+  email: string // Email address
+  username: string // Replit username
+  picture: string // Profile image URL
 }
 ```
 
@@ -106,11 +110,12 @@ CloudVault integrates with external services for authentication, storage, and de
 **isAuthenticated** - Protects routes requiring login
 
 **Usage**:
+
 ```typescript
-app.get("/api/folders", isAuthenticated, async (req: any, res) => {
-  const userId = req.user.claims.sub;
+app.get('/api/folders', isAuthenticated, async (req: any, res) => {
+  const userId = req.user.claims.sub
   // Handler logic
-});
+})
 ```
 
 **Evidence**: [server/replit_integrations/auth/middleware.ts](../../server/replit_integrations/auth/middleware.ts)
@@ -141,15 +146,10 @@ app.get("/api/folders", isAuthenticated, async (req: any, res) => {
 ```typescript
 class ObjectStorageService {
   // Generate presigned URL for upload
-  async getPresignedUploadUrl(
-    objectPath: string,
-    contentType: string
-  ): Promise<string>
-  
+  async getPresignedUploadUrl(objectPath: string, contentType: string): Promise<string>
+
   // Generate presigned URL for download
-  async getPresignedDownloadUrl(
-    objectPath: string
-  ): Promise<string>
+  async getPresignedDownloadUrl(objectPath: string): Promise<string>
 }
 ```
 
@@ -158,37 +158,39 @@ class ObjectStorageService {
 #### Presigned URL Pattern
 
 **Upload flow**:
+
 ```
 1. Client requests presigned URL
    → POST /api/storage/presigned-url
-   
+
 2. Server generates presigned URL
    → Calls GCS API via sidecar
-   
+
 3. Server returns presigned URL
    → Response: { presignedUrl, objectPath }
-   
+
 4. Client uploads file
    → PUT <presigned-url> with file data
-   
+
 5. Client notifies server
    → POST /api/files with metadata
 ```
 
 **Download flow**:
+
 ```
 1. Client requests download URL
    → POST /api/share-links/:token/download
-   
+
 2. Server validates access
    → Check expiration, password
-   
+
 3. Server generates presigned URL
    → Calls GCS API via sidecar
-   
+
 4. Server returns presigned URL
    → Response: { downloadUrl }
-   
+
 5. Client downloads file
    → GET <download-url> (browser)
 ```
@@ -198,6 +200,7 @@ class ObjectStorageService {
 #### Storage Limits
 
 **Per Repl**: Varies by Replit plan
+
 - Free tier: Limited storage
 - Paid tiers: Increased storage
 
@@ -230,13 +233,12 @@ class ObjectStorageService {
 **ORM**: Drizzle ORM for all queries
 
 **Example**:
-```typescript
-import { db } from "./db";
-import { folders } from "@shared/schema";
 
-const userFolders = await db.select()
-  .from(folders)
-  .where(eq(folders.userId, userId));
+```typescript
+import { db } from './db'
+import { folders } from '@shared/schema'
+
+const userFolders = await db.select().from(folders).where(eq(folders.userId, userId))
 ```
 
 **Evidence**: [server/storage.ts](../../server/storage.ts)
@@ -259,17 +261,17 @@ const userFolders = await db.select()
 
 ### npm Packages (Key External Dependencies)
 
-| Package | Purpose | Version | Vendor |
-|---------|---------|---------|--------|
-| `@google-cloud/storage` | GCS SDK | ^7.18.0 | Google |
-| `openid-client` | OIDC client | ^6.8.1 | panva |
-| `passport` | Auth middleware | ^0.7.0 | Jared Hanson |
-| `express` | HTTP server | ^5.0.1 | Express team |
-| `drizzle-orm` | Database ORM | ^0.39.3 | Drizzle team |
-| `bcryptjs` | Password hashing | ^3.0.3 | dcodeIO |
-| `pg` | PostgreSQL driver | ^8.16.3 | Brian Carlson |
-| `react` | UI framework | ^18.3.1 | Meta |
-| `vite` | Build tool | ^7.3.0 | Evan You |
+| Package                 | Purpose           | Version | Vendor        |
+| ----------------------- | ----------------- | ------- | ------------- |
+| `@google-cloud/storage` | GCS SDK           | ^7.18.0 | Google        |
+| `openid-client`         | OIDC client       | ^6.8.1  | panva         |
+| `passport`              | Auth middleware   | ^0.7.0  | Jared Hanson  |
+| `express`               | HTTP server       | ^5.0.1  | Express team  |
+| `drizzle-orm`           | Database ORM      | ^0.39.3 | Drizzle team  |
+| `bcryptjs`              | Password hashing  | ^3.0.3  | dcodeIO       |
+| `pg`                    | PostgreSQL driver | ^8.16.3 | Brian Carlson |
+| `react`                 | UI framework      | ^18.3.1 | Meta          |
+| `vite`                  | Build tool        | ^7.3.0  | Evan You      |
 
 **Evidence**: [package.json](../../package.json)
 
@@ -278,6 +280,7 @@ const userFolders = await db.select()
 **Current state**: No webhooks implemented
 
 **Potential use cases**:
+
 - Replit Auth user updates (not available)
 - File storage events (not used)
 - Payment/subscription webhooks (not applicable)
@@ -287,11 +290,13 @@ const userFolders = await db.select()
 ### Managed by Replit
 
 **Auto-set**:
+
 - `REPL_ID` - Application identifier
 - `DATABASE_URL` - PostgreSQL connection string
 - GCS credentials (not exposed to app)
 
 **User-set**:
+
 - `SESSION_SECRET` - Session encryption key
 - `ISSUER_URL` - OIDC discovery URL
 
@@ -388,6 +393,7 @@ const userFolders = await db.select()
 **Current state**: No external monitoring
 
 **Recommendations**:
+
 - **Sentry**: Error tracking
 - **Datadog**: APM and logging
 - **Uptime Robot**: Availability monitoring

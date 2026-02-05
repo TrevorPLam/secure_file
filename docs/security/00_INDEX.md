@@ -5,6 +5,7 @@ This directory contains the complete security documentation for the CloudVault f
 ## 🎯 Purpose
 
 CloudVault is a multi-tenant file storage platform handling sensitive user data. This security program ensures:
+
 - **Confidentiality**: User files are only accessible to authorized parties
 - **Integrity**: Files and metadata cannot be tampered with
 - **Availability**: The service remains accessible and resilient
@@ -14,44 +15,44 @@ CloudVault is a multi-tenant file storage platform handling sensitive user data.
 
 ### 10-Series: Threat Modeling & Access Control
 
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| [10_THREAT_MODEL.md](./10_THREAT_MODEL.md) | STRIDE threat analysis, abuse cases, risk register | Security engineers, architects |
-| [11_IDENTITY_AND_ACCESS.md](./11_IDENTITY_AND_ACCESS.md) | Authentication, authorization, session management | Backend developers, security team |
-| [12_CRYPTO_POLICY.md](./12_CRYPTO_POLICY.md) | Cryptographic standards and key management | All developers |
-| [13_APPSEC_BOUNDARIES.md](./13_APPSEC_BOUNDARIES.md) | Input validation, injection prevention, error handling | Backend developers |
+| Document                                                 | Purpose                                                | Audience                          |
+| -------------------------------------------------------- | ------------------------------------------------------ | --------------------------------- |
+| [10_THREAT_MODEL.md](./10_THREAT_MODEL.md)               | STRIDE threat analysis, abuse cases, risk register     | Security engineers, architects    |
+| [11_IDENTITY_AND_ACCESS.md](./11_IDENTITY_AND_ACCESS.md) | Authentication, authorization, session management      | Backend developers, security team |
+| [12_CRYPTO_POLICY.md](./12_CRYPTO_POLICY.md)             | Cryptographic standards and key management             | All developers                    |
+| [13_APPSEC_BOUNDARIES.md](./13_APPSEC_BOUNDARIES.md)     | Input validation, injection prevention, error handling | Backend developers                |
 
 ### 20-Series: Supply Chain Security
 
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| [20_SUPPLY_CHAIN.md](./20_SUPPLY_CHAIN.md) | Dependency management, npm audit, hygiene rules | DevOps, developers |
+| Document                                                 | Purpose                                               | Audience                         |
+| -------------------------------------------------------- | ----------------------------------------------------- | -------------------------------- |
+| [20_SUPPLY_CHAIN.md](./20_SUPPLY_CHAIN.md)               | Dependency management, npm audit, hygiene rules       | DevOps, developers               |
 | [21_SBOM_AND_PROVENANCE.md](./21_SBOM_AND_PROVENANCE.md) | Software bill of materials, build provenance, signing | Release engineers, security team |
 
 ### 30-Series: Infrastructure Hardening
 
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| [30_CICD_HARDENING.md](./30_CICD_HARDENING.md) | CI/CD security gates, secret protection, least privilege | DevOps, platform team |
+| Document                                             | Purpose                                                        | Audience                |
+| ---------------------------------------------------- | -------------------------------------------------------------- | ----------------------- |
+| [30_CICD_HARDENING.md](./30_CICD_HARDENING.md)       | CI/CD security gates, secret protection, least privilege       | DevOps, platform team   |
 | [31_RUNTIME_HARDENING.md](./31_RUNTIME_HARDENING.md) | Security headers, rate limiting, CSP/CORS, runtime protections | Backend developers, SRE |
 
 ### 40-Series: Detection & Response
 
-| Document | Purpose | Audience |
-|----------|---------|----------|
+| Document                                             | Purpose                                         | Audience                |
+| ---------------------------------------------------- | ----------------------------------------------- | ----------------------- |
 | [40_AUDIT_AND_LOGGING.md](./40_AUDIT_AND_LOGGING.md) | Structured logging, PII redaction, audit events | Backend developers, SRE |
 
 ### 50-Series: Process & Lifecycle
 
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| [50_SECURE_SDLC.md](./50_SECURE_SDLC.md) | PR security checklist, code review standards, regression tests | All developers |
+| Document                                             | Purpose                                                             | Audience                         |
+| ---------------------------------------------------- | ------------------------------------------------------------------- | -------------------------------- |
+| [50_SECURE_SDLC.md](./50_SECURE_SDLC.md)             | PR security checklist, code review standards, regression tests      | All developers                   |
 | [60_INCIDENT_RESPONSE.md](./60_INCIDENT_RESPONSE.md) | Secret leak playbook, vulnerability disclosure, postmortem template | Security team, on-call engineers |
 
 ### 90-Series: Reporting & Posture
 
-| Document | Purpose | Audience |
-|----------|---------|----------|
+| Document                                                         | Purpose                                                           | Audience             |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------- | -------------------- |
 | [99_SECURITY_POSTURE_REPORT.md](./99_SECURITY_POSTURE_REPORT.md) | Current security state, risk summary, local verification commands | Leadership, auditors |
 
 ## 🔄 Maintenance
@@ -82,5 +83,6 @@ CloudVault is a multi-tenant file storage platform handling sensitive user data.
 - [STRIDE Threat Model](https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats)
 
 ---
+
 **Last Updated**: 2025-02-04  
 **Next Review Due**: 2025-05-04

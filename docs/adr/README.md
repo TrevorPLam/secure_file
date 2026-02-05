@@ -5,6 +5,7 @@
 ## What are ADRs?
 
 Architecture Decision Records (ADRs) document significant architectural decisions made in the project. Each ADR captures:
+
 - **Context**: The situation requiring a decision
 - **Decision**: What was decided
 - **Consequences**: Trade-offs and implications
@@ -42,14 +43,17 @@ What did we decide to do?
 ## Consequences
 
 ### Positive
+
 - Benefit 1
 - Benefit 2
 
 ### Negative
+
 - Trade-off 1
 - Trade-off 2
 
 ### Risks
+
 - Risk 1
 - Risk 2
 
@@ -66,12 +70,14 @@ Based on codebase analysis, these architectural decisions have been made:
 
 **Decision**: Build as single Node.js process (monolith) instead of microservices.
 
-**Rationale**: 
+**Rationale**:
+
 - Simpler deployment (one Repl)
 - Lower complexity for small team
 - Faster initial development
 
 **Trade-offs**:
+
 - ✅ Easy to debug and test
 - ✅ No inter-service communication overhead
 - ❌ Harder to scale independently
@@ -86,11 +92,13 @@ Based on codebase analysis, these architectural decisions have been made:
 **Decision**: Build on Replit platform (Auth, PostgreSQL, Object Storage).
 
 **Rationale**:
+
 - Integrated auth (no separate identity provider)
 - Managed database (no ops overhead)
 - Free/cheap hosting for side projects
 
 **Trade-offs**:
+
 - ✅ Fast to set up and deploy
 - ✅ No infrastructure management
 - ❌ Vendor lock-in (hard to migrate)
@@ -105,11 +113,13 @@ Based on codebase analysis, these architectural decisions have been made:
 **Decision**: Use session cookies (via express-session) instead of JWT.
 
 **Rationale**:
+
 - Replit Auth provides OIDC ID token
 - Server-side sessions easier to invalidate
 - No need for token refresh logic
 
 **Trade-offs**:
+
 - ✅ Simple logout (delete session)
 - ✅ No client-side token management
 - ❌ Stateful (requires session store)
@@ -124,11 +134,13 @@ Based on codebase analysis, these architectural decisions have been made:
 **Decision**: Use Drizzle ORM instead of Prisma, TypeORM, or raw SQL.
 
 **Rationale**:
+
 - Type-safe queries with TypeScript
 - Lightweight (no heavy runtime)
 - Schema-first (types inferred from schema)
 
 **Trade-offs**:
+
 - ✅ Excellent TypeScript integration
 - ✅ No code generation step
 - ❌ Smaller community than Prisma
@@ -143,11 +155,13 @@ Based on codebase analysis, these architectural decisions have been made:
 **Decision**: Use presigned URLs for direct client-to-GCS uploads (bypassing server).
 
 **Rationale**:
+
 - Reduces server load (no file streaming)
 - Faster uploads (direct to cloud)
 - Scalable (no server bottleneck)
 
 **Trade-offs**:
+
 - ✅ Server only handles metadata (lightweight)
 - ✅ Parallel uploads scale independently
 - ❌ More complex client code (Uppy integration)
@@ -162,11 +176,13 @@ Based on codebase analysis, these architectural decisions have been made:
 **Decision**: Use shadcn/ui (copy-paste components) instead of Material-UI or Ant Design.
 
 **Rationale**:
+
 - Full control over component code
 - Tailwind CSS integration
 - Accessible (Radix UI primitives)
 
 **Trade-offs**:
+
 - ✅ Customizable (own the code)
 - ✅ No runtime dependencies
 - ❌ More code to maintain
@@ -181,11 +197,13 @@ Based on codebase analysis, these architectural decisions have been made:
 **Decision**: Use monorepo structure with `shared/` folder for types.
 
 **Rationale**:
+
 - Single source of truth for schemas
 - Type safety between client and server
 - No type drift
 
 **Trade-offs**:
+
 - ✅ Refactor-safe (rename propagates)
 - ✅ Zod schemas reused for validation
 - ❌ Tight coupling between client/server
@@ -200,11 +218,13 @@ Based on codebase analysis, these architectural decisions have been made:
 **Decision**: No separate background job queue (no Redis, no Bull, no workers).
 
 **Rationale**:
+
 - Simpler architecture
 - All operations synchronous (good enough for MVP)
 - No infrastructure overhead
 
 **Trade-offs**:
+
 - ✅ Simpler deployment
 - ✅ No queue management
 - ❌ Long operations block requests
@@ -219,11 +239,13 @@ Based on codebase analysis, these architectural decisions have been made:
 **Decision**: Implement cascade deletes in application code, not database foreign keys.
 
 **Rationale**:
+
 - More control over deletion logic
 - Can add logging/auditing
 - Flexible for future changes
 
 **Trade-offs**:
+
 - ✅ Explicit control
 - ✅ Can customize per-deletion
 - ❌ Risk of orphaned records if code has bugs
@@ -238,11 +260,13 @@ Based on codebase analysis, these architectural decisions have been made:
 **Decision**: Ship without automated test suite (manual testing only).
 
 **Rationale**:
+
 - Faster MVP development
 - Small codebase (easier to test manually)
 - Resource constraints
 
 **Trade-offs**:
+
 - ✅ Faster initial development
 - ❌ Higher risk of regressions
 - ❌ Harder to refactor confidently
@@ -259,6 +283,7 @@ When making significant architectural changes, create a new ADR file:
 **Location**: `docs/adr/`
 
 **Process**:
+
 1. Copy template above
 2. Fill in sections
 3. Discuss with team
@@ -268,6 +293,7 @@ When making significant architectural changes, create a new ADR file:
 ## When to Write an ADR
 
 Write an ADR for decisions that:
+
 - Change system architecture
 - Introduce new dependencies
 - Impact performance or security
@@ -275,6 +301,7 @@ Write an ADR for decisions that:
 - Have long-term consequences
 
 **Don't write ADRs for**:
+
 - Minor code refactors
 - Bug fixes
 - UI tweaks
@@ -290,6 +317,7 @@ Write an ADR for decisions that:
 ## Evidence
 
 Key files referenced:
+
 - [docs/architecture/](../architecture/) - Architectural documentation
 - [server/](../../server/) - Backend implementation
 - [client/](../../client/) - Frontend implementation

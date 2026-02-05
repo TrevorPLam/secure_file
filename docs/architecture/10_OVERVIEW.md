@@ -65,6 +65,7 @@ CloudVault is a secure file sharing and storage application that enables users t
 **Location**: `client/src/`
 
 **Responsibilities**:
+
 - Render UI with React components
 - Handle user interactions and form validation
 - Manage client-side routing (Wouter)
@@ -72,6 +73,7 @@ CloudVault is a secure file sharing and storage application that enables users t
 - Cache server data with React Query
 
 **Key Technologies**:
+
 - React 18 with TypeScript
 - shadcn/ui component library
 - Tailwind CSS for styling
@@ -83,6 +85,7 @@ CloudVault is a secure file sharing and storage application that enables users t
 **Location**: `server/`
 
 **Responsibilities**:
+
 - Authenticate users (Replit Auth via OIDC)
 - Provide REST API for CRUD operations
 - Generate presigned URLs for file upload/download
@@ -90,6 +93,7 @@ CloudVault is a secure file sharing and storage application that enables users t
 - Manage database sessions
 
 **Key Technologies**:
+
 - Express.js with TypeScript
 - Passport.js for authentication
 - Drizzle ORM for database queries
@@ -100,12 +104,14 @@ CloudVault is a secure file sharing and storage application that enables users t
 **Location**: `shared/schema.ts`, `server/db.ts`
 
 **Responsibilities**:
+
 - Store user accounts and sessions
 - Maintain file and folder hierarchy
 - Track share links and download counts
 - Provide type-safe query interface
 
 **Key Technologies**:
+
 - PostgreSQL database
 - Drizzle ORM with type inference
 - Database migrations via Drizzle Kit
@@ -115,12 +121,14 @@ CloudVault is a secure file sharing and storage application that enables users t
 **Location**: `server/replit_integrations/object_storage/`, `server/storage.ts`
 
 **Responsibilities**:
+
 - Store actual file blobs (object storage)
 - Generate time-limited upload/download URLs
 - Provide abstraction over Google Cloud Storage
 - Track file metadata in database
 
 **Key Technologies**:
+
 - Google Cloud Storage
 - Presigned URL pattern for direct uploads
 - ObjectStorageService class
@@ -130,12 +138,14 @@ CloudVault is a secure file sharing and storage application that enables users t
 **Location**: `server/replit_integrations/auth/`
 
 **Responsibilities**:
+
 - Authenticate users via Replit OIDC
 - Maintain session state in PostgreSQL
 - Protect routes with isAuthenticated middleware
 - Sync user data to local database
 
 **Key Technologies**:
+
 - OpenID Connect (OIDC)
 - Passport.js strategies
 - Express session with PostgreSQL store

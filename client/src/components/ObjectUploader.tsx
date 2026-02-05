@@ -8,19 +8,19 @@
 // TESTS: Manual testing with various file sizes and types, verify presigned URL upload to GCS
 // AI-META-END
 
-import { useState } from "react";
-import type { ReactNode } from "react";
-import Uppy from "@uppy/core";
-import type { UppyFile, UploadResult } from "@uppy/core";
-import DashboardModal from "@uppy/react/dashboard-modal";
-import "@uppy/core/css/style.min.css";
-import "@uppy/dashboard/css/style.min.css";
-import AwsS3 from "@uppy/aws-s3";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react'
+import type { ReactNode } from 'react'
+import Uppy from '@uppy/core'
+import type { UppyFile, UploadResult } from '@uppy/core'
+import DashboardModal from '@uppy/react/dashboard-modal'
+import '@uppy/core/css/style.min.css'
+import '@uppy/dashboard/css/style.min.css'
+import AwsS3 from '@uppy/aws-s3'
+import { Button } from '@/components/ui/button'
 
 interface ObjectUploaderProps {
-  maxNumberOfFiles?: number;
-  maxFileSize?: number;
+  maxNumberOfFiles?: number
+  maxFileSize?: number
   /**
    * Function to get upload parameters for each file.
    * IMPORTANT: This receives the file object - use file.name, file.size, file.type
@@ -29,15 +29,13 @@ interface ObjectUploaderProps {
   onGetUploadParameters: (
     file: UppyFile<Record<string, unknown>, Record<string, unknown>>
   ) => Promise<{
-    method: "PUT";
-    url: string;
-    headers?: Record<string, string>;
-  }>;
-  onComplete?: (
-    result: UploadResult<Record<string, unknown>, Record<string, unknown>>
-  ) => void;
-  buttonClassName?: string;
-  children: ReactNode;
+    method: 'PUT'
+    url: string
+    headers?: Record<string, string>
+  }>
+  onComplete?: (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => void
+  buttonClassName?: string
+  children: ReactNode
 }
 
 /**
@@ -77,7 +75,7 @@ export function ObjectUploader({
   buttonClassName,
   children,
 }: ObjectUploaderProps) {
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false)
   const [uppy] = useState(() =>
     new Uppy({
       restrictions: {
@@ -90,10 +88,10 @@ export function ObjectUploader({
         shouldUseMultipart: false,
         getUploadParameters: onGetUploadParameters,
       })
-      .on("complete", (result) => {
-        onComplete?.(result);
+      .on('complete', result => {
+        onComplete?.(result)
       })
-  );
+  )
 
   return (
     <div>
@@ -108,6 +106,5 @@ export function ObjectUploader({
         proudlyDisplayPoweredByUppy={false}
       />
     </div>
-  );
+  )
 }
-

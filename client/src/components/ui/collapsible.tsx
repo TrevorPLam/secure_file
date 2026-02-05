@@ -8,9 +8,9 @@
 // TESTS: Visual testing via Storybook or component usage, verify accessibility with screen readers
 // AI-META-END
 
-"use client"
+'use client'
 
-import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
+import * as CollapsiblePrimitive from '@radix-ui/react-collapsible'
 
 const Collapsible = CollapsiblePrimitive.Root
 

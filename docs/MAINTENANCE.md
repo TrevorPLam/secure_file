@@ -10,20 +10,20 @@ This guide explains how to keep the CloudVault documentation accurate and up-to-
 
 ### Code Changes That Require Doc Updates
 
-| Code Change | Documents to Update | Why |
-|-------------|---------------------|-----|
-| **New API endpoint** | [docs/api/00_INDEX.md](./api/00_INDEX.md) | API consumers need to know about new endpoints |
-| **Modified API endpoint** | [docs/api/00_INDEX.md](./api/00_INDEX.md) | Breaking changes must be documented |
-| **New user flow** | [docs/architecture/40_KEY_FLOWS.md](./architecture/40_KEY_FLOWS.md) | Developers need to understand critical paths |
-| **Modified user flow** | [docs/architecture/40_KEY_FLOWS.md](./architecture/40_KEY_FLOWS.md) | Keep flow documentation accurate |
-| **New database table** | [docs/data/00_INDEX.md](./data/00_INDEX.md) | Schema documentation must reflect DB state |
-| **Modified schema** | [docs/data/00_INDEX.md](./data/00_INDEX.md) | Column changes, indexes, relations |
-| **New module/folder** | [docs/architecture/30_MODULES_AND_DEPENDENCIES.md](./architecture/30_MODULES_AND_DEPENDENCIES.md) | Code organization must be documented |
-| **Module refactoring** | [docs/architecture/30_MODULES_AND_DEPENDENCIES.md](./architecture/30_MODULES_AND_DEPENDENCIES.md) | Update dependency graph |
-| **New external service** | [docs/integrations/00_INDEX.md](./integrations/00_INDEX.md) | Track third-party dependencies |
-| **Changed deployment** | [docs/architecture/20_RUNTIME_TOPOLOGY.md](./architecture/20_RUNTIME_TOPOLOGY.md) | Keep deployment docs current |
-| **Architectural decision** | [docs/adr/README.md](./adr/README.md) | Create new ADR file |
-| **New component** | [docs/architecture/10_OVERVIEW.md](./architecture/10_OVERVIEW.md) | Major architectural components |
+| Code Change                | Documents to Update                                                                               | Why                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **New API endpoint**       | [docs/api/00_INDEX.md](./api/00_INDEX.md)                                                         | API consumers need to know about new endpoints |
+| **Modified API endpoint**  | [docs/api/00_INDEX.md](./api/00_INDEX.md)                                                         | Breaking changes must be documented            |
+| **New user flow**          | [docs/architecture/40_KEY_FLOWS.md](./architecture/40_KEY_FLOWS.md)                               | Developers need to understand critical paths   |
+| **Modified user flow**     | [docs/architecture/40_KEY_FLOWS.md](./architecture/40_KEY_FLOWS.md)                               | Keep flow documentation accurate               |
+| **New database table**     | [docs/data/00_INDEX.md](./data/00_INDEX.md)                                                       | Schema documentation must reflect DB state     |
+| **Modified schema**        | [docs/data/00_INDEX.md](./data/00_INDEX.md)                                                       | Column changes, indexes, relations             |
+| **New module/folder**      | [docs/architecture/30_MODULES_AND_DEPENDENCIES.md](./architecture/30_MODULES_AND_DEPENDENCIES.md) | Code organization must be documented           |
+| **Module refactoring**     | [docs/architecture/30_MODULES_AND_DEPENDENCIES.md](./architecture/30_MODULES_AND_DEPENDENCIES.md) | Update dependency graph                        |
+| **New external service**   | [docs/integrations/00_INDEX.md](./integrations/00_INDEX.md)                                       | Track third-party dependencies                 |
+| **Changed deployment**     | [docs/architecture/20_RUNTIME_TOPOLOGY.md](./architecture/20_RUNTIME_TOPOLOGY.md)                 | Keep deployment docs current                   |
+| **Architectural decision** | [docs/adr/README.md](./adr/README.md)                                                             | Create new ADR file                            |
+| **New component**          | [docs/architecture/10_OVERVIEW.md](./architecture/10_OVERVIEW.md)                                 | Major architectural components                 |
 
 ### Changes That DON'T Require Doc Updates
 
@@ -71,23 +71,27 @@ Docs updated:
 Before merging a PR with doc changes, verify:
 
 ### Accuracy
+
 - [ ] All facts are verifiable from actual code files
 - [ ] File paths in "Evidence" sections are correct
 - [ ] No outdated information remains
 - [ ] Examples have been tested
 
 ### Links
+
 - [ ] All internal links work (to other docs)
 - [ ] All file path links point to existing files
 - [ ] Relative paths use correct format (`./` or `../`)
 
 ### Completeness
+
 - [ ] New features are documented
 - [ ] Breaking changes are highlighted
 - [ ] Migration steps included (if needed)
 - [ ] Examples provided where helpful
 
 ### Clarity
+
 - [ ] Written for smart beginners
 - [ ] Technical jargon explained in Glossary
 - [ ] Code examples are clear
@@ -104,25 +108,32 @@ Before merging a PR with doc changes, verify:
 1. **Open** `docs/api/00_INDEX.md`
 2. **Find** the relevant section (File Routes)
 3. **Add** new endpoint documentation:
-   ```markdown
+
+   ````markdown
    #### POST /api/files/:id/share-bulk
-   
+
    **Purpose**: Create multiple share links at once
-   
+
    **Auth required**: Yes
-   
+
    **Request body**:
+
    ```json
    {
      "fileIds": ["file1", "file2"],
      "expiresAt": "2026-12-31T23:59:59Z"
    }
    ```
-   
+   ````
+
    **Response**: Array of share link objects
-   
+
    **Evidence**: [server/routes.ts](../../server/routes.ts):XXX-YYY
+
    ```
+
+   ```
+
 4. **Update** Evidence section with correct line numbers
 5. **Check** if this affects any flows in `40_KEY_FLOWS.md`
 6. **Commit** with code changes
@@ -138,8 +149,8 @@ Before merging a PR with doc changes, verify:
    ```markdown
    server/
    ├── storage/
-   │   ├── folders.ts    # Folder CRUD operations
-   │   └── files.ts      # File CRUD operations
+   │ ├── folders.ts # Folder CRUD operations
+   │ └── files.ts # File CRUD operations
    ```
 3. **Update** dependency graph if imports changed
 4. **Update** Evidence section with new file paths
@@ -172,89 +183,109 @@ Before merging a PR with doc changes, verify:
 ## File-by-File Maintenance Guide
 
 ### docs/architecture/00_INDEX.md
+
 **Update when**: Any structural change to docs, new important files, changed commands
 
 **What to check**:
+
 - Table of key technologies is current
 - Common commands still work
 - Entry points are correct
 - Document map is complete
 
 ### docs/architecture/10_OVERVIEW.md
+
 **Update when**: Adding/removing major components, changing data flow, new integrations
 
 **What to check**:
+
 - Component diagram is accurate
 - Component boundaries are correct
 - Architectural principles still apply
 - Evidence links are valid
 
 ### docs/architecture/20_RUNTIME_TOPOLOGY.md
+
 **Update when**: Deployment changes, new environments, port changes, boot sequence changes
 
 **What to check**:
+
 - Port numbers are correct
 - Environment variables are complete
 - Boot sequence reflects actual code
 - Commands work
 
 ### docs/architecture/30_MODULES_AND_DEPENDENCIES.md
+
 **Update when**: New folders, moved files, changed imports, new dependencies
 
 **What to check**:
+
 - Directory tree is accurate
 - Dependency rules are enforced
 - Path aliases are correct
 - Evidence links point to real files
 
 ### docs/architecture/40_KEY_FLOWS.md
+
 **Update when**: New user flows, flow changes, new failure modes
 
 **What to check**:
+
 - Step-by-step flows match code
 - Modules touched are correct
 - Validation tips work
 - Failure modes are complete
 
 ### docs/architecture/90_GLOSSARY.md
+
 **Update when**: New terminology, new technology, changed definitions
 
 **What to check**:
+
 - All terms used in docs are defined
 - External links still work
 - Examples are accurate
 
 ### docs/data/00_INDEX.md
+
 **Update when**: Schema changes, new tables, changed indexes, new migration patterns
 
 **What to check**:
+
 - Table definitions match schema.ts
 - Indexes are documented
 - Invariants are enforced
 - Query patterns are current
 
 ### docs/api/00_INDEX.md
+
 **Update when**: New endpoints, changed endpoints, new error codes, auth changes
 
 **What to check**:
+
 - All endpoints documented
 - Request/response examples accurate
 - Error codes complete
 - Auth requirements correct
 
 ### docs/integrations/00_INDEX.md
+
 **Update when**: New external services, changed APIs, new environment variables
 
 **What to check**:
+
 - All third-party services listed
 - Configuration is complete
 - Secrets are documented (not exposed)
 - Integration flows are accurate
 
 ### docs/adr/README.md
+
 **Update when**: Making architectural decisions, superseding old decisions
 
 **What to check**:
+
 - Implied decisions are documented
 - New ADRs follow template
 - Status values are correct
@@ -265,18 +296,21 @@ Before merging a PR with doc changes, verify:
 **Not currently implemented**, but recommended:
 
 ### Link Checker
+
 ```bash
 # Check all markdown links
 npm run docs:check-links
 ```
 
 ### Freshness Checker
+
 ```bash
 # Find docs older than 6 months
 npm run docs:check-freshness
 ```
 
 ### Orphan Detector
+
 ```bash
 # Find docs not linked from any other doc
 npm run docs:find-orphans
@@ -341,13 +375,13 @@ npm run docs:find-orphans
 
 ## Maintenance Schedule
 
-| Frequency | Task |
-|-----------|------|
+| Frequency       | Task                                 |
+| --------------- | ------------------------------------ |
 | **On every PR** | Update docs affected by code changes |
-| **Monthly** | Check for broken links |
-| **Quarterly** | Full documentation review |
-| **Bi-annually** | Review and update implied ADRs |
-| **Annually** | Refresh all screenshots and diagrams |
+| **Monthly**     | Check for broken links               |
+| **Quarterly**   | Full documentation review            |
+| **Bi-annually** | Review and update implied ADRs       |
+| **Annually**    | Refresh all screenshots and diagrams |
 
 ## Success Metrics
 

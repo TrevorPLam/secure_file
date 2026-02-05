@@ -7,6 +7,7 @@ This document lists all code excluded from 100% coverage requirements and the ju
 ### Server Bootstrap Files
 
 **Files**:
+
 - `server/index.ts` - HTTP server initialization
 - `server/static.ts` - Static file middleware
 - `server/vite.ts` - Vite development server integration
@@ -34,13 +35,15 @@ This document lists all code excluded from 100% coverage requirements and the ju
 ### Replit Sidecar Integration
 
 **Files**:
+
 - `server/replit_integrations/auth/replitAuth.ts` - Replit auth integration
 - `server/replit_integrations/object_storage/routes.ts` - Object storage routes
 - `server/replit_integrations/object_storage/index.ts` - Object storage exports
 
 **Reason**: These files integrate with Replit's sidecar service (external service running at localhost:1106). They require the Replit environment to test properly. Mocking the entire sidecar would not provide meaningful test coverage.
 
-**Mitigation**: 
+**Mitigation**:
+
 - Core logic is tested where possible (see objectStorage.ts tests)
 - Path normalization and validation logic is fully tested
 - ACL policy logic has unit tests
@@ -86,12 +89,14 @@ To add a new exception:
 ## Exception Guidelines
 
 ### Valid Reasons
+
 - Platform-specific bootstrap code
 - External service integration (no mock possible)
 - Generated/vendored code
 - Production-only environment configuration
 
 ### Invalid Reasons
+
 - "Too complex to test"
 - "Not enough time"
 - "Low priority code"

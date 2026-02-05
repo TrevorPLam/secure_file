@@ -35,12 +35,12 @@ To help us triage and fix the issue quickly, please include:
 
 We aim to respond to security reports according to the following SLA:
 
-| Severity | Triage | Patch | Public Disclosure |
-|----------|--------|-------|-------------------|
-| **Critical** | 24 hours | 7 days | After patch deployed |
-| **High** | 48 hours | 14 days | After patch deployed |
-| **Medium** | 1 week | 30 days | After patch deployed |
-| **Low** | 2 weeks | 60 days | After patch deployed |
+| Severity     | Triage   | Patch   | Public Disclosure    |
+| ------------ | -------- | ------- | -------------------- |
+| **Critical** | 24 hours | 7 days  | After patch deployed |
+| **High**     | 48 hours | 14 days | After patch deployed |
+| **Medium**   | 1 week   | 30 days | After patch deployed |
+| **Low**      | 2 weeks  | 60 days | After patch deployed |
 
 ### What to Expect
 
@@ -54,7 +54,7 @@ We aim to respond to security reports according to the following SLA:
 ### Supported Versions
 
 | Version | Supported |
-|---------|-----------|
+| ------- | --------- |
 | 1.x     | ✅ Yes    |
 | < 1.0   | ❌ No     |
 
@@ -79,6 +79,7 @@ For complete security documentation, see [SECURITY_SUMMARY.md](SECURITY_SUMMARY.
 ### Scope
 
 #### In Scope
+
 - Authentication and authorization bypasses
 - SQL injection, XSS, CSRF
 - Remote code execution (RCE)
@@ -88,6 +89,7 @@ For complete security documentation, see [SECURITY_SUMMARY.md](SECURITY_SUMMARY.
 - Dependency vulnerabilities (with exploit proof)
 
 #### Out of Scope
+
 - Social engineering attacks
 - Denial of Service (DoS) without demonstrable impact
 - Issues in third-party services (Replit, GCS)
@@ -98,12 +100,14 @@ For complete security documentation, see [SECURITY_SUMMARY.md](SECURITY_SUMMARY.
 ### Bug Bounty
 
 We currently **do not** offer a bug bounty program, but we deeply appreciate:
+
 - Responsible disclosure
 - Detailed vulnerability reports
 - Proof-of-concept code
 - Suggested fixes
 
 We will credit security researchers in:
+
 - Security advisories
 - CHANGELOG.md
 - Hall of Fame (if we establish one)
@@ -133,6 +137,7 @@ See [GitHub Security Advisories](https://github.com/TrevorPLam/secure_file/secur
 ### Contact
 
 For general security questions (not vulnerability reports):
+
 - Open a discussion: https://github.com/TrevorPLam/secure_file/discussions
 - Email: security@example.com (update with actual email)
 
@@ -140,4 +145,4 @@ For general security questions (not vulnerability reports):
 
 **Thank you for helping keep CloudVault and our users safe!**
 
-*Last Updated: 2026-02-04*
+_Last Updated: 2026-02-04_

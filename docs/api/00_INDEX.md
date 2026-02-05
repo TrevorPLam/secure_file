@@ -28,6 +28,7 @@ CloudVault exposes a REST API for file and folder management. All endpoints (exc
 **Set by**: `/api/login` (via Replit Auth)
 
 **Required for**: All endpoints except:
+
 - `GET /api/share-links/token/:token` (public)
 - `POST /api/share-links/:token/download` (public)
 
@@ -88,6 +89,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Response**:
+
 ```json
 {
   "id": "user_abc123",
@@ -109,9 +111,11 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Query params**:
+
 - `parentId` (optional): Parent folder ID (omit for root)
 
 **Response**:
+
 ```json
 [
   {
@@ -125,6 +129,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Error codes**:
+
 - `401`: Not authenticated
 - `500`: Database error
 
@@ -139,9 +144,11 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Path params**:
+
 - `folderId`: Folder ID
 
 **Response**:
+
 ```json
 [
   {
@@ -162,6 +169,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Error codes**:
+
 - `401`: Not authenticated
 - `403`: Not authorized (not your folder)
 - `404`: Folder not found
@@ -177,6 +185,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Request body**:
+
 ```json
 {
   "name": "My Folder",
@@ -185,6 +194,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Response**:
+
 ```json
 {
   "id": "folder_new",
@@ -196,6 +206,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Error codes**:
+
 - `400`: Invalid request body (Zod validation)
 - `401`: Not authenticated
 - `500`: Database error
@@ -211,11 +222,13 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Path params**:
+
 - `id`: Folder ID
 
 **Response**: `204 No Content`
 
 **Error codes**:
+
 - `401`: Not authenticated
 - `403`: Not authorized (not your folder)
 - `500`: Database error
@@ -231,9 +244,11 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Query params**:
+
 - `folderId` (optional): Folder ID (omit for root)
 
 **Response**:
+
 ```json
 [
   {
@@ -250,6 +265,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Error codes**:
+
 - `401`: Not authenticated
 - `500`: Database error
 
@@ -264,6 +280,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Request body**:
+
 ```json
 {
   "name": "document.pdf",
@@ -275,6 +292,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Response**:
+
 ```json
 {
   "id": "file_abc",
@@ -289,6 +307,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Error codes**:
+
 - `400`: Invalid request body
 - `401`: Not authenticated
 - `500`: Database error
@@ -304,11 +323,13 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Path params**:
+
 - `id`: File ID
 
 **Response**: `204 No Content`
 
 **Error codes**:
+
 - `401`: Not authenticated
 - `403`: Not authorized (not your file)
 - `500`: Database or storage error
@@ -322,9 +343,11 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Query params**:
+
 - `fileId`: File ID
 
 **Response**:
+
 ```json
 [
   {
@@ -353,9 +376,11 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: No
 
 **Path params**:
+
 - `token`: Share token
 
 **Response**:
+
 ```json
 {
   "id": "link_xyz",
@@ -376,6 +401,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Error codes**:
+
 - `404`: Token not found, expired, or inactive
 
 **Evidence**: [server/routes.ts](../../server/routes.ts)
@@ -389,6 +415,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Request body**:
+
 ```json
 {
   "fileId": "file_abc",
@@ -398,6 +425,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Response**:
+
 ```json
 {
   "id": "link_xyz",
@@ -412,6 +440,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Error codes**:
+
 - `400`: Invalid request body
 - `401`: Not authenticated
 - `403`: Not your file
@@ -428,9 +457,11 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: No
 
 **Path params**:
+
 - `token`: Share token
 
 **Request body**:
+
 ```json
 {
   "password": "my-secure-password" // Required if link has password
@@ -438,6 +469,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Response**:
+
 ```json
 {
   "downloadUrl": "https://storage.googleapis.com/...?signature=..."
@@ -445,6 +477,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Error codes**:
+
 - `400`: Missing password when required
 - `401`: Incorrect password
 - `404`: Token not found, expired, or inactive
@@ -461,11 +494,13 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Path params**:
+
 - `id`: Share link ID
 
 **Response**: `204 No Content`
 
 **Error codes**:
+
 - `401`: Not authenticated
 - `403`: Not authorized (not your link)
 
@@ -478,6 +513,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Auth required**: Yes
 
 **Request body**:
+
 ```json
 {
   "filename": "document.pdf",
@@ -486,6 +522,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Response**:
+
 ```json
 {
   "presignedUrl": "https://storage.googleapis.com/...?signature=...",
@@ -494,11 +531,13 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Usage**:
+
 1. Client gets presigned URL
 2. Client uploads file to presigned URL (PUT request)
 3. Client creates file metadata via POST /api/files
 
 **Error codes**:
+
 - `401`: Not authenticated
 - `500`: Storage service error
 
@@ -510,12 +549,13 @@ curl -b cookies.txt http://localhost:5000/api/folders
 
 ```json
 {
-  "id": "resource_id",
+  "id": "resource_id"
   // ... resource fields
 }
 ```
 
 **Status codes**:
+
 - `200 OK`: GET, PUT, PATCH
 - `201 Created`: POST
 - `204 No Content`: DELETE
@@ -529,9 +569,11 @@ curl -b cookies.txt http://localhost:5000/api/folders
 ```
 
 **Optional fields**:
+
 - `errors`: Zod validation errors (array)
 
 **Status codes**:
+
 - `400 Bad Request`: Invalid input
 - `401 Unauthorized`: Not authenticated
 - `403 Forbidden`: Not authorized
@@ -558,7 +600,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 
 **Future versioning**: Not implemented
 
-**Breaking changes**: Would require new API version (e.g., /api/v2/*)
+**Breaking changes**: Would require new API version (e.g., /api/v2/\*)
 
 ## Rate Limiting
 
@@ -583,6 +625,7 @@ curl -b cookies.txt http://localhost:5000/api/folders
 **Catches**: All unhandled errors in routes
 
 **Response format**:
+
 ```json
 {
   "message": "Error message"
@@ -591,13 +634,13 @@ curl -b cookies.txt http://localhost:5000/api/folders
 
 ### Common Errors
 
-| Error Type | Status | Message | Cause |
-|------------|--------|---------|-------|
-| Authentication | 401 | "Unauthorized" | Missing or invalid session |
-| Authorization | 403 | "Not authorized" | User doesn't own resource |
-| Not Found | 404 | "Resource not found" | Invalid ID or deleted |
-| Validation | 400 | "Invalid ..." | Zod schema validation failed |
-| Server Error | 500 | "Failed to ..." | Database or storage error |
+| Error Type     | Status | Message              | Cause                        |
+| -------------- | ------ | -------------------- | ---------------------------- |
+| Authentication | 401    | "Unauthorized"       | Missing or invalid session   |
+| Authorization  | 403    | "Not authorized"     | User doesn't own resource    |
+| Not Found      | 404    | "Resource not found" | Invalid ID or deleted        |
+| Validation     | 400    | "Invalid ..."        | Zod schema validation failed |
+| Server Error   | 500    | "Failed to ..."      | Database or storage error    |
 
 ## Testing the API
 
@@ -649,14 +692,15 @@ See `client/src/lib/api.ts` for typed API client functions.
 **Pattern**: React Query hooks wrap API calls
 
 **Example**:
+
 ```typescript
 // In client code
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query'
 
 const { data: folders } = useQuery({
   queryKey: ['folders', parentId],
-  queryFn: () => fetch(`/api/folders?parentId=${parentId}`).then(r => r.json())
-});
+  queryFn: () => fetch(`/api/folders?parentId=${parentId}`).then(r => r.json()),
+})
 ```
 
 ## Evidence

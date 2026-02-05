@@ -1,0 +1,37 @@
+# Code Owners for CloudVault Project
+
+# Global owners - can approve any changes
+* @TrevorPLam
+
+# Security-critical areas - require security expert review
+/server/security.ts @TrevorPLam
+/server/encryption.ts @TrevorPLam
+/server/csrf.ts @TrevorPLam
+/server/audit.ts @TrevorPLam
+/server/config.ts @TrevorPLam
+
+# Authentication and authorization
+/server/replit_integrations/auth/ @TrevorPLam
+/shared/schema.ts @TrevorPLam
+
+# API routes and data access
+/server/routes.ts @TrevorPLam
+/server/storage.ts @TrevorPLam
+/server/db.ts @TrevorPLam
+
+# Testing infrastructure
+/test/ @TrevorPLam
+*.test.ts @TrevorPLam
+*.test.tsx @TrevorPLam
+vitest.config.ts @TrevorPLam
+
+# Documentation and docs
+/docs/ @TrevorPLam
+README.md @TrevorPLam
+AGENTS.md @TrevorPLam
+TODO.md @TrevorPLam
+
+# CI/CD and DevOps
+.github/ @TrevorPLam
+Dockerfile @TrevorPLam
+package.json @TrevorPLam

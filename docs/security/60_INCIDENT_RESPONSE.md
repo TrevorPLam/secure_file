@@ -5,6 +5,7 @@
 This document establishes procedures for responding to **security incidents**, including secret leaks, vulnerability discoveries, data breaches, and service outages.
 
 **Incident Types Covered**:
+
 1. Secret leaked to public repository
 2. Vulnerability disclosed by external researcher
 3. Compromised dependency discovered
@@ -15,12 +16,12 @@ This document establishes procedures for responding to **security incidents**, i
 
 ## Incident Severity Classification
 
-| Severity | Response Time | Examples | Escalation |
-|----------|---------------|----------|------------|
-| **P0 - Critical** | Immediate (24/7) | Active data breach, RCE exploit in the wild | All hands on deck, executive notification |
-| **P1 - High** | <4 hours | Secret leaked, SQL injection discovered | Security team + on-call engineer |
-| **P2 - Medium** | <24 hours | Non-exploited vulnerability, DDoS attack | Security team during business hours |
-| **P3 - Low** | <7 days | Outdated dependency, security header missing | Planned sprint work |
+| Severity          | Response Time    | Examples                                     | Escalation                                |
+| ----------------- | ---------------- | -------------------------------------------- | ----------------------------------------- |
+| **P0 - Critical** | Immediate (24/7) | Active data breach, RCE exploit in the wild  | All hands on deck, executive notification |
+| **P1 - High**     | <4 hours         | Secret leaked, SQL injection discovered      | Security team + on-call engineer          |
+| **P2 - Medium**   | <24 hours        | Non-exploited vulnerability, DDoS attack     | Security team during business hours       |
+| **P3 - Low**      | <7 days          | Outdated dependency, security header missing | Planned sprint work                       |
 
 ---
 
@@ -29,6 +30,7 @@ This document establishes procedures for responding to **security incidents**, i
 ### Detection
 
 **Indicators**:
+
 - GitHub secret scanning alert (if enabled)
 - Manual code review finds hardcoded credential
 - External researcher reports exposed key
@@ -39,6 +41,7 @@ This document establishes procedures for responding to **security incidents**, i
 #### T+0 (Immediate - Within 15 minutes)
 
 **Step 1: Confirm Exposure**
+
 ```bash
 # Search Git history for secret
 git log -p | grep -i "SESSION_SECRET\|DATABASE_URL\|CLIENT_SECRET"
@@ -51,6 +54,7 @@ git log --all --source --full-history -S "your-secret-value"
 ```
 
 **Step 2: Assess Impact**
+
 - Which secret was exposed? (SESSION_SECRET, database password, API key?)
 - When was it committed? (check commit timestamp)
 - Is repository public or private? (public = assume compromised)
@@ -61,6 +65,7 @@ git log --all --source --full-history -S "your-secret-value"
 #### T+15 min: Rotate Compromised Secret
 
 **For `SESSION_SECRET`**:
+
 ```bash
 # Generate new secret
 NEW_SECRET=$(openssl rand -hex 32)
@@ -77,6 +82,7 @@ secret: [process.env.SESSION_SECRET, process.env.SESSION_SECRET_OLD]
 ```
 
 **For `DATABASE_URL`**:
+
 ```bash
 # Create new database user with new password
 # Replit managed PostgreSQL: Contact support for credential rotation
@@ -86,6 +92,7 @@ secret: [process.env.SESSION_SECRET, process.env.SESSION_SECRET_OLD]
 ```
 
 **For `OIDC_CLIENT_SECRET`**:
+
 ```bash
 # Coordinate with Replit support to rotate OAuth client secret
 # Cannot be rotated instantly (requires IdP update)
@@ -93,6 +100,7 @@ secret: [process.env.SESSION_SECRET, process.env.SESSION_SECRET_OLD]
 ```
 
 **For `GCS_SERVICE_ACCOUNT_KEY`**:
+
 ```bash
 # In Google Cloud Console:
 # 1. Create new service account key
@@ -106,12 +114,14 @@ secret: [process.env.SESSION_SECRET, process.env.SESSION_SECRET_OLD]
 #### T+30 min: Revoke Compromised Secret
 
 **Invalidate all sessions** (if `SESSION_SECRET` leaked):
+
 ```sql
 -- PostgreSQL
 TRUNCATE TABLE session;
 ```
 
 **Revoke database access** (if `DATABASE_URL` leaked):
+
 ```sql
 -- Revoke old user's permissions
 REVOKE ALL PRIVILEGES ON DATABASE cloudvault FROM old_user;
@@ -119,6 +129,7 @@ DROP USER old_user;
 ```
 
 **Delete old GCS key** (if service account key leaked):
+
 ```bash
 # Google Cloud Console > IAM > Service Accounts > Keys > Delete
 ```
@@ -128,6 +139,7 @@ DROP USER old_user;
 #### T+1 hour: Remove Secret from Git History
 
 **Option 1: BFG Repo-Cleaner** (recommended for large repos)
+
 ```bash
 # Download BFG: https://rtyley.github.io/bfg-repo-cleaner/
 java -jar bfg.jar --replace-text secrets.txt repo.git
@@ -137,6 +149,7 @@ java -jar bfg.jar --replace-text secrets.txt repo.git
 ```
 
 **Option 2: git filter-branch** (built-in, slower)
+
 ```bash
 git filter-branch --tree-filter \
   'find . -type f -exec sed -i "s/SESSION_SECRET=.*/SESSION_SECRET=REDACTED/g" {} \;' \
@@ -144,6 +157,7 @@ git filter-branch --tree-filter \
 ```
 
 **Force Push** (⚠️ WARNING: Breaks history for all contributors)
+
 ```bash
 git push origin --force --all
 git push origin --force --tags
@@ -152,6 +166,7 @@ git push origin --force --tags
 ```
 
 **GitHub: Invalidate Old Commits**
+
 - Go to Settings > Branches > Add rule > "Require signed commits" (prevents old commits from being pushed back)
 
 ---
@@ -159,6 +174,7 @@ git push origin --force --tags
 #### T+4 hours: Audit for Unauthorized Access
 
 **Check database logs** (PostgreSQL):
+
 ```sql
 -- Find logins from unusual IPs
 SELECT * FROM session WHERE expire > NOW() - INTERVAL '24 hours'
@@ -169,10 +185,12 @@ SELECT * FROM files WHERE created_at > NOW() - INTERVAL '24 hours';
 ```
 
 **Check GCS access logs** (Google Cloud Console > Storage > Bucket > Logs):
+
 - Filter by timeframe: Last 24 hours
 - Look for downloads from unknown IPs
 
 **Check application logs** (`server/` logs):
+
 ```bash
 # Find 401/403 errors (failed auth attempts)
 grep -E "401|403" combined.log | tail -n 100
@@ -188,6 +206,7 @@ grep "GET\|POST" combined.log | awk '{print $3}' | sort | uniq -c | sort -rn
 **Template** (see Postmortem Template section below)
 
 **Key Questions**:
+
 1. How did secret end up in version control? (developer error, lack of .gitignore)
 2. How was exposure detected? (automated alert vs. manual discovery)
 3. What was the impact? (unauthorized access occurred? data accessed?)
@@ -204,6 +223,7 @@ grep "GET\|POST" combined.log | awk '{print $3}' | sort | uniq -c | sort -rn
 #### T+0 (Within 2 hours)
 
 **Step 1: Acknowledge Receipt**
+
 ```
 Subject: Re: [Security Report] SQL Injection in /api/folders
 
@@ -218,6 +238,7 @@ CloudVault Security Team
 ```
 
 **Step 2: Verify Vulnerability**
+
 ```bash
 # Attempt to reproduce issue in staging environment
 # Example: Test for SQL injection
@@ -231,6 +252,7 @@ curl -X GET "https://staging.cloudvault.example.com/api/folders/'; DROP TABLE fo
 **Use CVSS Calculator**: [https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator](https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator)
 
 **Example Assessment**:
+
 - **Attack Vector**: Network (AV:N)
 - **Attack Complexity**: Low (AC:L)
 - **Privileges Required**: None (PR:N)
@@ -247,6 +269,7 @@ curl -X GET "https://staging.cloudvault.example.com/api/folders/'; DROP TABLE fo
 #### T+8 hours: Fix Development
 
 **Create Private Security Advisory** (GitHub):
+
 1. Go to Security > Advisories > New draft advisory
 2. Title: "SQL Injection in Folder API Endpoint"
 3. Description: [Copy from researcher report]
@@ -255,23 +278,25 @@ curl -X GET "https://staging.cloudvault.example.com/api/folders/'; DROP TABLE fo
 6. Patched version: 1.2.4 (to be released)
 
 **Develop Fix**:
+
 ```typescript
 // Before (vulnerable)
-const query = `SELECT * FROM folders WHERE id = '${folderId}'`;
+const query = `SELECT * FROM folders WHERE id = '${folderId}'`
 
 // After (fixed)
 const folder = await db.query.folders.findFirst({
-  where: eq(folders.id, folderId)
-});
+  where: eq(folders.id, folderId),
+})
 ```
 
 **Add Security Regression Test**:
+
 ```typescript
 it('should prevent SQL injection in folder ID', async () => {
-  const maliciousId = "'; DROP TABLE folders; --";
-  const response = await request(app).get(`/api/folders/${maliciousId}`);
-  expect(response.status).toBe(404);
-});
+  const maliciousId = "'; DROP TABLE folders; --"
+  const response = await request(app).get(`/api/folders/${maliciousId}`)
+  expect(response.status).toBe(404)
+})
 ```
 
 ---
@@ -279,12 +304,14 @@ it('should prevent SQL injection in folder ID', async () => {
 #### T+24 hours: Deploy Fix
 
 **Emergency Deployment Process**:
+
 1. Merge fix to `main` branch (bypass normal PR process if critical)
 2. Tag release: `v1.2.4-security`
 3. Deploy to production immediately
 4. Verify fix in production: Attempt exploit (should fail)
 
 **Notify Researcher**:
+
 ```
 Subject: Re: [Security Report] SQL Injection - Fixed
 
@@ -309,27 +336,34 @@ CloudVault Security Team
 #### T+30 days: Public Disclosure
 
 **Publish GitHub Security Advisory**:
+
 - Change status from "Draft" to "Published"
 - Include CVE number (if assigned by GitHub)
 - Credit researcher (if agreed)
 
 **Example Advisory**:
+
 ```markdown
 # SQL Injection in Folder API (CVE-2025-XXXX)
 
 ## Summary
+
 A SQL injection vulnerability in the folder API endpoint allowed unauthenticated attackers to execute arbitrary SQL queries.
 
 ## Impact
+
 Attackers could read, modify, or delete database records.
 
 ## Affected Versions
+
 - 1.0.0 through 1.2.3
 
 ## Fix
+
 Upgrade to version 1.2.4 or later.
 
 ## Credits
+
 Reported by [Researcher Name] on 2025-02-04.
 ```
 
@@ -353,6 +387,7 @@ npm audit --json | jq '.advisories'
 ```
 
 **Key Questions**:
+
 1. Does CloudVault use the vulnerable function? (check import statements)
 2. Is vulnerability exploitable remotely? (RCE vs. local DoS)
 3. Is there a patched version available?
@@ -362,6 +397,7 @@ npm audit --json | jq '.advisories'
 #### T+1 hour: Mitigate or Upgrade
 
 **If Patched Version Available**:
+
 ```bash
 npm install express@5.0.2  # Upgrade to patched version
 npm audit  # Verify fix
@@ -370,6 +406,7 @@ git commit -m "security: Upgrade express to 5.0.2 (CVE-2025-XXXX)"
 ```
 
 **If No Patch Available**:
+
 - **Workaround**: Disable vulnerable feature if possible
 - **Vendor Contact**: Open issue with maintainer
 - **Fork and Patch**: Apply security patch to forked version (last resort)
@@ -380,6 +417,7 @@ git commit -m "security: Upgrade express to 5.0.2 (CVE-2025-XXXX)"
 #### T+24 hours: Deploy and Notify
 
 **Deploy Updated Dependencies**:
+
 ```bash
 npm ci           # Clean install with new lockfile
 npm run build    # Rebuild application
@@ -387,6 +425,7 @@ npm run build    # Rebuild application
 ```
 
 **Notify Users** (if critical):
+
 ```
 Subject: Security Update - CloudVault v1.2.5
 
@@ -402,6 +441,7 @@ Details: [Link to security advisory]
 ### Detection
 
 **Indicators**:
+
 - Multiple failed login attempts from same IP
 - File downloads from unusual location
 - Database queries with unexpected parameters
@@ -410,17 +450,20 @@ Details: [Link to security advisory]
 #### T+0: Contain Threat
 
 **Block IP Address** (if applicable):
+
 ```bash
 # Add to rate limiting blacklist
 # Or contact Replit support to block at infrastructure level
 ```
 
 **Revoke Session** (if account compromised):
+
 ```sql
 DELETE FROM session WHERE sess::text LIKE '%"sub":"compromised-user-id"%';
 ```
 
 **Disable Account** (if necessary):
+
 ```sql
 UPDATE users SET active = false WHERE id = 'compromised-user-id';
 ```
@@ -430,6 +473,7 @@ UPDATE users SET active = false WHERE id = 'compromised-user-id';
 #### T+1 hour: Investigate
 
 **Audit Logs Analysis**:
+
 ```bash
 # Find all actions by compromised account
 grep "userId: compromised-user-id" audit.log
@@ -440,6 +484,7 @@ SELECT * FROM files WHERE user_id = 'compromised-user-id' OR
 ```
 
 **Determine Scope**:
+
 - Which files were accessed?
 - Were files modified or deleted?
 - Was data exfiltrated?
@@ -449,6 +494,7 @@ SELECT * FROM files WHERE user_id = 'compromised-user-id' OR
 #### T+4 hours: Notify Affected Users
 
 **If Data Breach Confirmed** (GDPR requirement: notify within 72 hours):
+
 ```
 Subject: Security Incident Notification
 
@@ -479,23 +525,23 @@ For questions, contact: security@cloudvault.example.com
 
 ### Internal Communication
 
-| Audience | Notification Method | Content |
-|----------|---------------------|---------|
-| **Security Team** | Slack #security | Detailed technical info, real-time updates |
-| **Engineering Team** | Slack #engineering | High-level summary, action items |
-| **Leadership** | Email + Slack DM | Business impact, risk assessment, mitigation plan |
-| **Support Team** | Email | Customer-facing talking points, FAQs |
+| Audience             | Notification Method | Content                                           |
+| -------------------- | ------------------- | ------------------------------------------------- |
+| **Security Team**    | Slack #security     | Detailed technical info, real-time updates        |
+| **Engineering Team** | Slack #engineering  | High-level summary, action items                  |
+| **Leadership**       | Email + Slack DM    | Business impact, risk assessment, mitigation plan |
+| **Support Team**     | Email               | Customer-facing talking points, FAQs              |
 
 ---
 
 ### External Communication
 
-| Audience | Notification Method | Timeline |
-|----------|---------------------|----------|
-| **Affected Users** | Email | Within 72 hours (GDPR requirement) |
-| **All Users** | In-app banner | Immediately (if service-wide impact) |
-| **Public** | GitHub Security Advisory | After fix deployed (30 days max) |
-| **Press** | Press release (if major breach) | Coordinated with legal team |
+| Audience           | Notification Method             | Timeline                             |
+| ------------------ | ------------------------------- | ------------------------------------ |
+| **Affected Users** | Email                           | Within 72 hours (GDPR requirement)   |
+| **All Users**      | In-app banner                   | Immediately (if service-wide impact) |
+| **Public**         | GitHub Security Advisory        | After fix deployed (30 days max)     |
+| **Press**          | Press release (if major breach) | Coordinated with legal team          |
 
 ---
 
@@ -511,16 +557,16 @@ For questions, contact: security@cloudvault.example.com
 
 ### Timeline
 
-| Time | Event |
-|------|-------|
+| Time      | Event                                                |
+| --------- | ---------------------------------------------------- |
 | 10:00 UTC | Secret committed to `main` branch in commit `abc123` |
-| 10:15 UTC | Repository pushed to GitHub (public) |
-| 14:30 UTC | External researcher reported exposure |
-| 14:45 UTC | Security team confirmed leak |
-| 15:00 UTC | New `SESSION_SECRET` generated and deployed |
-| 15:15 UTC | All sessions invalidated (`TRUNCATE session`) |
-| 16:00 UTC | Old secret revoked, Git history rewritten |
-| 18:00 UTC | Audit completed (no unauthorized access detected) |
+| 10:15 UTC | Repository pushed to GitHub (public)                 |
+| 14:30 UTC | External researcher reported exposure                |
+| 14:45 UTC | Security team confirmed leak                         |
+| 15:00 UTC | New `SESSION_SECRET` generated and deployed          |
+| 15:15 UTC | All sessions invalidated (`TRUNCATE session`)        |
+| 16:00 UTC | Old secret revoked, Git history rewritten            |
+| 18:00 UTC | Audit completed (no unauthorized access detected)    |
 
 ---
 
@@ -538,6 +584,7 @@ For questions, contact: security@cloudvault.example.com
 **Immediate Cause**: Developer accidentally committed `.env` file containing `SESSION_SECRET`
 
 **Contributing Factors**:
+
 1. `.env` not in `.gitignore` (configuration error)
 2. No pre-commit hook to detect secrets (tooling gap)
 3. No automated secret scanning in CI/CD (detection gap)
@@ -563,24 +610,24 @@ For questions, contact: security@cloudvault.example.com
 
 ### Action Items
 
-| Action | Owner | Deadline | Status |
-|--------|-------|----------|--------|
-| Add `.env` to `.gitignore` | DevOps | 2025-02-05 | ✅ Done |
-| Install Gitleaks pre-commit hook | DevOps | 2025-02-07 | ⏳ In progress |
-| Enable GitHub secret scanning | Security | 2025-02-08 | ⏳ Pending |
-| Add secret scanning to CI/CD | DevOps | 2025-02-15 | 📋 Planned |
-| Quarterly secret rotation schedule | Security | 2025-03-01 | 📋 Planned |
+| Action                             | Owner    | Deadline   | Status         |
+| ---------------------------------- | -------- | ---------- | -------------- |
+| Add `.env` to `.gitignore`         | DevOps   | 2025-02-05 | ✅ Done        |
+| Install Gitleaks pre-commit hook   | DevOps   | 2025-02-07 | ⏳ In progress |
+| Enable GitHub secret scanning      | Security | 2025-02-08 | ⏳ Pending     |
+| Add secret scanning to CI/CD       | DevOps   | 2025-02-15 | 📋 Planned     |
+| Quarterly secret rotation schedule | Security | 2025-03-01 | 📋 Planned     |
 
 ---
 
 ## Escalation Contacts
 
-| Role | Contact | Availability |
-|------|---------|--------------|
-| **Security Lead** | security@cloudvault.example.com | 24/7 (on-call rotation) |
-| **Engineering Manager** | [Email] | Business hours + on-call |
-| **CTO** | [Email] | Escalation for P0 only |
-| **Legal Counsel** | [Email] | Data breach notification |
+| Role                    | Contact                         | Availability             |
+| ----------------------- | ------------------------------- | ------------------------ |
+| **Security Lead**       | security@cloudvault.example.com | 24/7 (on-call rotation)  |
+| **Engineering Manager** | [Email]                         | Business hours + on-call |
+| **CTO**                 | [Email]                         | Escalation for P0 only   |
+| **Legal Counsel**       | [Email]                         | Data breach notification |
 
 ---
 

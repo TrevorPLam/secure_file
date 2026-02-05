@@ -7,30 +7,30 @@ Common testing patterns used in the CloudVault project.
 ### Standard Test Template
 
 ```typescript
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { functionToTest } from "./module";
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { functionToTest } from './module'
 
-describe("ModuleName", () => {
+describe('ModuleName', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-  });
+    vi.clearAllMocks()
+  })
 
-  describe("functionName", () => {
-    it("should handle happy path", () => {
-      const result = functionToTest("valid input");
-      expect(result).toBe("expected output");
-    });
+  describe('functionName', () => {
+    it('should handle happy path', () => {
+      const result = functionToTest('valid input')
+      expect(result).toBe('expected output')
+    })
 
-    it("should handle edge case", () => {
-      const result = functionToTest("");
-      expect(result).toBeNull();
-    });
+    it('should handle edge case', () => {
+      const result = functionToTest('')
+      expect(result).toBeNull()
+    })
 
-    it("should throw on invalid input", () => {
-      expect(() => functionToTest(null)).toThrow("Invalid input");
-    });
-  });
-});
+    it('should throw on invalid input', () => {
+      expect(() => functionToTest(null)).toThrow('Invalid input')
+    })
+  })
+})
 ```
 
 ## Mocking Patterns
@@ -38,155 +38,158 @@ describe("ModuleName", () => {
 ### Database Mocking
 
 ```typescript
-vi.mock("../server/db", () => ({
+vi.mock('../server/db', () => ({
   db: {
     insert: vi.fn(),
     select: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
   },
-}));
+}))
 
-import { db } from "../server/db";
+import { db } from '../server/db'
 
 // In test
 const mockInsert = {
   values: vi.fn().mockReturnThis(),
   returning: vi.fn().mockResolvedValue([mockData]),
-};
-(db.insert as any).mockReturnValue(mockInsert);
+}
+;(db.insert as any).mockReturnValue(mockInsert)
 ```
 
 ### API Request Mocking
 
 ```typescript
 beforeEach(() => {
-  global.fetch = vi.fn();
-});
+  global.fetch = vi.fn()
+})
 
 // Mock successful response
-(global.fetch as any).mockResolvedValue({
+;(global.fetch as any).mockResolvedValue({
   ok: true,
-  json: () => Promise.resolve({ data: "test" }),
-});
+  json: () => Promise.resolve({ data: 'test' }),
+})
 
-// Mock error response  
-(global.fetch as any).mockResolvedValue({
+// Mock error response
+;(global.fetch as any).mockResolvedValue({
   ok: false,
   status: 404,
-  text: () => Promise.resolve("Not found"),
-});
+  text: () => Promise.resolve('Not found'),
+})
 ```
 
 ## Async Testing
 
 ```typescript
-it("should handle async operations", async () => {
-  const result = await asyncFunction();
-  expect(result).toBeDefined();
-});
+it('should handle async operations', async () => {
+  const result = await asyncFunction()
+  expect(result).toBeDefined()
+})
 
-it("should handle async errors", async () => {
-  await expect(failingAsyncFunction()).rejects.toThrow("Error message");
-});
+it('should handle async errors', async () => {
+  await expect(failingAsyncFunction()).rejects.toThrow('Error message')
+})
 ```
 
 ## Testing React Hooks
 
 ```typescript
-import { renderHook, act } from "@testing-library/react";
-import { useMyHook } from "./use-my-hook";
+import { renderHook, act } from '@testing-library/react'
+import { useMyHook } from './use-my-hook'
 
-it("should update state", () => {
-  const { result } = renderHook(() => useMyHook());
-  
+it('should update state', () => {
+  const { result } = renderHook(() => useMyHook())
+
   act(() => {
-    result.current.updateValue("new value");
-  });
-  
-  expect(result.current.value).toBe("new value");
-});
+    result.current.updateValue('new value')
+  })
+
+  expect(result.current.value).toBe('new value')
+})
 ```
 
 ## Time-Based Testing
 
 ```typescript
 beforeEach(() => {
-  vi.useFakeTimers();
-});
+  vi.useFakeTimers()
+})
 
 afterEach(() => {
-  vi.useRealTimers();
-});
+  vi.useRealTimers()
+})
 
-it("should execute after timeout", () => {
-  const callback = vi.fn();
-  setTimeout(callback, 1000);
-  
-  vi.advanceTimersByTime(1000);
-  expect(callback).toHaveBeenCalled();
-});
+it('should execute after timeout', () => {
+  const callback = vi.fn()
+  setTimeout(callback, 1000)
+
+  vi.advanceTimersByTime(1000)
+  expect(callback).toHaveBeenCalled()
+})
 ```
 
 ## Error Testing
 
 ```typescript
-it("should handle errors", () => {
+it('should handle errors', () => {
   expect(() => {
-    throwingFunction();
-  }).toThrow("Expected error message");
-});
+    throwingFunction()
+  }).toThrow('Expected error message')
+})
 
-it("should handle specific error types", () => {
+it('should handle specific error types', () => {
   expect(() => {
-    throwingFunction();
-  }).toThrow(CustomError);
-});
+    throwingFunction()
+  }).toThrow(CustomError)
+})
 ```
 
 ## Parameterized Tests
 
 ```typescript
 const testCases = [
-  { input: "hello", expected: "HELLO" },
-  { input: "world", expected: "WORLD" },
-  { input: "", expected: "" },
-];
+  { input: 'hello', expected: 'HELLO' },
+  { input: 'world', expected: 'WORLD' },
+  { input: '', expected: '' },
+]
 
 testCases.forEach(({ input, expected }) => {
   it(`should convert "${input}" to "${expected}"`, () => {
-    expect(toUpperCase(input)).toBe(expected);
-  });
-});
+    expect(toUpperCase(input)).toBe(expected)
+  })
+})
 ```
 
 ## Anti-Patterns to Avoid
 
 ### ❌ Testing Implementation Details
+
 ```typescript
 // Bad: Testing internal state
-expect(component.state.isLoading).toBe(true);
+expect(component.state.isLoading).toBe(true)
 
 // Good: Testing behavior
-expect(screen.getByText("Loading...")).toBeInTheDocument();
+expect(screen.getByText('Loading...')).toBeInTheDocument()
 ```
 
 ### ❌ Over-Mocking
+
 ```typescript
 // Bad: Mocking everything
-vi.mock("./utils", () => ({ all: "mocked" }));
+vi.mock('./utils', () => ({ all: 'mocked' }))
 
 // Good: Mock only external dependencies
-vi.mock("external-api-client");
+vi.mock('external-api-client')
 ```
 
 ### ❌ Brittle Snapshots
+
 ```typescript
 // Bad: Full component snapshot
-expect(component).toMatchSnapshot();
+expect(component).toMatchSnapshot()
 
 // Good: Specific assertions
-expect(component.props.value).toBe("expected");
+expect(component.props.value).toBe('expected')
 ```
 
 ## Best Practices

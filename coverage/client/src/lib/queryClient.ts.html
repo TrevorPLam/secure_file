@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>14/14</span>
+                <span class='fraction'>0/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>12/12</span>
+                <span class='fraction'>0/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>14/14</span>
+                <span class='fraction'>0/14</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -143,9 +143,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">15x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -154,36 +154,36 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9x</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -209,48 +209,48 @@
 &nbsp;
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 &nbsp;
-async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+async function <span class="fstat-no" title="function not covered" >throwIfResNotOk(r</span>es: Response) {
+<span class="cstat-no" title="statement not covered" >  if (!res.ok) {</span>
+    const text = (<span class="cstat-no" title="statement not covered" >await res.text()) || res.statusText;</span>
+<span class="cstat-no" title="statement not covered" >    throw new Error(`${res.status}: ${text}`);</span>
   }
 }
 &nbsp;
-export async function apiRequest(
+export async function <span class="fstat-no" title="function not covered" >apiRequest(</span>
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise&lt;Response&gt; {
-  const res = await fetch(url, {
+  const res = <span class="cstat-no" title="statement not covered" >await fetch(url, {</span>
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
 &nbsp;
-  await throwIfResNotOk(res);
-  return res;
+<span class="cstat-no" title="statement not covered" >  await throwIfResNotOk(res);</span>
+<span class="cstat-no" title="statement not covered" >  return res;</span>
 }
 &nbsp;
 type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: &lt;T&gt;(options: {
   on401: UnauthorizedBehavior;
 }) =&gt; QueryFunction&lt;T&gt; =
-  ({ on401: unauthorizedBehavior }) =&gt;
-  async ({ queryKey }) =&gt; {
-    const res = await fetch(queryKey.join("/") as string, {
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >  ({</span> on401: unauthorizedBehavior }) =&gt;</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >  async ({</span> queryKey }) =&gt; {</span>
+    const res = <span class="cstat-no" title="statement not covered" >await fetch(queryKey.join("/") as string, {</span>
       credentials: "include",
     });
 &nbsp;
-    if (unauthorizedBehavior === "returnNull" &amp;&amp; res.status === 401) {
-      return null;
+<span class="cstat-no" title="statement not covered" >    if (unauthorizedBehavior === "returnNull" &amp;&amp; res.status === 401) {</span>
+<span class="cstat-no" title="statement not covered" >      return null;</span>
     }
 &nbsp;
-    await throwIfResNotOk(res);
-    return await res.json();
+<span class="cstat-no" title="statement not covered" >    await throwIfResNotOk(res);</span>
+<span class="cstat-no" title="statement not covered" >    return await res.json();</span>
   };
 &nbsp;
-export const queryClient = new QueryClient({
+export const queryClient = <span class="cstat-no" title="statement not covered" >new QueryClient({</span>
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
@@ -271,7 +271,7 @@ export const queryClient = new QueryClient({
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-04T14:23:30.860Z
+                at 2026-02-04T23:51:49.193Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

@@ -5,12 +5,14 @@ CloudVault enforces **100% line and branch coverage** for all first-party, non-g
 ## What is Covered
 
 ### Included in Coverage
+
 - `server/**/*.ts` - All server-side business logic
 - `shared/**/*.ts` - Shared types and schemas
 - `client/src/lib/**/*.ts` - Client utility functions
 - `client/src/hooks/**/*.ts` - React hooks with business logic
 
 ### Excluded from Coverage
+
 - `client/src/components/ui/**/*` - Generated shadcn/ui components
 - `server/index.ts` - Server bootstrap (environment-specific)
 - `server/static.ts` - Static file serving (middleware only)
@@ -60,12 +62,15 @@ xdg-open coverage/index.html  # Linux
 ## Coverage Gates
 
 ### Local
+
 ```bash
 npm run test:coverage
 ```
+
 Fails if coverage is below thresholds.
 
 ### CI/CD
+
 GitHub Actions workflow runs coverage checks on every PR and push.
 Builds will fail if coverage drops below 100% (with exceptions).
 
@@ -82,6 +87,7 @@ When adding new code:
 ## Understanding Coverage Reports
 
 ### HTML Report Structure
+
 ```
 coverage/
 ├── index.html           # Overall summary
@@ -106,48 +112,52 @@ Click on any file in the HTML report to see line-by-line coverage.
 ### Uncovered Branches
 
 ❌ **Bad**: Test doesn't cover else branch
+
 ```typescript
 function isValid(value: string) {
   if (value.length > 0) {
-    return true;
+    return true
   }
-  return false;
+  return false
 }
 
 // Test only checks happy path
-expect(isValid("hello")).toBe(true);
+expect(isValid('hello')).toBe(true)
 ```
 
 ✅ **Good**: Test covers both branches
+
 ```typescript
-expect(isValid("hello")).toBe(true);
-expect(isValid("")).toBe(false);
+expect(isValid('hello')).toBe(true)
+expect(isValid('')).toBe(false)
 ```
 
 ### Uncovered Error Paths
 
 ❌ **Bad**: Doesn't test error handling
+
 ```typescript
 async function fetchData() {
   try {
-    return await api.get("/data");
+    return await api.get('/data')
   } catch (error) {
-    return null;  // Uncovered!
+    return null // Uncovered!
   }
 }
 ```
 
 ✅ **Good**: Tests both success and error
-```typescript
-it("returns data on success", async () => {
-  api.get.mockResolvedValue({ data: [] });
-  expect(await fetchData()).toEqual({ data: [] });
-});
 
-it("returns null on error", async () => {
-  api.get.mockRejectedValue(new Error("Network error"));
-  expect(await fetchData()).toBeNull();
-});
+```typescript
+it('returns data on success', async () => {
+  api.get.mockResolvedValue({ data: [] })
+  expect(await fetchData()).toEqual({ data: [] })
+})
+
+it('returns null on error', async () => {
+  api.get.mockRejectedValue(new Error('Network error'))
+  expect(await fetchData()).toBeNull()
+})
 ```
 
 ## Exceptions
@@ -155,12 +165,14 @@ it("returns null on error", async () => {
 Some code cannot realistically reach 100% coverage. Document these in [99_EXCEPTIONS.md](./99_EXCEPTIONS.md).
 
 Valid reasons for exceptions:
+
 - Platform-specific bootstrap code
 - Replit sidecar integration (external service)
 - Code that requires production environment
 - Dead code scheduled for removal
 
 Invalid reasons:
+
 - "Too hard to test"
 - "Not important"
 - "Takes too long"
@@ -168,18 +180,22 @@ Invalid reasons:
 ## Maintaining Coverage
 
 ### Before Merging
+
 1. Run `npm run test:coverage`
 2. Verify 100% coverage (or documented exceptions)
 3. Update exception docs if needed
 4. Get PR approval
 
 ### During Refactoring
+
 - Coverage must not decrease
 - If removing code, remove its tests
 - If adding code, add tests
 
 ### When Fixing Bugs
+
 Add a test that:
+
 1. Reproduces the bug (fails)
 2. Passes after the fix
 3. Maintains 100% coverage
@@ -187,6 +203,7 @@ Add a test that:
 ## No Merge Policy
 
 **PRs will not be merged if:**
+
 - Coverage drops below 100% (minus exceptions)
 - New code lacks tests
 - Exceptions aren't documented

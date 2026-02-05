@@ -192,7 +192,7 @@ A set of reusable database connections maintained by the application. Drizzle/pg
 
 A library of unstyled, accessible UI primitives (e.g., Dialog, Dropdown, Tooltip). shadcn/ui components are built on Radix primitives.
 
-**Evidence**: [package.json](../../package.json):17-42 (@radix-ui/* packages)
+**Evidence**: [package.json](../../package.json):17-42 (@radix-ui/\* packages)
 
 **Official docs**: https://www.radix-ui.com/
 
@@ -272,20 +272,20 @@ A fast build tool and development server for frontend projects. CloudVault uses 
 
 ## Domain Acronyms
 
-| Acronym | Full Term | Meaning |
-|---------|-----------|---------|
-| **CRUD** | Create, Read, Update, Delete | Basic data operations |
-| **GCS** | Google Cloud Storage | Object storage service |
-| **HMR** | Hot Module Replacement | Dev server live reload feature |
-| **OIDC** | OpenID Connect | Authentication protocol |
-| **ORM** | Object-Relational Mapping | Database abstraction layer |
-| **PKCE** | Proof Key for Code Exchange | OAuth security extension |
-| **REST** | Representational State Transfer | API architectural style |
-| **SQL** | Structured Query Language | Database query language |
-| **TTL** | Time To Live | Expiration duration |
-| **UI** | User Interface | Visual elements |
-| **URL** | Uniform Resource Locator | Web address |
-| **UUID** | Universally Unique Identifier | Random unique ID |
+| Acronym  | Full Term                       | Meaning                        |
+| -------- | ------------------------------- | ------------------------------ |
+| **CRUD** | Create, Read, Update, Delete    | Basic data operations          |
+| **GCS**  | Google Cloud Storage            | Object storage service         |
+| **HMR**  | Hot Module Replacement          | Dev server live reload feature |
+| **OIDC** | OpenID Connect                  | Authentication protocol        |
+| **ORM**  | Object-Relational Mapping       | Database abstraction layer     |
+| **PKCE** | Proof Key for Code Exchange     | OAuth security extension       |
+| **REST** | Representational State Transfer | API architectural style        |
+| **SQL**  | Structured Query Language       | Database query language        |
+| **TTL**  | Time To Live                    | Expiration duration            |
+| **UI**   | User Interface                  | Visual elements                |
+| **URL**  | Uniform Resource Locator        | Web address                    |
+| **UUID** | Universally Unique Identifier   | Random unique ID               |
 
 ## Replit-Specific Terms
 

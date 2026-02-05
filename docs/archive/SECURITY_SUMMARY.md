@@ -18,7 +18,7 @@ CloudVault has completed a comprehensive security hardening program, achieving a
 ✅ **5 Critical Security Controls Implemented** (rate limiting, headers, logging, error handling, CORS)  
 ✅ **240 Tests Passing** including 18 dedicated security tests  
 ✅ **5 CI/CD Security Gates** automated (SAST, secrets, dependencies, SBOM, lockfile)  
-✅ **Zero High-Severity Vulnerabilities** remaining unaddressed  
+✅ **Zero High-Severity Vulnerabilities** remaining unaddressed
 
 ---
 
@@ -46,6 +46,7 @@ npm run build
 ### CI/CD (Automated)
 
 Every PR and merge triggers:
+
 - ✅ TypeScript type checking
 - ✅ CodeQL SAST scanning
 - ✅ Gitleaks secret scanning
@@ -61,31 +62,31 @@ See `.github/workflows/security.yml` for details.
 
 ### Before Hardening
 
-| Control | Status | Risk Level |
-|---------|--------|------------|
-| Rate Limiting | ❌ None | 🔴 High |
-| Security Headers | ❌ None | 🔴 High |
-| Response Logging | ⚠️ Leaks tokens | 🔴 High |
-| Error Handling | ⚠️ Stack traces exposed | 🟡 Medium |
-| CORS Policy | ⚠️ Permissive | 🟡 Medium |
-| Secret Scanning | ❌ Not automated | 🟡 Medium |
-| SAST | ❌ Not automated | 🟡 Medium |
-| Dependency Scanning | ⚠️ Manual only | 🟡 Medium |
+| Control             | Status                  | Risk Level |
+| ------------------- | ----------------------- | ---------- |
+| Rate Limiting       | ❌ None                 | 🔴 High    |
+| Security Headers    | ❌ None                 | 🔴 High    |
+| Response Logging    | ⚠️ Leaks tokens         | 🔴 High    |
+| Error Handling      | ⚠️ Stack traces exposed | 🟡 Medium  |
+| CORS Policy         | ⚠️ Permissive           | 🟡 Medium  |
+| Secret Scanning     | ❌ Not automated        | 🟡 Medium  |
+| SAST                | ❌ Not automated        | 🟡 Medium  |
+| Dependency Scanning | ⚠️ Manual only          | 🟡 Medium  |
 
 **Overall Security Maturity:** 3/10 (LOW)
 
 ### After Hardening
 
-| Control | Status | Risk Level |
-|---------|--------|------------|
-| Rate Limiting | ✅ Auth + API + Share | 🟢 Low |
-| Security Headers | ✅ CSP, HSTS, X-Frame | 🟢 Low |
-| Response Logging | ✅ Sanitized | 🟢 Low |
-| Error Handling | ✅ Prod-safe | 🟢 Low |
-| CORS Policy | ✅ Allowlist | 🟢 Low |
-| Secret Scanning | ✅ Automated (Gitleaks) | 🟢 Low |
-| SAST | ✅ Automated (CodeQL) | 🟢 Low |
-| Dependency Scanning | ✅ Automated (npm audit) | 🟢 Low |
+| Control             | Status                   | Risk Level |
+| ------------------- | ------------------------ | ---------- |
+| Rate Limiting       | ✅ Auth + API + Share    | 🟢 Low     |
+| Security Headers    | ✅ CSP, HSTS, X-Frame    | 🟢 Low     |
+| Response Logging    | ✅ Sanitized             | 🟢 Low     |
+| Error Handling      | ✅ Prod-safe             | 🟢 Low     |
+| CORS Policy         | ✅ Allowlist             | 🟢 Low     |
+| Secret Scanning     | ✅ Automated (Gitleaks)  | 🟢 Low     |
+| SAST                | ✅ Automated (CodeQL)    | 🟢 Low     |
+| Dependency Scanning | ✅ Automated (npm audit) | 🟢 Low     |
 
 **Overall Security Maturity:** 9/10 (HIGH ASSURANCE)
 
@@ -96,6 +97,7 @@ See `.github/workflows/security.yml` for details.
 ### 1. Runtime Protections (`server/security.ts`)
 
 #### Security Headers
+
 ```
 Content-Security-Policy: Prevents XSS and injection attacks
 Strict-Transport-Security: Forces HTTPS (production)
@@ -106,11 +108,13 @@ Permissions-Policy: Restricts browser features
 ```
 
 #### Rate Limiting
+
 - **Auth Endpoints:** 5 requests / 15 minutes (brute force protection)
 - **Share Links:** 20 requests / 5 minutes (scraping prevention)
 - **General API:** 100 requests / minute (abuse prevention)
 
 #### CORS Policy
+
 - Allowlist-based origin validation
 - Wildcard support for deployment flexibility
 - No `Access-Control-Allow-Origin: *`
@@ -126,6 +130,7 @@ Permissions-Policy: Restricts browser features
 ### 3. Application Security
 
 #### Authentication (`server/replit_integrations/auth/replitAuth.ts`)
+
 - OIDC-based (Replit Auth)
 - Session management with PostgreSQL backend
 - HttpOnly/Secure cookie flags
@@ -133,16 +138,19 @@ Permissions-Policy: Restricts browser features
 - Rate-limited endpoints
 
 #### Authorization (`server/routes.ts`)
+
 - User ownership verification on all CRUD operations
 - Deny-by-default middleware (`isAuthenticated`)
 - No direct object references without authz check
 
 #### Cryptography
+
 - bcrypt password hashing (10 rounds)
 - TLS 1.2+ enforcement
 - No custom crypto implementations
 
 #### Input Validation
+
 - Zod schemas for all API requests
 - Path sanitization (`normalizeObjectEntityPath`)
 - SQL injection prevention (Drizzle ORM)
@@ -160,21 +168,21 @@ Permissions-Policy: Restricts browser features
 
 Complete security documentation in `docs/security/`:
 
-| Document | Description |
-|----------|-------------|
-| [00_INDEX.md](docs/security/00_INDEX.md) | Security program overview |
-| [10_THREAT_MODEL.md](docs/security/10_THREAT_MODEL.md) | STRIDE threats, abuse cases, risk register |
-| [11_IDENTITY_AND_ACCESS.md](docs/security/11_IDENTITY_AND_ACCESS.md) | Authentication & authorization |
-| [12_CRYPTO_POLICY.md](docs/security/12_CRYPTO_POLICY.md) | Cryptographic standards |
-| [13_APPSEC_BOUNDARIES.md](docs/security/13_APPSEC_BOUNDARIES.md) | Input validation, injection prevention |
-| [20_SUPPLY_CHAIN.md](docs/security/20_SUPPLY_CHAIN.md) | Dependency security |
-| [21_SBOM_AND_PROVENANCE.md](docs/security/21_SBOM_AND_PROVENANCE.md) | SBOMs and provenance |
-| [30_CICD_HARDENING.md](docs/security/30_CICD_HARDENING.md) | CI/CD security gates |
-| [31_RUNTIME_HARDENING.md](docs/security/31_RUNTIME_HARDENING.md) | Runtime isolation |
-| [40_AUDIT_AND_LOGGING.md](docs/security/40_AUDIT_AND_LOGGING.md) | Audit logs, forensics |
-| [50_SECURE_SDLC.md](docs/security/50_SECURE_SDLC.md) | Secure development lifecycle |
-| [60_INCIDENT_RESPONSE.md](docs/security/60_INCIDENT_RESPONSE.md) | Incident response playbooks |
-| [99_SECURITY_POSTURE_REPORT.md](docs/security/99_SECURITY_POSTURE_REPORT.md) | Full security assessment |
+| Document                                                                     | Description                                |
+| ---------------------------------------------------------------------------- | ------------------------------------------ |
+| [00_INDEX.md](docs/security/00_INDEX.md)                                     | Security program overview                  |
+| [10_THREAT_MODEL.md](docs/security/10_THREAT_MODEL.md)                       | STRIDE threats, abuse cases, risk register |
+| [11_IDENTITY_AND_ACCESS.md](docs/security/11_IDENTITY_AND_ACCESS.md)         | Authentication & authorization             |
+| [12_CRYPTO_POLICY.md](docs/security/12_CRYPTO_POLICY.md)                     | Cryptographic standards                    |
+| [13_APPSEC_BOUNDARIES.md](docs/security/13_APPSEC_BOUNDARIES.md)             | Input validation, injection prevention     |
+| [20_SUPPLY_CHAIN.md](docs/security/20_SUPPLY_CHAIN.md)                       | Dependency security                        |
+| [21_SBOM_AND_PROVENANCE.md](docs/security/21_SBOM_AND_PROVENANCE.md)         | SBOMs and provenance                       |
+| [30_CICD_HARDENING.md](docs/security/30_CICD_HARDENING.md)                   | CI/CD security gates                       |
+| [31_RUNTIME_HARDENING.md](docs/security/31_RUNTIME_HARDENING.md)             | Runtime isolation                          |
+| [40_AUDIT_AND_LOGGING.md](docs/security/40_AUDIT_AND_LOGGING.md)             | Audit logs, forensics                      |
+| [50_SECURE_SDLC.md](docs/security/50_SECURE_SDLC.md)                         | Secure development lifecycle               |
+| [60_INCIDENT_RESPONSE.md](docs/security/60_INCIDENT_RESPONSE.md)             | Incident response playbooks                |
+| [99_SECURITY_POSTURE_REPORT.md](docs/security/99_SECURITY_POSTURE_REPORT.md) | Full security assessment                   |
 
 ---
 
@@ -233,6 +241,7 @@ NODE_ENV=production
 ### Security Checklist for PRs
 
 Use `.github/PULL_REQUEST_TEMPLATE.md` to ensure:
+
 - ✅ Authentication/authorization on new endpoints
 - ✅ Input validation with Zod schemas
 - ✅ No secrets in code
@@ -246,11 +255,11 @@ Use `.github/PULL_REQUEST_TEMPLATE.md` to ensure:
 
 ### Low Priority (Accepted)
 
-| Risk | Likelihood | Impact | Mitigation | Owner |
-|------|-----------|--------|------------|-------|
-| MFA not available | Low | Medium | Rely on Replit OIDC MFA | Platform Team |
-| In-memory rate limiting | Low | Low | Document Redis upgrade path | DevOps |
-| CSP inline scripts | Low | Low | Required for Vite dev mode | Frontend Team |
+| Risk                    | Likelihood | Impact | Mitigation                  | Owner         |
+| ----------------------- | ---------- | ------ | --------------------------- | ------------- |
+| MFA not available       | Low        | Medium | Rely on Replit OIDC MFA     | Platform Team |
+| In-memory rate limiting | Low        | Low    | Document Redis upgrade path | DevOps        |
+| CSP inline scripts      | Low        | Low    | Required for Vite dev mode  | Frontend Team |
 
 ### Waivers
 
@@ -280,6 +289,7 @@ Policy: All waivers require security approval, documented justification, and 90-
 - ✅ Security middleware application
 
 Run security tests:
+
 ```bash
 npm run test -- server/security.test.ts
 ```
@@ -343,6 +353,7 @@ npm run test -- server/security.test.ts
 ## Next Steps
 
 ### Immediate (Week 1)
+
 - ✅ Complete security documentation
 - ✅ Implement runtime controls
 - ✅ Add CI/CD security gates
@@ -350,12 +361,14 @@ npm run test -- server/security.test.ts
 - ⏳ Validate security workflow runs
 
 ### Short Term (Month 1)
+
 - ⏳ Train team on security checklist
 - ⏳ Set up security monitoring dashboard
 - ⏳ Document waiver process
 - ⏳ Conduct security tabletop exercise
 
 ### Long Term (Quarter 1)
+
 - ⏳ Implement Redis-backed rate limiting
 - ⏳ Add structured logging (winston/pino)
 - ⏳ Set up log aggregation (ELK/Datadog)

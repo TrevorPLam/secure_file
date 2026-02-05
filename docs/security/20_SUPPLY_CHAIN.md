@@ -14,19 +14,20 @@ CloudVault depends on **92 direct dependencies** (56 production, 36 development)
 
 **High-Risk Dependencies** (direct access to sensitive operations):
 
-| Package | Version | Purpose | Risk Profile |
-|---------|---------|---------|--------------|
-| `express` | 5.0.1 | HTTP server | **HIGH** - Network-facing, attack surface |
-| `express-session` | 1.19.0 | Session management | **HIGH** - Handles authentication state |
-| `pg` | 8.16.3 | PostgreSQL driver | **HIGH** - Database access |
-| `bcryptjs` | 3.0.3 | Password hashing | **HIGH** - Cryptographic operations |
-| `openid-client` | 6.8.1 | OIDC authentication | **HIGH** - Identity verification |
-| `@google-cloud/storage` | 7.18.0 | GCS SDK | **HIGH** - File storage access |
-| `passport` | 0.7.0 | Authentication middleware | **MEDIUM** - Auth logic |
-| `drizzle-orm` | 0.39.3 | Database ORM | **MEDIUM** - SQL query generation |
-| `zod` | 3.24.2 | Input validation | **MEDIUM** - Security boundary |
+| Package                 | Version | Purpose                   | Risk Profile                              |
+| ----------------------- | ------- | ------------------------- | ----------------------------------------- |
+| `express`               | 5.0.1   | HTTP server               | **HIGH** - Network-facing, attack surface |
+| `express-session`       | 1.19.0  | Session management        | **HIGH** - Handles authentication state   |
+| `pg`                    | 8.16.3  | PostgreSQL driver         | **HIGH** - Database access                |
+| `bcryptjs`              | 3.0.3   | Password hashing          | **HIGH** - Cryptographic operations       |
+| `openid-client`         | 6.8.1   | OIDC authentication       | **HIGH** - Identity verification          |
+| `@google-cloud/storage` | 7.18.0  | GCS SDK                   | **HIGH** - File storage access            |
+| `passport`              | 0.7.0   | Authentication middleware | **MEDIUM** - Auth logic                   |
+| `drizzle-orm`           | 0.39.3  | Database ORM              | **MEDIUM** - SQL query generation         |
+| `zod`                   | 3.24.2  | Input validation          | **MEDIUM** - Security boundary            |
 
 **UI/Non-Security Dependencies** (42 packages):
+
 - React ecosystem: `react@18.3.1`, `react-dom@18.3.1`, `@tanstack/react-query`
 - UI components: 26 `@radix-ui` packages (badge, dialog, dropdown, etc.)
 - Styling: `tailwindcss`, `clsx`, `tailwind-merge`
@@ -40,15 +41,16 @@ CloudVault depends on **92 direct dependencies** (56 production, 36 development)
 
 **Build & Test Tools** (non-runtime, lower risk):
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `vite` | 7.3.0 | Build tool |
-| `vitest` | 4.0.18 | Test runner |
-| `typescript` | 5.6.3 | Type checker |
-| `esbuild` | 0.25.0 | JavaScript bundler |
-| `drizzle-kit` | 0.31.8 | Database migrations |
+| Package       | Version | Purpose             |
+| ------------- | ------- | ------------------- |
+| `vite`        | 7.3.0   | Build tool          |
+| `vitest`      | 4.0.18  | Test runner         |
+| `typescript`  | 5.6.3   | Type checker        |
+| `esbuild`     | 0.25.0  | JavaScript bundler  |
+| `drizzle-kit` | 0.31.8  | Database migrations |
 
 **Testing Libraries**:
+
 - `@testing-library/react`, `@testing-library/user-event`
 - `supertest` (HTTP testing)
 - `@vitest/coverage-v8` (code coverage)
@@ -64,11 +66,13 @@ CloudVault depends on **92 direct dependencies** (56 production, 36 development)
 **Purpose**: Pins exact versions of all dependencies (direct + transitive) to ensure reproducible builds
 
 **Security Properties**:
+
 - ✅ Prevents automatic updates to compromised versions
 - ✅ Ensures CI/CD uses same versions as local development
 - ✅ Includes integrity hashes (SHA-512) for all packages
 
 **Example Entry**:
+
 ```json
 "bcryptjs": {
   "version": "3.0.3",
@@ -78,6 +82,7 @@ CloudVault depends on **92 direct dependencies** (56 production, 36 development)
 ```
 
 **Integrity Verification**:
+
 - npm verifies SHA-512 hash during `npm install`
 - Mismatch → install fails (prevents registry compromise or MITM attacks)
 
@@ -86,12 +91,14 @@ CloudVault depends on **92 direct dependencies** (56 production, 36 development)
 ### CI/CD Lockfile Usage (`.github/workflows/test-coverage.yml:28`)
 
 **Command**:
+
 ```yaml
 - name: Install dependencies
   run: npm ci
 ```
 
 **Security Properties**:
+
 - ✅ `npm ci` (clean install) uses `package-lock.json` exclusively
 - ✅ Fails if `package.json` and lockfile are out of sync
 - ✅ Removes `node_modules` before install (no leftover malicious code)
@@ -119,6 +126,7 @@ CloudVault depends on **92 direct dependencies** (56 production, 36 development)
 ### npm audit Integration (Recommended)
 
 **Add to CI/CD**:
+
 ```yaml
 - name: Security audit
   run: npm audit --production --audit-level=moderate
@@ -126,6 +134,7 @@ CloudVault depends on **92 direct dependencies** (56 production, 36 development)
 ```
 
 **Audit Levels**:
+
 - `info`: Informational (non-security updates)
 - `low`: Low severity (fail-safe to ignore)
 - `moderate`: **Recommended threshold** (balance security vs. noise)
@@ -133,6 +142,7 @@ CloudVault depends on **92 direct dependencies** (56 production, 36 development)
 - `critical`: Critical severity (always fail)
 
 **Rationale for `moderate`**:
+
 - Blocks exploitable vulnerabilities (CVSS ≥ 4.0)
 - Low severity issues often false positives (e.g., RegEx DoS in dev tools)
 
@@ -143,26 +153,28 @@ CloudVault depends on **92 direct dependencies** (56 production, 36 development)
 **Option 1: Dependabot (GitHub)**
 
 **Configuration** (`.github/dependabot.yml`):
+
 ```yaml
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     open-pull-requests-limit: 10
     commit-message:
-      prefix: "chore(deps)"
+      prefix: 'chore(deps)'
     groups:
       security:
         patterns:
-          - "*"
-        dependency-type: "production"
+          - '*'
+        dependency-type: 'production'
         update-types:
-          - "security"
+          - 'security'
 ```
 
 **Security Benefits**:
+
 - Automatic PRs for security updates
 - Separates security patches from feature updates
 - Runs CI tests before merge
@@ -170,6 +182,7 @@ updates:
 **Option 2: Renovate Bot**
 
 **Configuration** (`renovate.json`):
+
 ```json
 {
   "extends": ["config:recommended", ":semanticCommits"],
@@ -190,10 +203,12 @@ updates:
 **Policy**: Only add direct dependencies when necessary; rely on transitive dependencies for sub-dependencies
 
 **Rationale**:
+
 - Reduces attack surface (fewer packages to audit)
 - Simplifies dependency graph (easier to identify vulnerabilities)
 
 **Example**:
+
 ```json
 // ❌ Bad - Redundant direct dependency
 {
@@ -218,6 +233,7 @@ updates:
 **Policy**: Prefer Node.js built-in modules over third-party packages for cryptographic operations
 
 **Examples**:
+
 - ✅ Use `crypto.randomUUID()` (built-in) over `uuid` package
 - ✅ Use `crypto.pbkdf2()` (built-in) over custom PBKDF2 implementation
 - ⚠️ Exception: bcrypt requires native library (no pure JS built-in)
@@ -229,12 +245,14 @@ updates:
 ### 3. Avoid Deprecated Packages
 
 **Check for Deprecation**:
+
 ```bash
 npm outdated
 npm deprecate
 ```
 
 **Current Gaps** (check periodically):
+
 - None identified as of 2025-02-04
 
 ---
@@ -244,16 +262,19 @@ npm deprecate
 **Policy**: Only use packages with permissive licenses (MIT, Apache 2.0, BSD)
 
 **Prohibited Licenses**:
+
 - GPL (requires derivative works to be GPL)
 - AGPL (requires source disclosure for network services)
 - Commercial licenses without approval
 
 **Audit Command**:
+
 ```bash
 npx license-checker --summary --production
 ```
 
 **Expected Output** (CloudVault):
+
 ```
 MIT: 45 packages
 Apache-2.0: 8 packages
@@ -267,11 +288,13 @@ BSD-3-Clause: 3 packages
 ### 1. Compromised npm Account (Maintainer Takeover)
 
 **Historical Examples**:
+
 - `event-stream` (2018): Malicious dependency added by new maintainer
 - `ua-parser-js` (2021): Maintainer account compromised, malware published
 - `coa` (2021): Account takeover, cryptocurrency miner injected
 
 **Mitigations**:
+
 - ✅ Lockfile pins exact versions (prevents automatic upgrades)
 - ✅ npm integrity hashes verify package contents
 - ⚠️ **MISSING**: No SBOM (Software Bill of Materials) for audit trail
@@ -286,6 +309,7 @@ BSD-3-Clause: 3 packages
 **Attack**: Attacker publishes malicious package with same name as internal package to public npm registry
 
 **Example**:
+
 ```json
 // Internal package (private registry)
 "@cloudvault/auth": "1.0.0"
@@ -295,10 +319,12 @@ BSD-3-Clause: 3 packages
 ```
 
 **Mitigations**:
+
 - ✅ CloudVault has no internal packages (not vulnerable)
 - ✅ Scoped packages (`@cloudvault/*`) require npm organization ownership
 
 **Prevention for Future**:
+
 ```json
 // .npmrc - Scope to private registry
 @cloudvault:registry=https://npm.pkg.github.com
@@ -311,14 +337,17 @@ BSD-3-Clause: 3 packages
 **Attack**: Attacker publishes malicious package with similar name to popular package
 
 **Examples**:
+
 - `react-native-svg` → `react-native-sgv` (typo)
 - `lodash` → `loadash` (typo)
 
 **Mitigations**:
+
 - ✅ Lockfile prevents accidental installation (exact package name pinned)
 - ✅ Code review for new dependencies (human verification)
 
 **Detection**:
+
 ```bash
 # Check for suspicious package names
 npx snyk test --detection-depth=5
@@ -331,19 +360,24 @@ npx snyk test --detection-depth=5
 **Vulnerability**: Malicious package modifies `Object.prototype`, affecting all JavaScript objects
 
 **Example**:
+
 ```javascript
 // Malicious package
-Object.prototype.isAdmin = true;
+Object.prototype.isAdmin = true
 
 // Victim code
-if (user.isAdmin) { /* Admin access granted */ }
+if (user.isAdmin) {
+  /* Admin access granted */
+}
 ```
 
 **Mitigations**:
+
 - ✅ Node.js `--frozen-intrinsics` flag (not currently used)
 - ⚠️ **MISSING**: No runtime prototype pollution detection
 
 **Detection in CI**:
+
 ```bash
 # Scan for prototype pollution vulnerabilities
 npx snyk test --severity-threshold=high
@@ -356,27 +390,32 @@ npx snyk test --severity-threshold=high
 ### Monthly Audit Workflow
 
 1. **Check for Outdated Packages**:
+
    ```bash
    npm outdated --long
    ```
 
 2. **Review Security Advisories**:
+
    ```bash
    npm audit --production
    ```
 
 3. **Update Non-Breaking Changes**:
+
    ```bash
    npm update --save # Updates within semver range
    ```
 
 4. **Test After Updates**:
+
    ```bash
    npm run test
    npm run build
    ```
 
 5. **Commit Lockfile**:
+
    ```bash
    git add package-lock.json
    git commit -m "chore(deps): Update dependencies [security]"
@@ -393,6 +432,7 @@ npx snyk test --severity-threshold=high
 **Scenario**: Critical vulnerability announced in production dependency (e.g., `express` RCE)
 
 **Response Timeline**:
+
 1. **T+0 hours**: Security advisory received
 2. **T+1 hour**: Assess impact (does CloudVault use vulnerable code path?)
 3. **T+2 hours**: Update dependency, run tests
@@ -400,6 +440,7 @@ npx snyk test --severity-threshold=high
 5. **T+24 hours**: Postmortem and preventative measures
 
 **Commands**:
+
 ```bash
 # Emergency update
 npm install express@latest-security
@@ -417,6 +458,7 @@ git commit -m "security: Patch express RCE (CVE-2024-XXXX)"
 **Automatic**: npm verifies `integrity` field in `package-lock.json` during install
 
 **Manual Verification** (for critical packages):
+
 ```bash
 # Download tarball
 npm pack bcryptjs@3.0.3
@@ -433,11 +475,13 @@ shasum -a 512 bcryptjs-3.0.3.tgz
 ### Package Signature Verification (Future)
 
 **npm provenance** (experimental feature as of npm 9+):
+
 ```bash
 npm publish --provenance
 ```
 
 **Benefits**:
+
 - Links package to source repository and commit
 - Verifies package built from declared source code
 - Prevents package substitution attacks
@@ -451,17 +495,20 @@ npm publish --provenance
 ### Recommended Tools
 
 1. **Snyk** (commercial, free tier available)
+
    ```bash
    npx snyk test --all-projects
    npx snyk monitor # Continuous monitoring
    ```
 
 2. **Socket.dev** (malware & supply chain analysis)
+
    ```bash
    npx socket-security analyze
    ```
 
 3. **npm audit** (built-in)
+
    ```bash
    npm audit --production --json > audit-report.json
    ```
@@ -478,12 +525,14 @@ npm publish --provenance
 ### Pre-commit Hooks (Recommended)
 
 **Install Husky**:
+
 ```bash
 npm install --save-dev husky
 npx husky install
 ```
 
 **Hook: Prevent Lockfile Desync** (`.husky/pre-commit`):
+
 ```bash
 #!/bin/sh
 npm ci --dry-run || {
@@ -493,6 +542,7 @@ npm ci --dry-run || {
 ```
 
 **Hook: Block Known Malicious Packages** (`.husky/pre-commit`):
+
 ```bash
 #!/bin/sh
 # Check against known malicious packages
@@ -526,13 +576,15 @@ grep -q "event-stream@3.3.6" package-lock.json && {
    npm audit fix --force
    ```
 4. **Verify**: Check for malicious code execution
+
    ```bash
    # Check for suspicious files created
    find . -name "*.exe" -o -name "*.sh" -mtime -1
-   
+
    # Check for credential theft
    grep -r "PASSWORD\|SECRET\|TOKEN" .
    ```
+
 5. **Rotate Secrets**: Assume credentials compromised (see `60_INCIDENT_RESPONSE.md`)
 6. **Document**: Create postmortem, add to threat model
 
@@ -543,11 +595,13 @@ grep -q "event-stream@3.3.6" package-lock.json && {
 ### SBOM Generation (See `21_SBOM_AND_PROVENANCE.md`)
 
 **Generate CycloneDX SBOM**:
+
 ```bash
 npx @cyclonedx/cyclonedx-npm --output-file sbom.json
 ```
 
 **Publish SBOM with Release**:
+
 ```bash
 gh release create v1.0.0 --notes "Release notes" sbom.json
 ```

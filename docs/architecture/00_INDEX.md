@@ -15,22 +15,22 @@ New to the codebase? Start here:
 
 ### Core Architecture
 
-| Document | Purpose | When to Read |
-|----------|---------|--------------|
-| [10_OVERVIEW.md](./10_OVERVIEW.md) | High-level system design | First time orientation |
-| [20_RUNTIME_TOPOLOGY.md](./20_RUNTIME_TOPOLOGY.md) | Deployment & environments | Setting up dev environment |
-| [30_MODULES_AND_DEPENDENCIES.md](./30_MODULES_AND_DEPENDENCIES.md) | Module structure & rules | Before adding new features |
-| [40_KEY_FLOWS.md](./40_KEY_FLOWS.md) | Critical application flows | Understanding user journeys |
-| [90_GLOSSARY.md](./90_GLOSSARY.md) | Terms & definitions | Reference as needed |
+| Document                                                           | Purpose                    | When to Read                |
+| ------------------------------------------------------------------ | -------------------------- | --------------------------- |
+| [10_OVERVIEW.md](./10_OVERVIEW.md)                                 | High-level system design   | First time orientation      |
+| [20_RUNTIME_TOPOLOGY.md](./20_RUNTIME_TOPOLOGY.md)                 | Deployment & environments  | Setting up dev environment  |
+| [30_MODULES_AND_DEPENDENCIES.md](./30_MODULES_AND_DEPENDENCIES.md) | Module structure & rules   | Before adding new features  |
+| [40_KEY_FLOWS.md](./40_KEY_FLOWS.md)                               | Critical application flows | Understanding user journeys |
+| [90_GLOSSARY.md](./90_GLOSSARY.md)                                 | Terms & definitions        | Reference as needed         |
 
 ### Deep Dive Documentation
 
-| Document | Purpose |
-|----------|---------|
-| [Data Documentation](../data/00_INDEX.md) | Database schema, migrations, storage |
-| [API Documentation](../api/00_INDEX.md) | REST API design and conventions |
+| Document                                    | Purpose                               |
+| ------------------------------------------- | ------------------------------------- |
+| [Data Documentation](../data/00_INDEX.md)   | Database schema, migrations, storage  |
+| [API Documentation](../api/00_INDEX.md)     | REST API design and conventions       |
 | [Integrations](../integrations/00_INDEX.md) | Third-party services & authentication |
-| [ADR](../adr/README.md) | Architecture Decision Records |
+| [ADR](../adr/README.md)                     | Architecture Decision Records         |
 
 ## Quick Reference
 
@@ -83,6 +83,7 @@ See [90_GLOSSARY.md](./90_GLOSSARY.md) for complete definitions.
 ## Maintenance
 
 **When code changes, update docs:**
+
 - New feature → Update [40_KEY_FLOWS.md](./40_KEY_FLOWS.md)
 - New module/folder → Update [30_MODULES_AND_DEPENDENCIES.md](./30_MODULES_AND_DEPENDENCIES.md)
 - API changes → Update [../api/00_INDEX.md](../api/00_INDEX.md)
@@ -92,6 +93,7 @@ See [90_GLOSSARY.md](./90_GLOSSARY.md) for complete definitions.
 ## Evidence
 
 This documentation set is based on:
+
 - Repository structure at `/` (89 source files analyzed)
 - [replit.md](../../replit.md) - Existing architecture documentation
 - [package.json](../../package.json) - Dependencies and scripts

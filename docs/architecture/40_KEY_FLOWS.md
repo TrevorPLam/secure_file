@@ -7,6 +7,7 @@
 This document describes the **6 critical flows** in CloudVault that every developer should understand.
 
 **Reading guide**: Each flow includes:
+
 - **Trigger**: What starts the flow
 - **Steps**: Numbered sequence through system layers
 - **Modules Touched**: Code locations
@@ -24,36 +25,36 @@ User clicks "Sign in with Replit" on landing page.
 ```
 1. User clicks login button
    → client/src/pages/landing.tsx
-   
+
 2. Browser redirected to Replit Auth OIDC endpoint
    → server/replit_integrations/auth/setup.ts (Passport strategy)
-   
+
 3. User authenticates on Replit
    → External (Replit Auth service)
-   
+
 4. Replit redirects back with authorization code
    → /auth/callback
-   
+
 5. Server exchanges code for ID token
    → server/replit_integrations/auth/setup.ts (OpenIDConnectStrategy)
-   
+
 6. Server validates token and extracts claims (sub, name, email)
    → Passport.js verify callback
-   
+
 7. Server upserts user to database
    → server/replit_integrations/auth/user.ts (upsertUser)
    → shared/schema.ts (users table)
-   
+
 8. Server creates session in PostgreSQL
    → express-session with connect-pg-simple
    → shared/schema.ts (sessions table)
-   
+
 9. Server sets session cookie
    → express-session middleware
-   
+
 10. Browser redirected to dashboard
     → client/src/App.tsx (AuthenticatedApp)
-    
+
 11. Client fetches user info
     → client/src/hooks/use-auth.ts (useAuth hook)
     → GET /api/user
@@ -70,12 +71,12 @@ User clicks "Sign in with Replit" on landing page.
 
 ### Failure Modes
 
-| Error | Cause | Symptom | Fix |
-|-------|-------|---------|-----|
-| "OIDC discovery failed" | Wrong ISSUER_URL | Server won't start | Check environment variable |
-| "Session not found" | Session expired/cleared | Redirected to login | User must re-authenticate |
-| "Unauthorized" | Missing session cookie | API returns 401 | Check cookie settings |
-| "User not found" | Database insert failed | Auth succeeds but no user | Check DATABASE_URL |
+| Error                   | Cause                   | Symptom                   | Fix                        |
+| ----------------------- | ----------------------- | ------------------------- | -------------------------- |
+| "OIDC discovery failed" | Wrong ISSUER_URL        | Server won't start        | Check environment variable |
+| "Session not found"     | Session expired/cleared | Redirected to login       | User must re-authenticate  |
+| "Unauthorized"          | Missing session cookie  | API returns 401           | Check cookie settings      |
+| "User not found"        | Database insert failed  | Auth succeeds but no user | Check DATABASE_URL         |
 
 ### Validation Tips
 
@@ -106,42 +107,42 @@ User drags file into upload dialog on dashboard.
 ```
 1. User selects file in Uppy dialog
    → client/src/components/FileUpload.tsx (Uppy Dashboard)
-   
+
 2. Client requests presigned upload URL
    → POST /api/storage/presigned-url
    → server/replit_integrations/object_storage/routes.ts
-   
+
 3. Server validates user authentication
    → isAuthenticated middleware
-   
+
 4. Server generates presigned URL from Google Cloud Storage
    → server/replit_integrations/object_storage/service.ts (getPresignedUploadUrl)
-   
+
 5. Server returns presigned URL + objectPath
    → Response: { presignedUrl, objectPath }
-   
+
 6. Client uploads file directly to Google Cloud Storage
    → Uppy @uppy/aws-s3 plugin (uses presigned URL)
    → Bypasses server for data transfer
-   
+
 7. Upload completes, client notifies server
    → POST /api/files
    → Body: { name, size, mimeType, objectPath, folderId? }
-   
+
 8. Server validates request with Zod schema
    → server/routes.ts (insertFileSchema)
-   
+
 9. Server creates file metadata record
    → server/storage.ts (createFile)
    → INSERT INTO files
-   
+
 10. Server returns file object
     → Response: { id, name, size, ... }
-    
+
 11. Client updates file list cache
     → client/src/hooks/use-upload.ts
     → React Query invalidates /api/files query
-    
+
 12. UI shows new file in folder
     → client/src/pages/dashboard.tsx (file table re-renders)
 ```
@@ -158,12 +159,12 @@ User drags file into upload dialog on dashboard.
 
 ### Failure Modes
 
-| Error | Cause | Symptom | Fix |
-|-------|-------|---------|-----|
-| "Failed to get presigned URL" | GCS credentials missing | Upload fails immediately | Check REPL_ID and GCS setup |
-| "Upload to storage failed" | Network error or expired URL | Upload progress stops | Retry upload |
-| "File not found in storage" | Client didn't upload | POST /api/files returns 500 | Check objectPath exists in GCS |
-| "Duplicate file name" | File name conflict | No error (allowed) | Files can have same name |
+| Error                         | Cause                        | Symptom                     | Fix                            |
+| ----------------------------- | ---------------------------- | --------------------------- | ------------------------------ |
+| "Failed to get presigned URL" | GCS credentials missing      | Upload fails immediately    | Check REPL_ID and GCS setup    |
+| "Upload to storage failed"    | Network error or expired URL | Upload progress stops       | Retry upload                   |
+| "File not found in storage"   | Client didn't upload         | POST /api/files returns 500 | Check objectPath exists in GCS |
+| "Duplicate file name"         | File name conflict           | No error (allowed)          | Files can have same name       |
 
 ### Validation Tips
 
@@ -201,41 +202,41 @@ Unauthenticated user visits `/share/:token` URL.
 1. User opens share link in browser
    → https://app.example.com/share/abc123xyz
    → client/src/App.tsx routes to ShareDownloadPage
-   
+
 2. Client fetches share link metadata
    → GET /api/share-links/token/abc123xyz
    → server/routes.ts (public endpoint, no auth required)
-   
+
 3. Server validates token and checks expiration
    → server/storage.ts (getShareLinkByToken)
    → Check: isActive = true, expiresAt > now
-   
+
 4. Server returns share link + file metadata
    → Response: { id, fileId, expiresAt, password?, file: {...} }
-   
+
 5. If password protected, show password prompt
    → client/src/pages/share-download.tsx (password form)
-   
+
 6. User enters password (if required)
    → Client submits password
-   
+
 7. Client requests download URL
    → POST /api/share-links/:token/download
    → Body: { password? }
-   
+
 8. Server validates password (if set)
    → server/routes.ts (bcrypt.compare)
-   
+
 9. Server generates presigned download URL
    → server/replit_integrations/object_storage/service.ts (getPresignedDownloadUrl)
-   
+
 10. Server increments download count
     → server/storage.ts (incrementDownloadCount)
     → UPDATE share_links SET download_count = download_count + 1
-    
+
 11. Server returns presigned download URL
     → Response: { downloadUrl }
-    
+
 12. Client auto-downloads file
     → window.location.href = downloadUrl (browser downloads file)
 ```
@@ -250,13 +251,13 @@ Unauthenticated user visits `/share/:token` URL.
 
 ### Failure Modes
 
-| Error | Cause | Symptom | Fix |
-|-------|-------|---------|-----|
-| "Share link not found" | Invalid token | 404 error page | Check token in URL |
-| "Link expired" | expiresAt < now | Error message | Create new share link |
-| "Invalid password" | Wrong password | "Incorrect password" | Retry with correct password |
-| "Link inactive" | isActive = false | 404 or error | Owner deactivated link |
-| "Download failed" | GCS presigned URL expired | Browser error | Retry (new URL generated) |
+| Error                  | Cause                     | Symptom              | Fix                         |
+| ---------------------- | ------------------------- | -------------------- | --------------------------- |
+| "Share link not found" | Invalid token             | 404 error page       | Check token in URL          |
+| "Link expired"         | expiresAt < now           | Error message        | Create new share link       |
+| "Invalid password"     | Wrong password            | "Incorrect password" | Retry with correct password |
+| "Link inactive"        | isActive = false          | 404 or error         | Owner deactivated link      |
+| "Download failed"      | GCS presigned URL expired | Browser error        | Retry (new URL generated)   |
 
 ### Validation Tips
 
@@ -291,37 +292,37 @@ User clicks on folder in dashboard.
 ```
 1. User clicks folder name
    → client/src/pages/dashboard.tsx (FolderTree or file list)
-   
+
 2. Client updates current folder state
    → Local state (useState or React Query param)
-   
+
 3. Client fetches subfolders
    → GET /api/folders?parentId=<folder-id>
    → server/routes.ts
-   
+
 4. Server validates user owns parent folder
    → Implicit via userId filter in query
-   
+
 5. Server queries folders table
    → server/storage.ts (getFoldersByParent)
    → SELECT * FROM folders WHERE user_id=... AND parent_id=...
-   
+
 6. Client fetches files in folder
    → GET /api/files?folderId=<folder-id>
    → server/routes.ts
-   
+
 7. Server queries files table
    → server/storage.ts (getFilesByFolder)
    → SELECT * FROM files WHERE user_id=... AND folder_id=...
-   
+
 8. Client fetches folder path (breadcrumbs)
    → GET /api/folders/path/<folder-id>
    → server/routes.ts
-   
+
 9. Server builds path from folder to root
    → server/storage.ts (getFolderPath)
    → Recursive query up parent_id chain
-   
+
 10. Client renders breadcrumbs + folder contents
     → UI updates with new folder/file lists
 ```
@@ -335,11 +336,11 @@ User clicks on folder in dashboard.
 
 ### Failure Modes
 
-| Error | Cause | Symptom | Fix |
-|-------|-------|---------|-----|
-| "Folder not found" | Invalid folderId | Empty list or 404 | Check folder exists |
-| "Not authorized" | User doesn't own folder | 403 error | Check userId match |
-| "Slow query" | Deep folder hierarchy | Breadcrumbs load slowly | Optimize getFolderPath (use CTE) |
+| Error              | Cause                   | Symptom                 | Fix                              |
+| ------------------ | ----------------------- | ----------------------- | -------------------------------- |
+| "Folder not found" | Invalid folderId        | Empty list or 404       | Check folder exists              |
+| "Not authorized"   | User doesn't own folder | 403 error               | Check userId match               |
+| "Slow query"       | Deep folder hierarchy   | Breadcrumbs load slowly | Optimize getFolderPath (use CTE) |
 
 ### Validation Tips
 
@@ -375,39 +376,39 @@ User clicks delete button on folder.
 ```
 1. User confirms deletion in dialog
    → client/src/pages/dashboard.tsx (AlertDialog confirmation)
-   
+
 2. Client sends delete request
    → DELETE /api/folders/<folder-id>
    → server/routes.ts
-   
+
 3. Server validates user owns folder
    → Implicit via userId in deleteFolder call
-   
+
 4. Server begins recursive cascade deletion
    → server/storage.ts (deleteFolder)
-   
+
 5. Server queries all child folders
    → SELECT * FROM folders WHERE parent_id=<folder-id>
-   
+
 6. For each child folder, recursively call deleteFolder
    → Depth-first traversal of folder tree
-   
+
 7. Server queries all files in folder
    → SELECT * FROM files WHERE folder_id=<folder-id>
-   
+
 8. For each file:
    a. Delete all share links
       → DELETE FROM share_links WHERE file_id=<file-id>
    b. Delete file metadata
       → DELETE FROM files WHERE id=<file-id>
    c. (Note: File blob in GCS not deleted - orphaned)
-   
+
 9. Server deletes folder itself
    → DELETE FROM folders WHERE id=<folder-id> AND user_id=<user-id>
-   
+
 10. Client invalidates folder/file queries
     → React Query cache cleared
-    
+
 11. UI updates to show folder gone
     → Folder tree and file list re-render
 ```
@@ -420,12 +421,12 @@ User clicks delete button on folder.
 
 ### Failure Modes
 
-| Error | Cause | Symptom | Fix |
-|-------|-------|---------|-----|
-| "Timeout on large folder" | Too many nested items | 500 error after 30s | Optimize with batch queries |
-| "Orphaned GCS objects" | Blobs not deleted | Storage fills up | Implement GCS cleanup job |
-| "Partial deletion" | Error mid-cascade | Inconsistent state | Use database transactions |
-| "Not authorized" | User doesn't own folder | 403 error | Check folder ownership first |
+| Error                     | Cause                   | Symptom             | Fix                          |
+| ------------------------- | ----------------------- | ------------------- | ---------------------------- |
+| "Timeout on large folder" | Too many nested items   | 500 error after 30s | Optimize with batch queries  |
+| "Orphaned GCS objects"    | Blobs not deleted       | Storage fills up    | Implement GCS cleanup job    |
+| "Partial deletion"        | Error mid-cascade       | Inconsistent state  | Use database transactions    |
+| "Not authorized"          | User doesn't own folder | 403 error           | Check folder ownership first |
 
 ### Validation Tips
 
@@ -458,40 +459,40 @@ User clicks "Share" button on file.
 ```
 1. User opens share dialog
    → client/src/pages/dashboard.tsx (Share dialog)
-   
+
 2. User configures share options
    → Optional: password, expiration date
    → Form inputs in dialog
-   
+
 3. User submits share form
    → Client sends POST request
-   
+
 4. Client sends create share link request
    → POST /api/share-links
    → Body: { fileId, expiresAt?, password? }
-   
+
 5. Server validates request schema
    → server/routes.ts (insertShareLinkSchema)
-   
+
 6. Server hashes password (if provided)
    → bcrypt.hash(password, 10)
-   
+
 7. Server generates cryptographically secure token
    → server/storage.ts (randomBytes(32).toString('hex'))
-   
+
 8. Server creates share link record
    → INSERT INTO share_links
    → Fields: fileId, token, expiresAt?, password? (hashed), isActive=true
-   
+
 9. Server returns share link object
    → Response: { id, token, expiresAt, ... }
-   
+
 10. Client builds shareable URL
     → const shareUrl = `${window.location.origin}/share/${token}`
-    
+
 11. Client shows URL in dialog with copy button
     → User can copy URL to clipboard
-    
+
 12. User shares URL externally
     → Via email, Slack, etc. (outside app)
 ```
@@ -506,12 +507,12 @@ User clicks "Share" button on file.
 
 ### Failure Modes
 
-| Error | Cause | Symptom | Fix |
-|-------|-------|---------|-----|
-| "File not found" | Invalid fileId | 400 error | Check file exists |
-| "Invalid date" | expiresAt in past | 400 error | Validate date is future |
-| "Token collision" | Duplicate random token | Rare (1 in 2^256) | Retry with new token |
-| "Weak password" | No validation | Security risk | Add password strength check |
+| Error             | Cause                  | Symptom           | Fix                         |
+| ----------------- | ---------------------- | ----------------- | --------------------------- |
+| "File not found"  | Invalid fileId         | 400 error         | Check file exists           |
+| "Invalid date"    | expiresAt in past      | 400 error         | Validate date is future     |
+| "Token collision" | Duplicate random token | Rare (1 in 2^256) | Retry with new token        |
+| "Weak password"   | No validation          | Security risk     | Add password strength check |
 
 ### Validation Tips
 
@@ -542,37 +543,41 @@ curl http://localhost:5000/api/share-links?fileId=<file-id> \
 ### Authentication Check
 
 All authenticated flows follow this pattern:
+
 ```typescript
-app.get("/api/resource", isAuthenticated, async (req: any, res) => {
-  const userId = req.user.claims.sub;
+app.get('/api/resource', isAuthenticated, async (req: any, res) => {
+  const userId = req.user.claims.sub
   // Use userId to filter query
-});
+})
 ```
 
 ### Input Validation
 
 All POST/PUT endpoints validate with Zod:
+
 ```typescript
-const data = insertResourceSchema.parse(req.body);
+const data = insertResourceSchema.parse(req.body)
 ```
 
 ### Authorization
 
 Implicit authorization via userId filter:
+
 ```typescript
 // Only returns resources owned by user
-await storage.getResources(userId);
+await storage.getResources(userId)
 ```
 
 ### Error Handling
 
 All routes wrapped in try/catch:
+
 ```typescript
 try {
   // Handler logic
 } catch (error) {
-  console.error("Error:", error);
-  res.status(500).json({ message: "Failed to..." });
+  console.error('Error:', error)
+  res.status(500).json({ message: 'Failed to...' })
 }
 ```
 
