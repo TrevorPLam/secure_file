@@ -1,0 +1,14 @@
+# Default owners for everything
+* @cloudvault-maintainers
+
+# Documentation
+/docs/** @cloudvault-docs
+
+# Security-related files
+/docs/security/** @cloudvault-security
+/server/security.ts @cloudvault-security
+/.github/workflows/security.yml @cloudvault-security
+
+# Testing infrastructure
+/test/** @cloudvault-qa
+/.github/workflows/test-coverage.yml @cloudvault-qa
