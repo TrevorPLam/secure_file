@@ -10,6 +10,8 @@ docs/
 ├── api/             # REST API reference
 ├── data/            # Database schema and storage
 ├── integrations/    # Third-party services
+├── testing/         # Testing strategy and patterns
+├── archive/         # Historical reports and session notes
 └── adr/             # Architecture decision records
 ```
 
@@ -43,6 +45,7 @@ The architecture folder contains the main architectural documentation:
 | [Data](./data/00_INDEX.md) | Database schema, migrations, storage patterns |
 | [API](./api/00_INDEX.md) | REST API endpoints and conventions |
 | [Integrations](./integrations/00_INDEX.md) | Third-party services (Replit Auth, GCS) |
+| [Testing](./testing/00_INDEX.md) | Running tests, coverage, and patterns |
 | [ADR](./adr/README.md) | Architecture decision records |
 
 ## 🎯 Common Tasks
@@ -147,16 +150,16 @@ All documentation in this repository follows these principles:
 
 ### What's Not (Yet) Documented
 
-⚠️ Testing strategy (no tests exist)  
+✅ Testing strategy and patterns  
 ⚠️ CI/CD pipeline (minimal)  
 ⚠️ Monitoring and alerting (not implemented)  
 ⚠️ Disaster recovery procedures  
-⚠️ Performance benchmarks  
+✅ Performance testing setup  
 ⚠️ Security audit results  
 
 ## 📊 Documentation Statistics
 
-- **Total documents**: 10 files
+- **Total documents**: 14 files
 - **Total words**: ~30,000 words
 - **Evidence citations**: 100+ file references
 - **Diagrams**: 3 ASCII diagrams
