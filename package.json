@@ -14,7 +14,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:coverage-fail": "vitest run --coverage --coverage.thresholds.autoUpdate=false",
-    "test:check-focused": "grep -rn '\\.only\\|describe\\.skip\\|it\\.skip\\|test\\.skip' server/ client/src/ && exit 1 || exit 0"
+    "test:check-focused": "grep -E -r -n '\\b(it|test|describe)\\.(only|skip)\\b' server/ client/src/ && exit 1 || exit 0"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.18.0",
