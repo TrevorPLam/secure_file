@@ -92,6 +92,45 @@ CloudVault currently provides:
 
 **Business Value**: Reduces context switching and keeps feedback centralized with files.
 
+### 2.5 Multi-Factor Authentication (MFA)
+**User Story**: As an administrator, I want to require multi-factor authentication for all users so that I can enhance account security and prevent unauthorized access.
+
+**Acceptance Criteria**:
+- 2.5.1 Support TOTP (Time-based One-Time Password) authenticator apps
+- 2.5.2 Support SMS-based 2FA as backup method
+- 2.5.3 Support backup codes for account recovery
+- 2.5.4 Admin can enforce MFA for all users or specific groups
+- 2.5.5 Users can manage their MFA devices in account settings
+- 2.5.6 MFA session management with configurable timeout
+
+**Business Value**: Critical for enterprise security compliance and preventing account takeover attacks.
+
+### 2.6 Advanced Security Controls
+**User Story**: As a security administrator, I want to implement advanced security policies so that I can protect sensitive data and prevent data leaks.
+
+**Acceptance Criteria**:
+- 2.6.1 IP whitelisting for enterprise access control
+- 2.6.2 Device management and approval system
+- 2.6.3 Session timeout and automatic logout policies
+- 2.6.4 Geographic access restrictions (allow/block specific countries)
+- 2.6.5 Anomaly detection for suspicious login patterns
+- 2.6.6 Data loss prevention (DLP) basic patterns for sensitive data
+
+**Business Value**: Essential for enterprise security posture and compliance requirements.
+
+### 2.7 Enterprise Admin Dashboard
+**User Story**: As an IT administrator, I want a centralized dashboard to manage users, security settings, and monitor system health so that I can effectively manage the enterprise deployment.
+
+**Acceptance Criteria**:
+- 2.7.1 User management dashboard with bulk operations
+- 2.7.2 Security policy configuration interface
+- 2.7.3 System health monitoring and alerts
+- 2.7.4 Usage analytics and reporting
+- 2.7.5 Compliance status dashboard
+- 2.7.6 Audit log viewer with advanced filtering
+
+**Business Value**: Provides administrators with tools needed for enterprise management and compliance.
+
 ## 3. High Priority Features (P1 - Should Have)
 
 ### 3.1 Real-time Notifications
@@ -158,6 +197,32 @@ CloudVault currently provides:
 - 3.5.6 Tag management interface (rename, merge, delete tags)
 
 **Business Value**: Enables flexible organization beyond folder hierarchies.
+
+### 3.6 E-Signature Integration
+**User Story**: As a user, I want to send documents for electronic signature so that I can complete agreements without leaving the platform.
+
+**Acceptance Criteria**:
+- 3.6.1 Prepare document with signature fields
+- 3.6.2 Send document to recipients via email
+- 3.6.3 Recipients can sign in browser
+- 3.6.4 Track signature status and send reminders
+- 3.6.5 Legally binding signatures (ESIGN/UETA compliant)
+- 3.6.6 Completed documents stored in CloudVault
+
+**Business Value**: High-value feature for professional services, real estate, legal industries. Reduces workflow friction.
+
+### 3.7 Integration Framework
+**User Story**: As a user, I want to connect CloudVault with other tools I use so that I can streamline my workflow.
+
+**Acceptance Criteria**:
+- 3.7.1 OAuth integration framework
+- 3.7.2 Microsoft 365 integration (OneDrive, Outlook, Teams)
+- 3.7.3 Google Workspace integration (Drive, Gmail, Calendar)
+- 3.7.4 Slack notifications and file sharing
+- 3.7.5 Webhook support for custom integrations
+- 3.7.6 API documentation for third-party developers
+
+**Business Value**: Increases platform stickiness and reduces friction for enterprise adoption.
 
 ## 4. Medium Priority Features (P2 - Nice to Have)
 
@@ -226,35 +291,35 @@ CloudVault currently provides:
 
 **Business Value**: Provides enterprise-grade sharing controls and insights.
 
-## 5. Low Priority Features (P3 - Future Enhancements)
-
-### 5.1 E-Signature Integration
-**User Story**: As a user, I want to send documents for electronic signature so that I can complete agreements without leaving the platform.
-
-**Acceptance Criteria**:
-- 5.1.1 Prepare document with signature fields
-- 5.1.2 Send document to recipients via email
-- 5.1.3 Recipients can sign in browser
-- 5.1.4 Track signature status
-- 5.1.5 Legally binding signatures (ESIGN/UETA compliant)
-- 5.1.6 Completed documents stored in CloudVault
-
-**Business Value**: High-value feature for professional services, real estate, legal industries.
-
-### 5.2 Workflow Automation
+### 4.6 Workflow Automation
 **User Story**: As a power user, I want to automate repetitive tasks so that I can save time and reduce errors.
 
 **Acceptance Criteria**:
-- 5.2.1 Visual workflow builder
-- 5.2.2 Triggers: file upload, share link created, etc.
-- 5.2.3 Actions: move file, send notification, create share link
-- 5.2.4 Conditional logic (if/then/else)
-- 5.2.5 Workflow templates for common scenarios
-- 5.2.6 Workflow execution history and logs
+- 4.6.1 Visual workflow builder
+- 4.6.2 Triggers: file upload, share link created, etc.
+- 4.6.3 Actions: move file, send notification, create share link
+- 4.6.4 Conditional logic (if/then/else)
+- 4.6.5 Workflow templates for common scenarios
+- 4.6.6 Workflow execution history and logs
 
 **Business Value**: Differentiator for enterprise customers with complex processes.
 
-### 5.3 AI-Powered Features
+## 5. Low Priority Features (P3 - Future Enhancements)
+
+### 5.1 Virtual Data Room
+**User Story**: As a deal manager, I want a secure space for confidential transactions so that I can control access to sensitive documents.
+
+**Acceptance Criteria**:
+- 5.1.1 Create isolated data rooms with strict access control
+- 5.1.2 Watermarked document viewing
+- 5.1.3 Detailed access analytics per user
+- 5.1.4 Q&A functionality
+- 5.1.5 NDA acceptance before access
+- 5.1.6 Granular permission controls per document
+
+**Business Value**: High-value feature for M&A, fundraising, legal due diligence.
+
+### 5.2 AI-Powered Features
 **User Story**: As a user, I want AI to help me organize and find files so that I can work more efficiently.
 
 **Acceptance Criteria**:
@@ -267,20 +332,7 @@ CloudVault currently provides:
 
 **Business Value**: Modern feature that improves user experience and productivity.
 
-### 5.4 Virtual Data Room
-**User Story**: As a deal manager, I want a secure space for confidential transactions so that I can control access to sensitive documents.
-
-**Acceptance Criteria**:
-- 5.4.1 Create isolated data rooms with strict access control
-- 5.4.2 Watermarked document viewing
-- 5.4.3 Detailed access analytics per user
-- 5.4.4 Q&A functionality
-- 5.4.5 NDA acceptance before access
-- 5.4.6 Granular permission controls per document
-
-**Business Value**: High-value feature for M&A, fundraising, legal due diligence.
-
-### 5.5 Compliance and Retention Policies
+### 5.3 Compliance and Retention Policies
 **User Story**: As a compliance officer, I want to enforce data retention policies so that we meet regulatory requirements.
 
 **Acceptance Criteria**:
@@ -350,29 +402,32 @@ CloudVault currently provides:
 2. Granular Permissions System (2.2)
 3. Activity Audit Logs (2.3)
 4. File Comments (2.4)
+5. Multi-Factor Authentication (2.5)
+6. Advanced Security Controls (2.6)
+7. Enterprise Admin Dashboard (2.7)
 
 ### Phase 2 (Q2 2026) - Collaboration & Productivity
 1. Real-time Notifications (3.1)
 2. Advanced Search (3.2)
 3. File Preview (3.3)
 4. Bulk Operations (3.4)
+5. File Tags and Metadata (3.5)
 
 ### Phase 3 (Q3 2026) - Organization & Teams
-1. File Tags and Metadata (3.5)
-2. Team Workspaces (4.1)
-3. File Request Feature (4.2)
-4. Advanced Share Link Options (4.5)
+1. E-Signature Integration (3.6)
+2. Integration Framework (3.7)
+3. Team Workspaces (4.1)
+4. File Request Feature (4.2)
+5. Advanced Share Link Options (4.5)
 
-### Phase 4 (Q4 2026) - Integrations & Mobile
-1. Integration Framework (4.3)
+### Phase 4 (Q4 2026) - Advanced Features
+1. Workflow Automation (4.6)
 2. Mobile-Responsive Improvements (4.4)
-3. E-Signature Integration (5.1)
 
-### Phase 5 (2027) - Advanced Features
-1. Workflow Automation (5.2)
-2. AI-Powered Features (5.3)
-3. Virtual Data Room (5.4)
-4. Compliance Policies (5.5)
+### Phase 5 (2027) - Future Enhancements
+1. Virtual Data Room (5.1)
+2. AI-Powered Features (5.2)
+3. Compliance and Retention Policies (5.5)
 
 ## 9. Dependencies and Constraints
 

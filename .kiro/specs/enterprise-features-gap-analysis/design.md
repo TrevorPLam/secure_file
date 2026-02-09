@@ -282,6 +282,157 @@ export const fileMetadata = pgTable(
 )
 ```
 
+### 2.10 MFA Devices Table
+```typescript
+export const mfaDevices = pgTable(
+  'mfa_devices',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar('user_id').notNull(),
+    type: varchar('type').notNull(), // 'totp', 'sms'
+    secret: text('secret'), // encrypted TOTP secret or phone number
+    isBackup: boolean('is_backup').default(false),
+    lastUsedAt: timestamp('last_used_at'),
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  table => [
+    index('idx_mfa_devices_user').on(table.userId),
+  ]
+)
+```
+
+### 2.11 Security Policies Table
+```typescript
+export const securityPolicies = pgTable(
+  'security_policies',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar('user_id'), // null for global policies
+    policyType: varchar('policy_type').notNull(), // 'mfa_required', 'ip_whitelist', 'session_timeout'
+    policyValue: text('policy_value').notNull(), // JSON config for policy
+    isActive: boolean('is_active').default(true),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  table => [
+    index('idx_security_policies_type').on(table.policyType),
+    index('idx_security_policies_user').on(table.userId),
+  ]
+)
+```
+
+### 2.12 Integration Connections Table
+```typescript
+export const integrationConnections = pgTable(
+  'integration_connections',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar('user_id').notNull(),
+    integrationType: varchar('integration_type').notNull(), // 'microsoft365', 'google_workspace', 'slack'
+    accessToken: text('access_token'), // encrypted
+    refreshToken: text('refresh_token'), // encrypted
+    expiresAt: timestamp('expires_at'),
+    isActive: boolean('is_active').default(true),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  table => [
+    index('idx_integration_connections_user').on(table.userId),
+    index('idx_integration_connections_type').on(table.integrationType),
+  ]
+)
+```
+
+### 2.13 E-Signature Requests Table
+```typescript
+export const signatureRequests = pgTable(
+  'signature_requests',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    fileId: varchar('file_id').notNull().references(() => files.id, { onDelete: 'cascade' }),
+    requesterId: varchar('requester_id').notNull(),
+    status: varchar('status').notNull(), // 'pending', 'signed', 'declined', 'expired'
+    recipients: text('recipients').notNull(), // JSON array of recipient emails
+    signatureFields: text('signature_fields'), // JSON array of field definitions
+    message: text('message'),
+    expiresAt: timestamp('expires_at'),
+    createdAt: timestamp('created_at').defaultNow(),
+    completedAt: timestamp('completed_at'),
+  },
+  table => [
+    index('idx_signature_requests_file').on(table.fileId),
+    index('idx_signature_requests_requester').on(table.requesterId),
+    index('idx_signature_requests_status').on(table.status),
+  ]
+)
+```
+
+### 2.14 Signature Responses Table
+```typescript
+export const signatureResponses = pgTable(
+  'signature_responses',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    signatureRequestId: varchar('signature_request_id').notNull().references(() => signatureRequests.id, { onDelete: 'cascade' }),
+    recipientId: varchar('recipient_id').notNull(),
+    recipientEmail: varchar('recipient_email').notNull(),
+    signatureData: text('signature_data'), // JSON with signature info
+    ipAddress: varchar('ip_address'),
+    userAgent: text('user_agent'),
+    signedAt: timestamp('signed_at').defaultNow(),
+  },
+  table => [
+    index('idx_signature_responses_request').on(table.signatureRequestId),
+    index('idx_signature_responses_recipient').on(table.recipientEmail),
+  ]
+)
+```
+
+### 2.15 Workflow Definitions Table
+```typescript
+export const workflowDefinitions = pgTable(
+  'workflow_definitions',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    name: text('name').notNull(),
+    description: text('description'),
+    triggerType: varchar('trigger_type').notNull(), // 'file_upload', 'share_created', 'schedule'
+    triggerConfig: text('trigger_config'), // JSON config for trigger
+    actions: text('actions').notNull(), // JSON array of actions
+    isActive: boolean('is_active').default(true),
+    createdBy: varchar('created_by').notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  table => [
+    index('idx_workflow_definitions_trigger').on(table.triggerType),
+    index('idx_workflow_definitions_creator').on(table.createdBy),
+  ]
+)
+```
+
+### 2.16 Workflow Executions Table
+```typescript
+export const workflowExecutions = pgTable(
+  'workflow_executions',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    workflowDefinitionId: varchar('workflow_definition_id').notNull().references(() => workflowDefinitions.id, { onDelete: 'cascade' }),
+    triggerData: text('trigger_data'), // JSON data that triggered workflow
+    status: varchar('status').notNull(), // 'running', 'completed', 'failed'
+    result: text('result'), // JSON result of execution
+    error: text('error'),
+    startedAt: timestamp('started_at').defaultNow(),
+    completedAt: timestamp('completed_at'),
+  },
+  table => [
+    index('idx_workflow_executions_definition').on(table.workflowDefinitionId),
+    index('idx_workflow_executions_status').on(table.status),
+    index('idx_workflow_executions_started').on(table.startedAt),
+  ]
+)
+```
+
 ### 2.9 Schema Migration Strategy
 - Use Drizzle Kit for migrations: `npm run db:push` for development
 - Production migrations via `drizzle-kit generate` and `drizzle-kit migrate`
@@ -861,7 +1012,6 @@ Move multiple files/folders.
   "fileIds": ["uuid1", "uuid2"],
   "folderIds": ["uuid3"],
   "targetFolderId": "uuid4"
-}
 ```
 
 **Implementation Notes**:
@@ -869,6 +1019,356 @@ Move multiple files/folders.
 - Progress tracking via WebSocket or polling
 - Atomic operations where possible (all or nothing)
 - Audit log entries for each item
+
+
+### 3.8 MFA API
+
+#### POST /api/mfa/setup
+Set up multi-factor authentication for user.
+
+**Authorization**: Authenticated user
+
+**Request Body**:
+```json
+{
+  "type": "totp", // or "sms"
+  "secret": "base32-secret", // for TOTP
+  "phoneNumber": "+1234567890" // for SMS
+}
+```
+
+**Response (201)**:
+```json
+{
+  "qrCode": "data:image/png;base64,...", // TOTP QR code
+  "backupCodes": ["123456", "789012", ...],
+  "message": "MFA setup successful"
+}
+```
+
+#### POST /api/mfa/verify
+Verify MFA code during login.
+
+**Request Body**:
+```json
+{
+  "code": "123456",
+  "mfaToken": "temporary-token"
+}
+```
+
+**Response (200)**:
+```json
+{
+  "verified": true,
+  "message": "MFA verification successful"
+}
+```
+
+#### GET /api/mfa/devices
+List user's MFA devices.
+
+**Authorization**: Authenticated user
+
+**Response (200)**:
+```json
+{
+  "devices": [
+    {
+      "id": "uuid",
+      "type": "totp",
+      "isBackup": false,
+      "lastUsedAt": "2026-01-15T10:30:00Z",
+      "createdAt": "2026-01-10T09:00:00Z"
+    }
+  ]
+}
+```
+
+#### DELETE /api/mfa/devices/:deviceId
+Remove MFA device.
+
+**Authorization**: Authenticated user (device owner)
+
+**Response (200)**:
+```json
+{
+  "message": "MFA device removed successfully"
+}
+```
+
+### 3.9 Security Policies API
+
+#### GET /api/security/policies
+List security policies for user or organization.
+
+**Authorization**: Authenticated user (admin for global policies)
+
+**Response (200)**:
+```json
+{
+  "policies": [
+    {
+      "id": "uuid",
+      "policyType": "mfa_required",
+      "policyValue": {"enabled": true, "exceptions": []},
+      "isActive": true,
+      "createdAt": "2026-01-10T09:00:00Z"
+    }
+  ]
+}
+```
+
+#### PUT /api/security/policies/:policyId
+Update security policy.
+
+**Authorization**: Authenticated user (admin)
+
+**Request Body**:
+```json
+{
+  "policyValue": {"enabled": true, "exceptions": []},
+  "isActive": true
+}
+```
+
+**Response (200)**:
+```json
+{
+  "message": "Security policy updated successfully"
+}
+```
+
+### 3.10 E-Signature API
+
+#### POST /api/signature-requests
+Create signature request for document.
+
+**Authorization**: Authenticated user (must have 'edit' permission on file)
+
+**Request Body**:
+```json
+{
+  "fileId": "uuid",
+  "recipients": ["email@example.com", "user2@example.com"],
+  "signatureFields": [
+    {
+      "type": "signature",
+      "page": 1,
+      "x": 100,
+      "y": 200,
+      "width": 200,
+      "height": 50
+    }
+  ],
+  "message": "Please sign this document",
+  "expiresAt": "2026-02-15T23:59:59Z"
+}
+```
+
+**Response (201)**:
+```json
+{
+  "id": "uuid",
+  "message": "Signature request created successfully",
+  "status": "pending"
+}
+```
+
+#### GET /api/signature-requests
+List user's signature requests.
+
+**Authorization**: Authenticated user
+
+**Response (200)**:
+```json
+{
+  "requests": [
+    {
+      "id": "uuid",
+      "fileId": "uuid",
+      "fileName": "contract.pdf",
+      "status": "pending",
+      "recipients": ["email@example.com"],
+      "createdAt": "2026-01-15T10:30:00Z",
+      "expiresAt": "2026-02-15T23:59:59Z"
+    }
+  ]
+}
+```
+
+#### GET /api/signature-requests/:requestId/sign
+Get signing interface for signature request.
+
+**Authorization**: Public access via signed URL
+
+**Response (200)**:
+```json
+{
+  "request": {
+    "id": "uuid",
+    "fileName": "contract.pdf",
+    "message": "Please sign this document",
+    "signatureFields": [...]
+  },
+  "documentUrl": "https://storage.googleapis.com/...",
+  "recipientEmail": "email@example.com"
+}
+```
+
+#### POST /api/signature-requests/:requestId/sign
+Submit signature for document.
+
+**Request Body**:
+```json
+{
+  "signatureData": {
+    "signature": "data:image/png;base64,...",
+    "typedName": "John Doe",
+    "timestamp": "2026-01-15T10:30:00Z"
+  }
+}
+```
+
+**Response (200)**:
+```json
+{
+  "message": "Signature submitted successfully",
+  "status": "signed"
+}
+```
+
+### 3.11 Integration API
+
+#### GET /api/integrations
+List user's integration connections.
+
+**Authorization**: Authenticated user
+
+**Response (200)**:
+```json
+{
+  "integrations": [
+    {
+      "id": "uuid",
+      "integrationType": "microsoft365",
+      "isActive": true,
+      "connectedAt": "2026-01-10T09:00:00Z",
+      "lastSyncAt": "2026-01-15T10:30:00Z"
+    }
+  ]
+}
+```
+
+#### POST /api/integrations/:type/connect
+Connect to external integration.
+
+**Authorization**: Authenticated user
+
+**Request Body**:
+```json
+{
+  "authCode": "auth-code-from-oauth-flow",
+  "redirectUri": "https://app.cloudvault.com/integrations/callback"
+}
+```
+
+**Response (201)**:
+```json
+{
+  "id": "uuid",
+  "message": "Microsoft 365 connected successfully",
+  "integrationType": "microsoft365"
+}
+```
+
+#### DELETE /api/integrations/:connectionId
+Disconnect integration.
+
+**Authorization**: Authenticated user
+
+**Response (200)**:
+```json
+{
+  "message": "Integration disconnected successfully"
+}
+```
+
+### 3.12 Workflow Automation API
+
+#### GET /api/workflows
+List user's workflow definitions.
+
+**Authorization**: Authenticated user
+
+**Response (200)**:
+```json
+{
+  "workflows": [
+    {
+      "id": "uuid",
+      "name": "File Approval Process",
+      "description": "Automatically approve uploaded files",
+      "triggerType": "file_upload",
+      "isActive": true,
+      "createdAt": "2026-01-10T09:00:00Z"
+    }
+  ]
+}
+```
+
+#### POST /api/workflows
+Create new workflow definition.
+
+**Authorization**: Authenticated user
+
+**Request Body**:
+```json
+{
+  "name": "File Approval Process",
+  "description": "Automatically approve uploaded files",
+  "triggerType": "file_upload",
+  "triggerConfig": {
+    "folderId": "uuid",
+    "fileTypes": ["pdf", "docx"]
+  },
+  "actions": [
+    {
+      "type": "send_notification",
+      "config": {"message": "New file uploaded: {{fileName}}"}
+    }
+  ]
+}
+```
+
+**Response (201)**:
+```json
+{
+  "id": "uuid",
+  "message": "Workflow created successfully"
+}
+```
+
+#### GET /api/workflows/:workflowId/executions
+List workflow execution history.
+
+**Authorization**: Authenticated user (workflow owner)
+
+**Response (200)**:
+```json
+{
+  "executions": [
+    {
+      "id": "uuid",
+      "status": "completed",
+      "triggerData": {"fileName": "contract.pdf"},
+      "result": {"notificationSent": true},
+      "startedAt": "2026-01-15T10:30:00Z",
+      "completedAt": "2026-01-15T10:31:00Z"
+    }
+  ]
+}
+```
 
 
 ## 4. Component Architecture
@@ -1012,13 +1512,11 @@ interface BulkOperationsToolbarProps {
 // - Selection count display
 // - Clear selection button
 // - Progress indicator for async operations
-```
-
-
-### 4.2 Backend Services
-
-#### Version Service
-```typescript
+// - MFA Setup Component
+// client/src/components/MFASetup.tsx
+interface MFASetupProps {
+  userId: string;
+  onSetupComplete: () => void;
 // server/services/versionService.ts
 class VersionService {
   async createVersion(fileId: string, uploadedBy: string): Promise<FileVersion>
@@ -1089,6 +1587,119 @@ class NotificationService {
 // - Queue email notifications (don't block)
 // - Send real-time via WebSocket/SSE
 // - Batch notifications to reduce noise
+```
+
+#### MFA Service
+```typescript
+// server/services/mfaService.ts
+class MFAService {
+  async setupMFA(userId: string, type: 'totp' | 'sms', secret?: string, phoneNumber?: string): Promise<MFADevice>
+  async verifyMFA(userId: string, code: string, mfaToken: string): Promise<boolean>
+  async generateBackupCodes(userId: string): Promise<string[]>
+  async getUserDevices(userId: string): Promise<MFADevice[]>
+  async removeDevice(userId: string, deviceId: string): Promise<void>
+  async validateTOTPSecret(secret: string, token: string): Promise<boolean>
+}
+
+// Implementation Notes:
+// - Generate TOTP secret with crypto library
+// - QR code generation for easy setup
+// - Rate limiting for verification attempts
+// - Encrypt sensitive data in database
+```
+
+#### Security Policies Service
+```typescript
+// server/services/securityPolicyService.ts
+class SecurityPolicyService {
+  async getPolicy(userId: string, policyType: string): Promise<SecurityPolicy | null>
+  async updatePolicy(userId: string, policyType: string, policyValue: any): Promise<SecurityPolicy>
+  async getUserPolicies(userId: string): Promise<SecurityPolicy[]>
+  async getGlobalPolicies(): Promise<SecurityPolicy[]>
+  async validateAccess(userId: string, resourceType: string, resourceId: string): Promise<boolean>
+}
+
+// Implementation Notes:
+// - Policy evaluation engine for access control
+// - Cache policies in Redis for performance
+// - Policy inheritance (global > user > resource)
+// - Audit all policy changes
+```
+
+#### E-Signature Service
+```typescript
+// server/services/signatureService.ts
+class SignatureService {
+  async createSignatureRequest(data: SignatureRequestData): Promise<SignatureRequest>
+  async getSignatureRequests(userId: string): Promise<SignatureRequest[]>
+  async getSigningInterface(requestId: string, recipientEmail: string): Promise<SigningInterface>
+  async submitSignature(requestId: string, signatureData: SignatureData): Promise<void>
+  async sendReminderEmails(requestId: string): Promise<void>
+  async validateSignatureFields(fields: SignatureField[]): Promise<boolean>
+}
+
+// Implementation Notes:
+// - PDF manipulation for signature placement
+// - Email template rendering
+// - Legally compliant signature capture
+// - Audit trail for all signature actions
+```
+
+#### Integration Service
+```typescript
+// server/services/integrationService.ts
+class IntegrationService {
+  async connectIntegration(userId: string, type: string, authCode: string): Promise<IntegrationConnection>
+  async getUserIntegrations(userId: string): Promise<IntegrationConnection[]>
+  async disconnectIntegration(userId: string, connectionId: string): Promise<void>
+  async refreshToken(connectionId: string): Promise<void>
+  async syncData(connectionId: string): Promise<SyncResult>
+  async getOAuthURL(type: string): Promise<string>
+}
+
+// Implementation Notes:
+// - OAuth 2.0 flow implementation
+// - Token encryption and secure storage
+// - Webhook handling for real-time sync
+// - Rate limiting for API calls
+```
+
+#### Workflow Service
+```typescript
+// server/services/workflowService.ts
+class WorkflowService {
+  async createWorkflow(userId: string, workflow: WorkflowDefinition): Promise<WorkflowDefinition>
+  async getUserWorkflows(userId: string): Promise<WorkflowDefinition[]>
+  async executeWorkflow(workflowId: string, triggerData: any): Promise<WorkflowExecution>
+  async getWorkflowExecutions(workflowId: string): Promise<WorkflowExecution[]>
+  async validateWorkflow(workflow: WorkflowDefinition): Promise<ValidationResult>
+  async scheduleWorkflow(workflowId: string, schedule: ScheduleConfig): Promise<void>
+}
+
+// Implementation Notes:
+// - Workflow engine with conditional logic
+// - Action executor with error handling
+// - Trigger detection and processing
+// - Background job execution for long-running workflows
+```
+
+#### Admin Dashboard Service
+```typescript
+// server/services/adminService.ts
+class AdminService {
+  async getUserManagementData(): Promise<UserManagementData>
+  async bulkUserOperation(operation: 'create' | 'update' | 'delete', users: UserData[]): Promise<BulkOperationResult>
+  async getSystemHealth(): Promise<SystemHealth>
+  async getUsageAnalytics(filters: AnalyticsFilters): Promise<UsageAnalytics>
+  async getComplianceStatus(): Promise<ComplianceStatus>
+  async exportAuditLogs(filters: AuditFilters): Promise<string>
+}
+
+// Implementation Notes:
+// - Role-based access control for admin functions
+// - Real-time metrics aggregation
+// - Compliance report generation
+// - Bulk operation optimization
 ```
 
 #### Search Service

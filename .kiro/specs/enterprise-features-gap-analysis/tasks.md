@@ -173,7 +173,254 @@ This implementation plan transforms CloudVault into an enterprise-grade file sha
 
 ---
 
-### 3. Granular Permissions System
+### 3. Multi-Factor Authentication (MFA)
+
+- [ ] 3.1 Create MFA database schema
+  - [ ] 3.1.1 Add mfaDevices table to shared/schema.ts
+    - Define table with id, userId, type, secret, isBackup, lastUsedAt, createdAt
+    - Add indexes on userId
+    - _Requirements: 2.5.1, 2.5.2, 2.5.3, 2.5.4, 2.5.5, 2.5.6_
+
+  - [ ] 3.1.2 Add securityPolicies table to shared/schema.ts
+    - Define table with id, userId, policyType, policyValue, isActive, createdAt, updatedAt
+    - Add indexes on policyType and userId
+    - _Requirements: 2.6.1, 2.6.2, 2.6.3, 2.6.4, 2.6.5, 2.6.6_
+
+  - [ ] 3.1.3 Run database migration
+    - Generate and apply migration for new tables
+    - Test on development database
+    - _Requirements: 2.5.1, 2.6.1_
+
+- [ ] 3.2 Implement MFA service
+  - [ ] 3.2.1 Create server/services/mfaService.ts
+    - Implement setupMFA() method for TOTP/SMS setup
+    - Implement verifyMFA() method for code verification
+    - Implement generateBackupCodes() method
+    - Implement getUserDevices() method
+    - Implement removeDevice() method
+    - Implement validateTOTPSecret() method
+    - _Requirements: 2.5.1, 2.5.2, 2.5.3, 2.5.4, 2.5.5, 2.5.6_
+
+  - [ ] 3.2.2 Write property tests for MFA service
+    - **Property 18: MFA Setup Creates Device**
+    - **Validates: Requirements 2.5.1, 2.5.2**
+
+  - [ ] 3.2.3 Write property test for MFA verification
+    - **Property 19: MFA Verification Validates Codes**
+    - **Validates: Requirements 2.5.1, 2.5.3**
+
+  - [ ] 3.2.4 Write unit tests for MFA service
+    - Test TOTP secret generation
+    - Test backup code generation
+    - Test device management
+    - Test rate limiting
+    - _Requirements: 2.5.1, 2.5.2, 2.5.3, 2.5.4, 2.5.5, 2.5.6_
+
+- [ ] 3.3 Implement MFA API endpoints
+  - [ ] 3.3.1 Add POST /api/mfa/setup endpoint
+    - Implement MFA setup with QR code generation
+    - Support TOTP and SMS setup
+    - Generate backup codes
+    - _Requirements: 2.5.1, 2.5.2, 2.5.6_
+
+  - [ ] 3.3.2 Add POST /api/mfa/verify endpoint
+    - Implement MFA code verification
+    - Rate limiting for verification attempts
+    - _Requirements: 2.5.1, 2.5.3_
+
+  - [ ] 3.3.3 Add GET /api/mfa/devices endpoint
+    - List user's MFA devices
+    - Support device management
+    - _Requirements: 2.5.1, 2.5.4, 2.5.5_
+
+  - [ ] 3.3.4 Add DELETE /api/mfa/devices/:deviceId endpoint
+    - Remove MFA device
+    - Require device ownership
+    - _Requirements: 2.5.1, 2.5.5_
+
+  - [ ] 3.3.5 Write integration tests for MFA API
+    - Test MFA setup flow
+    - Test verification flow
+    - Test device management
+    - Test error handling
+    - _Requirements: 2.5.1, 2.5.2, 2.5.3, 2.5.4, 2.5.5, 2.5.6_
+
+- [ ] 3.4 Create MFA setup UI component
+  - [ ] 3.4.1 Create client/src/components/MFASetup.tsx
+    - TOTP QR code display
+    - Backup codes display
+    - SMS verification option
+    - Setup success confirmation
+    - _Requirements: 2.5.1, 2.5.2, 2.5.3, 2.5.4, 2.5.5, 2.5.6_
+
+  - [ ] 3.4.2 Write component tests for MFASetup
+    - Test QR code generation
+    - Test backup codes display
+    - Test setup flow
+    - _Requirements: 2.5.1, 2.5.2, 2.5.3, 2.5.4, 2.5.5, 2.5.6_
+
+- [ ] 3.5 Checkpoint - MFA Complete
+  - Ensure all MFA tests pass
+  - Verify TOTP setup works
+  - Check SMS verification works
+  - Verify device management
+  - Ask user if questions arise
+
+---
+
+### 4. Advanced Security Controls
+
+- [ ] 4.1 Implement security policies service
+  - [ ] 4.1.1 Extend server/services/securityPolicyService.ts
+    - Implement getPolicy() method
+    - Implement updatePolicy() method
+    - Implement getUserPolicies() method
+    - Implement getGlobalPolicies() method
+    - Implement validateAccess() method
+    - _Requirements: 2.6.1, 2.6.2, 2.6.3, 2.6.4, 2.6.5, 2.6.6_
+
+  - [ ] 4.1.2 Add security policy caching
+    - Cache policies in Redis for performance
+    - Implement cache invalidation
+    - Add cache warming for common policies
+    - _Requirements: Performance optimization_
+
+  - [ ] 4.1.3 Write property tests for security policies
+    - **Property 20: Security Policy Evaluation**
+    - **Validates: Requirements 2.6.1, 2.6.2, 2.6.3**
+
+  - [ ] 4.1.4 Write unit tests for security policies
+    - Test policy inheritance
+    - Test policy caching
+    - Test access validation
+    - _Requirements: 2.6.1, 2.6.2, 2.6.3, 2.6.4, 2.6.5, 2.6.6_
+
+- [ ] 4.2 Implement security policies API
+  - [ ] 4.2.1 Add GET /api/security/policies endpoint
+    - List security policies for user/organization
+    - Support filtering and pagination
+    - _Requirements: 2.6.1, 2.6.2, 2.6.3_
+
+  - [ ] 4.2.2 Add PUT /api/security/policies/:policyId endpoint
+    - Update security policy configuration
+    - Validate policy changes
+    - _Requirements: 2.6.1, 2.6.2, 2.6.3, 2.6.4, 2.6.5, 2.6.6_
+
+  - [ ] 4.2.3 Write integration tests for security policies API
+    - Test policy CRUD operations
+    - Test access control enforcement
+    - Test admin authorization
+    - _Requirements: 2.6.1, 2.6.2, 2.6.3, 2.6.4, 2.6.5, 2.6.6_
+
+- [ ] 4.3 Create security policies UI component
+  - [ ] 4.3.1 Create client/src/components/SecurityPolicies.tsx
+    - Policy configuration interface
+    - MFA requirement toggle
+    - IP whitelist management
+    - Session timeout settings
+    - _Requirements: 2.6.1, 2.6.2, 2.6.3, 2.6.4, 2.6.5, 2.6.6_
+
+  - [ ] 4.3.2 Write component tests for SecurityPolicies
+    - Test policy configuration
+    - Test real-time updates
+    - Test permission validation
+    - _Requirements: 2.6.1, 2.6.2, 2.6.3, 2.6.4, 2.6.5, 2.6.6_
+
+- [ ] 4.4 Checkpoint - Security Controls Complete
+  - Ensure all security control tests pass
+  - Verify policy enforcement works
+  - Check caching improves performance
+  - Ask user if questions arise
+
+---
+
+### 5. Enterprise Admin Dashboard
+
+- [ ] 5.1 Implement admin dashboard service
+  - [ ] 5.1.1 Create server/services/adminService.ts
+    - Implement getUserManagementData() method
+    - Implement bulkUserOperation() method
+    - Implement getSystemHealth() method
+    - Implement getUsageAnalytics() method
+    - Implement getComplianceStatus() method
+    - _Requirements: 2.7.1, 2.7.2, 2.7.3, 2.7.4, 2.7.5, 2.7.6_
+
+  - [ ] 5.1.2 Add real-time metrics aggregation
+    - Implement system health monitoring
+    - Add usage analytics aggregation
+    - Create compliance report generation
+    - _Requirements: Performance optimization_
+
+  - [ ] 5.1.3 Write property tests for admin service
+    - **Property 21: Admin Dashboard Data Accuracy**
+    - **Validates: Requirements 2.7.1, 2.7.2, 2.7.3, 2.7.4, 2.7.5, 2.7.6**
+
+  - [ ] 5.1.4 Write unit tests for admin service
+    - Test user management operations
+    - Test analytics aggregation
+    - Test compliance reporting
+    - _Requirements: 2.7.1, 2.7.2, 2.7.3, 2.7.4, 2.7.5, 2.7.6_
+
+- [ ] 5.2 Implement admin dashboard API
+  - [ ] 5.2.1 Add GET /api/admin/users endpoint
+    - User management with bulk operations
+    - Role-based access control
+    - _Requirements: 2.7.1, 2.7.2_
+
+  - [ ] 5.2.2 Add POST /api/admin/users/bulk endpoint
+    - Bulk user operations (create, update, delete)
+    - Operation progress tracking
+    - _Requirements: 2.7.1, 2.7.2_
+
+  - [ ] 5.2.3 Add GET /api/admin/system-health endpoint
+    - System health monitoring
+    - Performance metrics
+    - Alert configuration
+    - _Requirements: 2.7.3, 2.7.4_
+
+  - [ ] 5.2.4 Add GET /api/admin/analytics endpoint
+    - Usage analytics and reporting
+    - Custom date ranges and filters
+    - Export capabilities
+    - _Requirements: 2.7.4, 2.7.5_
+
+  - [ ] 5.2.5 Add GET /api/admin/compliance endpoint
+    - Compliance status dashboard
+    - Report generation
+    - Audit log access
+    - _Requirements: 2.7.5, 2.7.6_
+
+  - [ ] 5.2.6 Write integration tests for admin API
+    - Test admin authorization
+    - Test bulk operations
+    - Test analytics accuracy
+    - Test compliance reporting
+    - _Requirements: 2.7.1, 2.7.2, 2.7.3, 2.7.4, 2.7.5, 2.7.6_
+
+- [ ] 5.3 Create admin dashboard UI component
+  - [ ] 5.3.1 Create client/src/components/AdminDashboard.tsx
+    - User management interface
+    - Security policy configuration
+    - System health monitoring
+    - Usage analytics dashboard
+    - _Requirements: 2.7.1, 2.7.2, 2.7.3, 2.7.4, 2.7.5, 2.7.6_
+
+  - [ ] 5.3.2 Write component tests for AdminDashboard
+    - Test dashboard rendering
+    - Test admin functionality
+    - Test real-time updates
+    - _Requirements: 2.7.1, 2.7.2, 2.7.3, 2.7.4, 2.7.5, 2.7.6_
+
+- [ ] 5.4 Checkpoint - Admin Dashboard Complete
+  - Ensure all admin dashboard tests pass
+  - Verify user management works
+  - Check analytics are accurate
+  - Verify compliance reporting works
+  - Ask user if questions arise
+
+---
+
+### 6. Granular Permissions System
 
 - [ ] 3.1 Create permissions database schema
   - [ ] 3.1.1 Add permissions table to shared/schema.ts
@@ -303,7 +550,7 @@ This implementation plan transforms CloudVault into an enterprise-grade file sha
     - Test remove permission button works
     - _Requirements: 2.2.3, 2.2.5, 2.2.6_
 
-- [ ] 3.7 Checkpoint - Permissions System Complete
+- [ ] 4.4 Checkpoint - Granular Permissions System Complete
   - Ensure all permission tests pass
   - Verify permission checks work on all file operations
   - Check permission inheritance works correctly
@@ -312,10 +559,10 @@ This implementation plan transforms CloudVault into an enterprise-grade file sha
 
 ---
 
-### 4. Activity Audit Logs
+### 5. Activity Audit Logs
 
-- [ ] 4.1 Create audit logs database schema
-  - [ ] 4.1.1 Add auditLogs table to shared/schema.ts
+- [ ] 5.1 Create audit logs database schema
+  - [ ] 5.1.1 Add auditLogs table to shared/schema.ts
     - Define table with id, userId, action, resourceType, resourceId, metadata, ipAddress, userAgent, createdAt
     - Add indexes on userId, (resourceType, resourceId), createdAt, action
     - Make table append-only (no updates/deletes)
