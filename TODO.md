@@ -77,6 +77,108 @@
 - Legal review (optional but recommended)
 - Project documentation for license reference
 
+- [x] Create LICENSE file with full MIT license text
+- [x] Commit to repository
+
+**Impact:** +2 points in Basics category
+
+---
+
+#### 2. Add ESLint + Prettier (4-8 hours)
+**Current:** 9/10 - Consistent code style without formal linter  
+**Target:** 10/10 - Enforced code style  
+**DIAMOND Reference:** Best Practices #3
+
+**Action:**
+```bash
+npm install --save-dev eslint prettier eslint-config-prettier eslint-plugin-react @typescript-eslint/eslint-plugin @typescript-eslint/parser
+```
+
+**Files to create:**
+- [x] `.eslintrc.json` - ESLint configuration
+- [x] `.prettierrc.json` - Prettier configuration
+- [x] `.eslintignore` - Exclude patterns
+- [x] Add `lint` and `format` scripts to package.json
+- [ ] Add pre-commit hook (optional: husky + lint-staged)
+- [ ] Run `npm run format` to fix existing files *(blocked in this environment until npm registry access allows installing ESLint/Prettier dependencies)*
+- [ ] Add ESLint check to CI/CD (.github/workflows/test-coverage.yml) *(blocked until lint dependencies can be installed and lockfile updated)*
+
+**Impact:** +1 point in Best Practices, prevents future style drift
+
+---
+
+#### 3. Add CODEOWNERS File (15 minutes)
+**Current:** 9/10 - No automatic reviewer assignment  
+**Target:** 10/10 - Clear code ownership  
+**DIAMOND Reference:** Best Practices #8
+
+**Action:**
+```bash
+# Create .github/CODEOWNERS file
+```
+
+**Content:**
+```text
+# Default owners for everything
+* @your-username
+
+# Security-related files
+/docs/security/** @security-team
+/server/security.ts @security-team
+/.github/workflows/security.yml @security-team
+
+# Testing infrastructure
+/test/** @qa-team
+/.github/workflows/test-coverage.yml @qa-team
+
+# Documentation
+/docs/** @docs-team
+```
+
+- [x] Create `.github/CODEOWNERS` file
+- [x] Define ownership for key areas
+- [x] Commit to repository
+
+**Impact:** +1 point in Best Practices, improves review workflow
+
+---
+
+### 🟠 HIGH PRIORITY - Production Readiness (2-4 Weeks)
+
+#### 4. Structured Audit Logging (32 hours / 1 week)
+**Current:** 7/10 - Basic console logging only  
+**Target:** 9/10 - Tamper-proof audit logging  
+**DIAMOND Reference:** Fundamentals #6, Highest Standards #5
+
+**Requirements (From Security Posture Report T-R-01):**
+- [ ] Migrate logs to PostgreSQL (append-only table)
+- [ ] Add cryptographic log signing (HMAC-SHA256 per entry)
+- [ ] Implement log retention policy (1 year minimum)
+- [ ] Create audit events enum (LOGIN, UPLOAD, DOWNLOAD, SHARE_CREATE, etc.)
+- [ ] Log all security-relevant events
+- [ ] Add log query API endpoint (`/api/admin/audit-logs`)
+- [ ] Create admin UI for audit log viewing
+
+**Files to create/modify:**
+- `shared/schema.ts` - Add `audit_logs` table
+- `server/audit-logger.ts` - Logging service with HMAC signing
+- `server/routes.ts` - Integrate audit logging into all endpoints
+- `client/src/pages/admin-audit-logs.tsx` - Admin log viewer
+
+**Impact:** +3 points in Fundamentals, required for SOC 2 compliance
+
+---
+
+#### 5. Deploy Monitoring & Observability (80 hours / 2 weeks)
+**Current:** 6/10 - No monitoring infrastructure  
+**Target:** 9/10 - Full observability stack  
+**DIAMOND Reference:** Highest Standards #5
+
+**Options:**
+- **Option A:** Datadog (Recommended - $15-31/host/month)
+- **Option B:** Self-hosted (Prometheus + Grafana + Loki)
+- **Option C:** AWS CloudWatch (if migrating to AWS)
+
 **Implementation Steps:**
 - [x] Create `LICENSE` file in project root
 - [x] Copy MIT license text with 2026 copyright and CloudVault Contributors
@@ -455,6 +557,7 @@
 **Status:** 🔵 Not Started
 **Agent/Human:** AGENT
 
+<<<<<<< HEAD
 **Acceptance Requirements:**
 - Server fails fast on invalid environment variables with clear error messages
 - All `process.env` usage replaced with validated, typed configuration object
@@ -464,6 +567,12 @@
 - Environment variable validation runs before any other server operations
 - Support for environment-specific configurations (development, staging, production)
 - Automatic environment variable documentation generation
+=======
+- [x] Create `.github/dependabot.yml` file
+- [x] Configure update schedule (weekly recommended)
+- [x] Set PR limits to avoid spam
+- [ ] Add approval workflow in GitHub settings
+>>>>>>> c19e75b7590a3348a340675404c25d1cc8b5e216
 
 **Files to Create/Modify:**
 - Create: `server/config.ts` (configuration validation and management)
@@ -1362,11 +1471,21 @@ describe('Performance Tests', () => {
 
 ### 15. Add Test Coverage Enforcement
 
+<<<<<<< HEAD
 **Task ID:** TASK-015
 **Title:** Add Test Coverage Enforcement
 **Priority:** P2 - CI/CD Quality
 **Status:** 🔵 Not Started
 **Agent/Human:** AGENT
+=======
+**Additions Needed:**
+- [x] Add troubleshooting section to `docs/testing/10_RUNNING_TESTS.md`
+- [x] Create `docs/testing/40_INTEGRATION_TESTS.md`
+- [x] Add more examples to `docs/testing/30_TEST_PATTERNS.md`
+- [x] Document performance testing setup
+- [x] Add CI/CD debugging guide
+- [x] Create test data management guide
+>>>>>>> c19e75b7590a3348a340675404c25d1cc8b5e216
 
 **Acceptance Requirements:**
 - 80% minimum test coverage enforcement with automated CI/CD integration
@@ -1758,6 +1877,7 @@ export default defineConfig({
 - Use appropriate wait strategies to avoid flaky tests
 - Validate E2E tests don't create security vulnerabilities
 
+<<<<<<< HEAD
 **Dependencies:**
 - Playwright testing framework with comprehensive browser support
 - Test environment with sufficient resources and browser installations
@@ -1827,6 +1947,11 @@ export default defineConfig({
 - [ ] Test across browsers (Chrome, Firefox, Safari)
 - [ ] Add mobile viewport testing
 - [ ] Configure CI/CD integration
+=======
+- [x] `allowOnly: false` added to vitest config
+- [x] CI fails if `.only()` or `.skip()` present
+- [x] Pre-commit check script works
+>>>>>>> c19e75b7590a3348a340675404c25d1cc8b5e216
 
 ---
 
@@ -5835,4 +5960,574 @@ Some tasks depend on others:
 
 ---
 
+<<<<<<< HEAD
 _This document serves as the master task list for the CloudVault project. Tasks are prioritized based on business value, security requirements, and user impact. Update this file regularly as tasks are completed and new priorities emerge._
+=======
+## 💰 Cost Summary
+
+| Compliance Framework | Implementation Cost | Audit/Certification Cost | Annual Maintenance | Total Year 1 |
+|---------------------|---------------------|-------------------------|-------------------|--------------|
+| **SOC 2 Type II** | $48,000 | $25,000 (Type I + Type II) | $15,000 | $88,000 |
+| **HIPAA** | $48,000 | $25,000 | $10,000 | $83,000 |
+| **PCI-DSS** | $36,000 | $30,000 (QSA) + $15,000 (ASV scans) | $20,000 | $101,000 |
+| **GDPR** | $24,000 | $5,000 (legal review) | $5,000 | $34,000 |
+| **ISO 27001** | $60,000 | $40,000 | $15,000 | $115,000 |
+| **TOTAL (All)** | **$216,000** | **$140,000** | **$65,000** | **$421,000** |
+
+**Minimum Viable Compliance (SOC 2 Only):** $88,000 Year 1  
+**Recommended for SaaS (SOC 2 + GDPR):** $122,000 Year 1  
+**Healthcare (SOC 2 + HIPAA + GDPR):** $205,000 Year 1  
+**Finance/E-commerce (All):** $421,000 Year 1
+
+**Note:** Costs assume external contractors at $150/hr. In-house development may reduce costs by 30-40%.
+
+---
+
+## 📋 Compliance Checklist (Track Progress)
+
+### SOC 2 Type II
+- [ ] Access controls implemented
+- [ ] Audit logging operational
+- [ ] Change management process documented
+- [ ] Backup/DR tested
+- [ ] Vendor assessments complete
+- [ ] Evidence repository established
+- [ ] Type I audit passed
+- [ ] 3-month control operation period
+- [ ] Type II audit passed
+
+### HIPAA
+- [ ] Risk analysis completed
+- [ ] BAAs executed
+- [ ] PHI encryption verified
+- [ ] Breach notification procedures tested
+- [ ] Workforce training completed
+- [ ] HIPAA audit passed
+
+### PCI-DSS
+- [ ] Network segmentation implemented
+- [ ] Cardholder data encrypted
+- [ ] Quarterly vulnerability scans passing
+- [ ] Annual penetration test passed
+- [ ] QSA audit passed (Level 1-4 depending on transaction volume)
+
+### GDPR
+- [ ] Privacy policy published
+- [ ] Consent management implemented
+- [ ] User rights endpoints operational
+- [ ] DPAs executed
+- [ ] DPIA completed
+- [ ] DPO appointed (if required)
+
+### ISO 27001
+- [ ] ISMS documentation complete
+- [ ] Risk assessment conducted
+- [ ] Internal audit passed
+- [ ] Management review completed
+- [ ] Stage 1 audit passed
+- [ ] Stage 2 audit passed
+- [ ] Certification issued
+
+---
+
+## 🚨 Compliance Blockers
+
+**STOP WORK if you plan to:**
+1. Store Protected Health Information (PHI) → Implement HIPAA first
+2. Process credit card payments → Implement PCI-DSS first
+3. Serve EU customers at scale (>10,000 users) → Implement GDPR first
+4. Sell to enterprise customers → Implement SOC 2 first
+5. Sell to US government → Implement FedRAMP (not covered here)
+
+**You can proceed with MVP if:**
+- ✅ B2B SaaS with non-sensitive data (implement SOC 2 within 12 months)
+- ✅ Consumer app with <1,000 users (implement GDPR basics)
+- ✅ Internal tool (implement basic security, defer certifications)
+
+---
+
+## 📚 Compliance Resources
+
+### SOC 2
+- [AICPA Trust Services Criteria](https://www.aicpa.org/interestareas/frc/assuranceadvisoryservices/aicpasoc2report.html)
+- [Vanta SOC 2 Guide](https://www.vanta.com/products/soc-2)
+- [Drata Compliance Platform](https://drata.com/)
+
+### HIPAA
+- [HHS HIPAA Security Rule](https://www.hhs.gov/hipaa/for-professionals/security/index.html)
+- [HIPAA Journal](https://www.hipaajournal.com/)
+
+### PCI-DSS
+- [PCI Security Standards Council](https://www.pcisecuritystandards.org/)
+- [PCI-DSS v4.0 Requirements](https://listings.pcisecuritystandards.org/documents/PCI_DSS-v4_0.pdf)
+
+### GDPR
+- [ICO GDPR Guide](https://ico.org.uk/for-organisations/guide-to-data-protection/guide-to-the-general-data-protection-regulation-gdpr/)
+- [GDPR.eu](https://gdpr.eu/)
+
+### ISO 27001
+- [ISO 27001:2022 Standard](https://www.iso.org/standard/27001)
+- [BSI ISO 27001 Toolkit](https://www.itgovernance.co.uk/iso27001)
+
+---
+
+## 🤝 Getting Help
+
+### When to Hire Consultants
+- **Audits:** Always hire certified auditors (CPA for SOC 2, QSA for PCI-DSS)
+- **Legal:** Privacy policies, DPAs, BAAs (hire lawyer with compliance expertise)
+- **Implementation:** Consider consultants for Phase 1-2 if lacking internal expertise
+- **DPO:** Can outsource to compliance firm if <250 employees
+
+### Recommended Vendors
+- **Compliance Automation:** Vanta, Drata, Secureframe, Tugboat Logic
+- **SOC 2 Auditors:** Deloitte, PWC, Schellman, A-LIGN
+- **PCI-DSS QSAs:** Coalfire, Trustwave, ControlScan
+- **HIPAA Auditors:** Compliancy Group, HIPAA Secure Now
+
+---
+
+**Questions or need compliance guidance?**
+- Review `docs/security/` for current security posture
+- Consult with legal team before committing to compliance frameworks
+- Consider phased approach: SOC 2 → GDPR → HIPAA/PCI-DSS as needed
+
+**Status Legend:**
+- ✅ Complete
+- 🟡 Partial / In Progress
+- 🔵 Not Started
+- ⚠️ Dependency (requires platform/vendor action)
+---
+
+---
+
+# 🚀 Feature Development Roadmap
+
+**Last Updated:** February 4, 2026  
+**Current Status:** MVP Complete - Core file storage and sharing operational  
+**Source:** Derived from features.md analysis
+
+**Priority Framework:**
+- 🔴 P0: Critical for enterprise sales or user retention
+- 🟠 P1: High user demand, competitive parity
+- 🟡 P2: Nice-to-have, differentiating features
+- 🔵 P3: Advanced features for specific use cases
+
+---
+
+## 🔴 P0 - Critical Path (Next 3 Months)
+
+### **1. Advanced Sharing & Permissions (4-6 weeks)**
+
+**Business Value:** Required for team/enterprise adoption. Current sharing is public-link only.
+
+#### Week 1-2: User-Based Sharing
+- [ ] **Share files to specific users** (not just public links)
+  - Add `share_permissions` table (userId, fileId, role)
+  - Create `/api/shares/users` POST endpoint
+  - UI: User picker component (search by email)
+  - UI: Permissions dropdown (Viewer, Editor, Owner)
+  - Email notifications when shared
+  - **Files:** `shared/schema.ts`, `server/routes.ts`, `client/src/components/ShareDialog.tsx`
+  - **Effort:** 40 hours
+
+#### Week 3-4: Granular Permissions
+- [ ] **Role-based access control (RBAC)**
+  - Viewer: Can view and download
+  - Editor: Can upload, rename, move files
+  - Owner: Can delete and manage permissions
+  - Update all API routes with permission checks
+  - **Files:** `server/routes.ts`, `server/storage.ts`
+  - **Effort:** 32 hours
+
+- [ ] **Folder-level permissions**
+  - Inherit permissions from parent folder
+  - Override permissions for subfolders
+  - UI: Permissions panel in folder properties
+  - **Effort:** 24 hours
+
+#### Week 5-6: Advanced Share Features
+- [ ] **View-only links** (download disabled)
+  - Add `allowDownload` flag to share links
+  - Update share page to hide download button
+  - **Effort:** 8 hours
+
+- [ ] **Track link views** (not just downloads)
+  - Add `viewCount` column to `share_links` table
+  - Log view events in separate table for analytics
+  - UI: Show view count in share management
+  - **Effort:** 12 hours
+
+- [ ] **Domain-restricted sharing**
+  - Add `allowedDomains` field to share links (comma-separated)
+  - Validate user email domain before granting access
+  - UI: Domain whitelist input
+  - **Effort:** 16 hours
+
+---
+
+### **2. Search Functionality (2-3 weeks)**
+
+**Business Value:** Users can't find files at scale. Critical for UX beyond 100 files.
+
+#### Week 1: Basic Search
+- [ ] **Full-text search on file names**
+  - Add PostgreSQL full-text search index (`CREATE INDEX ... USING GIN`)
+  - Create `/api/search` GET endpoint
+  - Query: `SELECT * FROM files WHERE to_tsvector(name) @@ to_tsquery($1)`
+  - UI: Search bar in header with autocomplete
+  - **Files:** `server/routes.ts`, `client/src/components/Header.tsx` (new)
+  - **Effort:** 24 hours
+
+- [ ] **Filter by file type, size, date**
+  - Add query params: `?type=pdf&sizeMin=1000000&dateAfter=2026-01-01`
+  - UI: Filter sidebar component
+  - **Effort:** 16 hours
+
+#### Week 2-3: Advanced Search
+- [ ] **Fuzzy search** (typo tolerance)
+  - Use `pg_trgm` PostgreSQL extension for trigram similarity
+  - Query: `SELECT * FROM files WHERE similarity(name, $1) > 0.3 ORDER BY similarity DESC`
+  - **Effort:** 12 hours
+
+- [ ] **Search in metadata** (MIME type, owner)
+  - Extend full-text index to include metadata fields
+  - **Effort:** 8 hours
+
+- [ ] **Recent activity feed**
+  - Create `/api/activity` endpoint (recent uploads, shares, downloads)
+  - UI: Activity panel on dashboard
+  - **Effort:** 16 hours
+
+---
+
+### **3. Admin Dashboard (2-3 weeks)**
+
+**Business Value:** Required for SaaS operations. Need visibility into users, storage, activity.
+
+#### Week 1-2: User Management
+- [ ] **User management UI**
+  - Create `admin_users` role in database
+  - List all users: `/api/admin/users` GET endpoint
+  - UI: Admin page (`/admin/users`)
+  - Table: Username, email, storage used, last login
+  - Actions: Deactivate, reset password, view files
+  - **Files:** `server/routes.ts`, `client/src/pages/admin.tsx` (new)
+  - **Effort:** 32 hours
+
+- [ ] **Storage analytics dashboard**
+  - Total storage used across all users
+  - Storage by user (top 10 consumers)
+  - Storage trends (daily/weekly/monthly)
+  - Chart: Files uploaded over time
+  - **Library:** recharts or chart.js
+  - **Effort:** 24 hours
+
+#### Week 3: Activity & Alerts
+- [ ] **Activity reporting**
+  - Most active users (uploads, downloads)
+  - Most shared files
+  - Link usage statistics
+  - Export to CSV
+  - **Effort:** 16 hours
+
+- [ ] **Alerts & notifications**
+  - Email alerts for high storage usage (>80% quota)
+  - Alert for suspicious activity (mass downloads)
+  - Webhook support for external monitoring
+  - **Effort:** 20 hours
+
+---
+
+## 🟠 P1 - High Value (Months 4-6)
+
+### **4. PDF Viewer & Basic Tools (3-4 weeks)**
+
+**Business Value:** High user demand. Users currently must download to view PDFs.
+
+#### Week 1-2: PDF Viewer
+- [ ] **In-browser PDF viewer**
+  - Use `react-pdf` or `pdf.js`
+  - Create `/files/:id/view` route
+  - Render PDF in modal or full-page view
+  - Navigation: Next/previous page, zoom
+  - **Files:** `client/src/pages/file-viewer.tsx` (new)
+  - **Effort:** 32 hours
+
+- [ ] **PDF annotations** (comments, highlights)
+  - Use `pdfjs-annotate` library or custom canvas overlay
+  - Save annotations to database (`pdf_annotations` table)
+  - Display saved annotations on reload
+  - **Effort:** 40 hours (complex)
+
+#### Week 3-4: PDF Manipulation
+- [ ] **Merge PDFs**
+  - Server endpoint: POST `/api/pdf/merge` with `fileIds: string[]`
+  - Use `pdf-lib` Node.js library
+  - Return new merged file
+  - **Effort:** 16 hours
+
+- [ ] **Split PDF**
+  - UI: Select page ranges to extract
+  - Endpoint: POST `/api/pdf/split` with `fileId, ranges: [[1,3], [5,7]]`
+  - **Effort:** 16 hours
+
+- [ ] **Rotate pages**
+  - Endpoint: POST `/api/pdf/rotate` with `fileId, pages: [1,3], degrees: 90`
+  - **Effort:** 12 hours
+
+- [ ] **Compress PDF**
+  - Use `ghostscript` or `pdfcpu` via child_process
+  - Reduce file size for large PDFs
+  - **Effort:** 16 hours
+
+---
+
+### **5. File Request Portal (3-4 weeks)**
+
+**Business Value:** Unique differentiator. Competitors: ShareFile, DocSend.
+
+#### Week 1-2: File Drop Links
+- [ ] **Upload-only links** (no auth required)
+  - Create `file_requests` table (id, folderId, token, title, description)
+  - Endpoint: POST `/api/file-requests` (creates request)
+  - Public page: `/request/:token` (upload form)
+  - Uploaded files automatically go to specified folder
+  - **Files:** `shared/schema.ts`, `server/routes.ts`, `client/src/pages/file-request.tsx` (new)
+  - **Effort:** 32 hours
+
+- [ ] **File request forms** (structured intake)
+  - JSON schema: `{ fields: [{ name, required, type: "file" | "text" }] }`
+  - UI: Form builder for admins
+  - Public form renders from schema
+  - **Effort:** 40 hours
+
+#### Week 3-4: Advanced Features
+- [ ] **Intake checklists** (multi-step forms)
+  - Progress indicator: "Step 2 of 4"
+  - Save draft progress (localStorage or server)
+  - **Effort:** 24 hours
+
+- [ ] **Approval workflow**
+  - Admin reviews submitted files
+  - Approve/reject with reasons
+  - Email notifications to submitter
+  - **Effort:** 24 hours
+
+---
+
+### **6. Collaboration Features (4-6 weeks)**
+
+**Business Value:** Required for team productivity. Enable async collaboration.
+
+#### Week 1-2: Comments & Activity
+- [ ] **Comment threads on files**
+  - Create `file_comments` table (id, fileId, userId, text, createdAt)
+  - Endpoint: POST `/api/files/:id/comments`
+  - UI: Comments sidebar on file view page
+  - **Effort:** 32 hours
+
+- [ ] **Mentions** (@user notifications)
+  - Parse `@username` in comments
+  - Send email notification to mentioned user
+  - Highlight mentions in comments
+  - **Effort:** 16 hours
+
+- [ ] **Activity feed inside file**
+  - Show: Uploads, comments, shares, downloads
+  - Real-time updates (WebSocket or polling)
+  - **Effort:** 24 hours
+
+#### Week 3-6: Version Control
+- [ ] **Version history** (track all file changes)
+  - Create `file_versions` table (id, fileId, objectPath, size, version, createdAt)
+  - On file update: Create new version (don't overwrite)
+  - Endpoint: GET `/api/files/:id/versions`
+  - UI: Version history panel
+  - **Effort:** 40 hours
+
+- [ ] **Version restore**
+  - Endpoint: POST `/api/files/:id/restore/:versionId`
+  - Promote old version to current
+  - **Effort:** 12 hours
+
+- [ ] **Version compare** (diff view)
+  - For text files: Show line-by-line diff
+  - For PDFs: Side-by-side page comparison
+  - Use `diff` library for text
+  - **Effort:** 32 hours (complex)
+
+---
+
+## 🟡 P2 - Nice-to-Have (Months 7-12)
+
+### **7. Video & Media Tools (2-3 weeks)**
+
+- [ ] Video preview (HTML5 `<video>` player)
+- [ ] Video transcription (use AssemblyAI or Whisper API)
+- [ ] Frame-accurate commenting (Dropbox Replay-style)
+- [ ] Audio waveform viewer
+- [ ] Thumbnail generation for videos
+
+**Effort:** 80 hours total
+
+---
+
+### **8. Desktop Sync Client (8-12 weeks)**
+
+**High Complexity - Requires separate application**
+
+- [ ] Windows desktop app (Electron or native)
+- [ ] macOS desktop app
+- [ ] Two-way sync engine
+- [ ] Selective sync
+- [ ] Smart Sync (online-only files)
+- [ ] System tray integration
+
+**Effort:** 320+ hours (separate project)
+
+---
+
+### **9. AI-Powered Features (4-6 weeks)**
+
+**Requires OpenAI API or similar**
+
+- [ ] Semantic search ("find contracts related to X")
+- [ ] Auto-tagging (extract keywords from files)
+- [ ] PDF summarization (generate executive summaries)
+- [ ] Auto-name files (based on content)
+- [ ] Smart file categorization
+
+**Effort:** 100-120 hours + API costs
+
+---
+
+### **10. Integrations (2-3 weeks each)**
+
+- [ ] Slack integration (share files to channels)
+- [ ] Outlook/Gmail plugin (save attachments)
+- [ ] Zapier connector (automation)
+- [ ] Webhooks (notify external systems on events)
+- [ ] REST API improvements (public API docs, rate limiting)
+
+**Effort:** 40 hours per integration
+
+---
+
+## 🔵 P3 - Advanced/Niche (Year 2+)
+
+### **11. Scanning & OCR**
+- Requires desktop client + scanner integration
+- OCR processing (Tesseract or cloud OCR API)
+- Document separation (barcode detection)
+
+**Effort:** 200+ hours
+
+---
+
+### **12. Client Portal** (ShareFile-inspired)
+- Custom branding
+- White-label domains
+- E-signature integration (DocuSign API)
+- Client user type (free tier)
+
+**Effort:** 160+ hours
+
+---
+
+### **13. Advanced Security**
+- Encryption at rest (KMS integration)
+- Multi-factor authentication (TOTP)
+- Client-side encryption
+- Hardware security module (HSM)
+
+**Effort:** 120+ hours
+
+---
+
+### **14. Compliance Tools**
+- Retention policies (auto-delete old files)
+- Legal hold (prevent deletion)
+- eDiscovery export
+- Data loss prevention (DLP scanning)
+
+**Effort:** 200+ hours
+
+---
+
+## 📋 Sprint Planning Template
+
+### Example: Sprint 1-2 (Weeks 1-2)
+
+**Goal:** Enable user-based sharing (not just public links)
+
+**Tasks:**
+1. Database: Add `share_permissions` table
+2. Backend: Create `/api/shares/users` endpoint
+3. Backend: Add permission checks to file endpoints
+4. Frontend: User picker component (search by email)
+5. Frontend: Update ShareDialog with user sharing tab
+6. Testing: Unit tests for permissions logic
+7. Documentation: Update API docs
+
+**Acceptance Criteria:**
+- Users can share files to specific user emails
+- Recipients see shared files in their dashboard
+- Permissions are enforced (Viewer can't delete)
+- Email notifications sent on share
+
+---
+
+## 🎯 Quick Wins (Can Complete in 1 Day)
+
+1. **View count tracking** - 8 hours
+2. **Download-only links** - 8 hours  
+3. **File type filters** - 8 hours
+4. **Recent files list** - 8 hours
+5. **Export activity logs to CSV** - 8 hours
+
+---
+
+## 📝 Notes for Implementation
+
+### When Adding New Features
+1. **Update schema first:** Run `npm run db:push` after modifying `shared/schema.ts`
+2. **Write tests:** Aim for 80%+ coverage on new code
+3. **Update docs:** Add to `docs/api/` and `docs/architecture/`
+4. **Security review:** Check authentication, authorization, input validation
+
+### API Design Patterns
+- Use RESTful conventions: `GET /api/resource`, `POST /api/resource`, `DELETE /api/resource/:id`
+- Return consistent error format: `{ error: "message", code: "ERROR_CODE" }`
+- Add rate limiting for public endpoints
+- Validate input with Zod schemas
+
+### UI/UX Best Practices
+- Show loading states (Skeleton components)
+- Display success/error toasts
+- Confirm destructive actions (delete, revoke)
+- Responsive design (mobile-first)
+- Accessibility (ARIA labels, keyboard navigation)
+
+---
+
+## 🔗 Related Documentation
+
+- **Full Feature List:** [features.md](./features.md)
+- **Architecture:** [docs/architecture/](./docs/architecture/)
+- **API Reference:** [docs/api/](./docs/api/)
+- **Testing Todos:** See "Testing & Quality" section above
+- **Compliance Todos:** See "Compliance & Regulatory" section above
+
+---
+
+**Status Legend:**
+- ✅ Complete
+- 🟡 In Progress
+- 🔵 Not Started
+- ⏸️ Blocked/On Hold
+- 🔴 Critical Priority
+- 🟠 High Priority
+- 🟡 Medium Priority
+- 🔵 Low Priority
+>>>>>>> c19e75b7590a3348a340675404c25d1cc8b5e216

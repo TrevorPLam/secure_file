@@ -1,9 +1,9 @@
 node_modules/
 dist/
 build/
+coverage/
 *.log
 .env*
-coverage/
 .nyc_output/
 .cache/
 .temp/

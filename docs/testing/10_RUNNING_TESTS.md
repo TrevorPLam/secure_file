@@ -2,6 +2,13 @@
 
 This guide explains how to run tests in the CloudVault project.
 
+## Metadata
+
+- **Purpose**: Document how to execute tests locally and interpret results.
+- **Inputs**: Local Node.js environment, dependency installation, and optional test filters.
+- **Outputs**: Test results in console output and optional coverage artifacts in `coverage/`.
+- **Invariants**: Commands should not mutate production data; `.only`/`.skip` must be removed before commit.
+
 ## Prerequisites
 
 - Node.js 20+
@@ -18,6 +25,9 @@ npm run test:watch
 
 # Run tests with coverage report
 npm run test:coverage
+
+# Fail CI if focused tests are committed
+npm run test:check-focused
 
 # Run tests with UI (interactive browser interface)
 npm run test:ui
@@ -64,6 +74,33 @@ describe.only('my suite', () => {
 ```
 
 **Remember to remove `.only` before committing!**
+
+## Troubleshooting
+
+### Tests Fail with Missing Environment Variables
+
+Some server tests expect `DATABASE_URL` or `SESSION_SECRET` to be present. Provide temporary values:
+
+```bash
+DATABASE_URL=postgres://localhost:5432/cloudvault SESSION_SECRET=dev_secret npm test
+```
+
+### Coverage Appears Stale
+
+Delete the existing coverage directory and re-run:
+
+```bash
+rm -rf coverage
+npm run test:coverage
+```
+
+### Watch Mode Doesn't React
+
+If the terminal loses file watcher events, restart watch mode:
+
+```bash
+npm run test:watch
+```
 
 ## Understanding Test Output
 

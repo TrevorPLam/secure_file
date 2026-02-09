@@ -2,6 +2,13 @@
 
 Common testing patterns used in the CloudVault project.
 
+## Metadata
+
+- **Purpose**: Provide repeatable testing templates for unit, integration, and UI tests.
+- **Inputs**: Code under test, mocks/stubs, and supporting test utilities.
+- **Outputs**: Deterministic expectations verifying behavior and error handling.
+- **Invariants**: Tests must be isolated, readable, and avoid external side effects.
+
 ## Test Structure
 
 ### Standard Test Template
@@ -158,6 +165,21 @@ testCases.forEach(({ input, expected }) => {
     expect(toUpperCase(input)).toBe(expected)
   })
 })
+```
+
+## Integration Test Pattern
+
+```typescript
+import request from "supertest";
+import { describe, it, expect } from "vitest";
+import { app } from "../server/index";
+
+describe("File routes", () => {
+  it("should reject unauthenticated access", async () => {
+    const response = await request(app).get("/api/files");
+    expect(response.status).toBe(401);
+  });
+});
 ```
 
 ## Anti-Patterns to Avoid
