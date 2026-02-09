@@ -40,6 +40,51 @@ CloudVault currently provides:
 
 ## 2. Critical Missing Features (P0 - Must Have)
 
+### 2.0 AI Document Intelligence
+**User Story**: As a user, I want AI to automatically understand and analyze my documents so that I can find and extract information faster without manual review.
+
+**Acceptance Criteria**:
+- 2.0.1 Auto-summarize uploaded documents (PDF, DOCX, TXT)
+- 2.0.2 Extract key entities (dates, amounts, names, email addresses)
+- 2.0.3 Auto-classify documents by sensitivity level (public/internal/confidential/restricted)
+- 2.0.4 Detect duplicate files using semantic similarity
+- 2.0.5 Provide AI-powered search using natural language ("Find all contracts from Q4 2025")
+- 2.0.6 Generate smart recommendations ("Similar files", "Files you might need")
+- 2.0.7 OCR for scanned documents with text extraction
+- 2.0.8 Auto-tagging based on document content and context
+
+**Business Value**: Critical competitive feature (Box, Dropbox lead here). Increases user productivity 40%+. Enables intelligent data discovery and compliance automation.
+
+### 2.0.1 Data Loss Prevention (DLP)
+**User Story**: As a security administrator, I want to prevent accidental sharing of sensitive data so that I can protect the organization from data leaks and compliance violations.
+
+**Acceptance Criteria**:
+- 2.0.1.1 Define DLP rules with pattern matching (regex, keywords, ML-based)
+- 2.0.1.2 Rules for common patterns (SSN, credit card, API keys, passwords)
+- 2.0.1.3 Block file sharing that matches DLP rules
+- 2.0.1.4 Alert admins on DLP violations with context
+- 2.0.1.5 Allow exceptions/whitelisting by admins
+- 2.0.1.6 Audit trail of DLP events
+- 2.0.1.7 Custom DLP rules per organization/team
+- 2.0.1.8 Disable download for high-risk files
+
+**Business Value**: Essential for regulated industries (healthcare, finance, legal). Required for HIPAA, PCI-DSS, SOC 2 compliance.
+
+### 2.0.2 Device Trust & Conditional Access
+**User Story**: As an IT administrator, I want to enforce conditional access policies so that I can control access based on device trust, location, and file sensitivity.
+
+**Acceptance Criteria**:
+- 2.0.2.1 Create device fingerprint (hardware ID, OS, browser)
+- 2.0.2.2 Admin approval workflow for new devices
+- 2.0.2.3 Require MFA for unrecognized devices
+- 2.0.2.4 Geofencing: restrict access by country or region
+- 2.0.2.5 Time-based access control (business hours only)
+- 2.0.2.6 Risk-based conditional access (impossible travel detection)
+- 2.0.2.7 Remote device wipe capability
+- 2.0.2.8 Device compliance checks (screen lock, antivirus enabled)
+
+**Business Value**: Enterprise security essential. Reduces insider threats and unauthorized access by 60%+.
+
 ### 2.1 File Version Control
 **User Story**: As a user, I want to see previous versions of my files so that I can recover from accidental changes or review edit history.
 
@@ -146,18 +191,22 @@ CloudVault currently provides:
 
 **Business Value**: Improves collaboration efficiency and user engagement.
 
-### 3.2 Advanced Search
+### 3.2 Advanced Search (Enhanced with AI)
 **User Story**: As a user, I want to search files by content, metadata, and tags so that I can quickly find what I need.
 
 **Acceptance Criteria**:
 - 3.2.1 Full-text search across file names and metadata
-- 3.2.2 Filter by file type, date range, size, owner
+- 3.2.2 Filter by file type, date range, size, owner, sensitivity level
 - 3.2.3 Search within folder hierarchies
-- 3.2.4 Save search queries for reuse
+- 3.2.4 Save search queries as smart folders (auto-update)
 - 3.2.5 Search results show relevant context/snippets
 - 3.2.6 Support for advanced operators (AND, OR, NOT, quotes)
+- 3.2.7 Natural language search ("Find my unsigned contracts")
+- 3.2.8 Semantic search (understand intent, not just keywords)
+- 3.2.9 Search suggestions and autocomplete
+- 3.2.10 Recent searches and trending searches
 
-**Business Value**: Critical for productivity as file count grows. Reduces time to find information.
+**Business Value**: Critical for productivity as file count grows. AI-powered search reduces time to find information by 50%+.
 
 ### 3.3 File Preview
 **User Story**: As a user, I want to preview files without downloading them so that I can quickly verify content.
@@ -223,6 +272,20 @@ CloudVault currently provides:
 - 3.7.6 API documentation for third-party developers
 
 **Business Value**: Increases platform stickiness and reduces friction for enterprise adoption.
+
+### 3.8 Real-time Collaboration Enhancements
+**User Story**: As a team member, I want to collaborate on files in real-time with visibility into who's working on what so that I can avoid conflicts and work efficiently.
+
+**Acceptance Criteria**:
+- 3.8.1 File locking during edit (prevent concurrent modifications)
+- 3.8.2 Real-time presence indicators (who's viewing/editing)
+- 3.8.3 Change tracking with detailed audit (who changed what, when)
+- 3.8.4 Diff view showing before/after changes
+- 3.8.5 @mentions with notifications
+- 3.8.6 Approval workflows (route to approver)
+- 3.8.7 Emoji reactions for quick feedback
+
+**Business Value**: Enables asynchronous collaboration, reduces email threads, speeds up approvals.
 
 ## 4. Medium Priority Features (P2 - Nice to Have)
 
@@ -353,6 +416,9 @@ CloudVault currently provides:
 - 6.1.3 Support files up to 5GB
 - 6.1.4 Concurrent user support: 1000+ users
 - 6.1.5 API response time < 500ms (p95)
+- 6.1.6 AI analysis latency < 30 seconds for documents < 50MB
+- 6.1.7 Search results < 2 seconds for queries < 100K documents
+- 6.1.8 WebSocket message latency < 100ms
 
 ### 6.2 Security
 - 6.2.1 End-to-end encryption for files at rest
@@ -397,21 +463,31 @@ CloudVault currently provides:
 
 ## 8. Implementation Priority
 
+### Phase 0 (Q4 2025 - Early 2026) - AI Foundation
+1. AI Document Intelligence (2.0) - Critical foundation for other features
+2. LLM Integration (OpenAI/Anthropic/Google API setup)
+3. Vector Database Setup (pgvector for semantic search)
+4. Document Embedding Generation
+5. Core AI API endpoints
+
 ### Phase 1 (Q1 2026) - Critical Enterprise Features
-1. File Version Control (2.1)
-2. Granular Permissions System (2.2)
-3. Activity Audit Logs (2.3)
-4. File Comments (2.4)
-5. Multi-Factor Authentication (2.5)
-6. Advanced Security Controls (2.6)
-7. Enterprise Admin Dashboard (2.7)
+1. Data Loss Prevention (2.0.1) - Uses AI from Phase 0
+2. Device Trust & Conditional Access (2.0.2)
+3. File Version Control (2.1)
+4. Granular Permissions System (2.2)
+5. Activity Audit Logs (2.3)
+6. File Comments (2.4)
+7. Multi-Factor Authentication (2.5)
+8. Advanced Security Controls (2.6)
+9. Enterprise Admin Dashboard (2.7)
 
 ### Phase 2 (Q2 2026) - Collaboration & Productivity
 1. Real-time Notifications (3.1)
-2. Advanced Search (3.2)
+2. Advanced Search with AI (3.2) - Depends on Phase 0 AI
 3. File Preview (3.3)
 4. Bulk Operations (3.4)
 5. File Tags and Metadata (3.5)
+6. Real-time Collaboration Enhancements (3.8)
 
 ### Phase 3 (Q3 2026) - Organization & Teams
 1. E-Signature Integration (3.6)
@@ -470,7 +546,26 @@ CloudVault currently provides:
 - **Risk**: Enterprise customers require custom features
   - **Mitigation**: Build extensible architecture, plugin system
 
-## 11. Open Questions
+## 11. AI Strategy & Roadmap
+
+### LLM Selection Criteria
+1. **Cost**: Pay-per-call model (not subscriptions)
+2. **Latency**: < 5s for summaries, < 2s for entity extraction
+3. **Accuracy**: 95%+ on common document types
+4. **Privacy**: Option for private deployment
+5. **Capability**: Good at document analysis and entity extraction
+
+**Recommended**: Start with OpenAI GPT-4 for accuracy, migrate to open-source or self-hosted later
+
+### Content Analysis Pipeline
+1. Document upload → Add to processing queue
+2. Extract text (OCR for images)
+3. Generate embeddings (use pgvector)
+4. Run AI analysis (summarize, extract entities, classify)
+5. Cache results in database
+6. Make available for search, recommendations, DLP
+
+## 12. Open Questions
 
 1. Should we support multiple authentication providers (Google, Microsoft, SAML)?
 2. What is the target storage limit per user/organization?
@@ -478,8 +573,12 @@ CloudVault currently provides:
 4. Should we build native mobile apps or focus on PWA?
 5. What is the pricing model for enterprise features?
 6. Do we need on-premise deployment option?
-7. Should we support file locking for concurrent editing?
+7. Should we support file locking for concurrent editing? (Yes - in 3.8)
 8. What level of customization do enterprise customers need?
+9. Which LLM provider should we use for AI features? (OpenAI recommended initially)
+10. Should AI analysis run synchronously or asynchronously?
+11. Do we need SOC 2 Type II certification before GA?
+12. Should we offer a free tier for personal use?
 
 ## 12. References
 

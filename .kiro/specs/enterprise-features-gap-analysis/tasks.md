@@ -16,6 +16,122 @@ This implementation plan transforms CloudVault into an enterprise-grade file sha
 - Search: PostgreSQL full-text search (Phase 1), Elasticsearch (Phase 2+)
 - Caching: Redis for sessions and query caching
 - Testing: fast-check for property-based testing
+- AI/ML: OpenAI GPT-4 (or alternative LLM), pgvector for embeddings
+- Vector Search: PostgreSQL pgvector extension
+- DLP: Custom pattern matching + ML-based detection
+
+---
+
+## Phase 0: AI Foundation & Infrastructure (Weeks 1-4, Late 2025/Early 2026)
+
+**Critical Path**: Must complete before other enterprise features can fully benefit from AI capabilities.
+
+### 0. Infrastructure & AI Setup
+
+- [ ] 0.1 Infrastructure Foundation
+  - [ ] 0.1.1 Set up Redis instance for caching and job queues
+    - Install and configure Redis server
+    - Set up connection pooling
+    - Configure persistence and backup
+    - _Requirements: 6.3.4, AI caching_
+  
+  - [ ] 0.1.2 Configure BullMQ for background job processing
+    - Install BullMQ and dependencies
+    - Create queue manager module
+    - Set up job monitoring dashboard
+    - _Requirements: AI async processing, 6.3.5_
+  
+  - [ ] 0.1.3 Set up test database and test GCS bucket
+    - Create separate test database
+    - Configure test GCS bucket
+    - Add database reset scripts for tests
+    - _Requirements: Testing infrastructure_
+  
+  - [ ] 0.1.4 Install and configure fast-check for property-based testing
+    - Add fast-check dependency
+    - Create test generators for domain objects
+    - Set up test configuration (100 runs minimum)
+    - _Requirements: Testing infrastructure_
+
+- [ ] 0.2 AI/LLM Integration
+  - [ ] 0.2.1 Evaluate and select LLM provider
+    - Compare OpenAI, Anthropic Claude, Google Vertex, open-source options
+    - Criteria: cost, latency, accuracy, privacy
+    - Recommended: OpenAI GPT-4 initially, plan migration path
+    - _Requirements: 2.0_
+  
+  - [ ] 0.2.2 Set up LLM API integration
+    - Add API keys and rate limiting
+    - Implement token counting for cost control
+    - Add retry logic and circuit breaker
+    - _Requirements: 2.0_
+  
+  - [ ] 0.2.3 Create LLM service module
+    - Implement summarization endpoint
+    - Implement entity extraction endpoint
+    - Implement classification endpoint
+    - Add cost tracking and alerting
+    - _Requirements: 2.0_
+  
+  - [ ] 0.2.4 Write integration tests for LLM
+    - Test summarization accuracy
+    - Test entity extraction
+    - Test classification
+    - Test rate limiting and cost controls
+    - _Requirements: 2.0_
+
+- [ ] 0.3 Vector Database Setup (pgvector)
+  - [ ] 0.3.1 Install pgvector PostgreSQL extension
+    - Add pgvector to PostgreSQL
+    - Test vector similarity operations
+    - _Requirements: 3.2, semantic search_
+  
+  - [ ] 0.3.2 Create embedding tables
+    - Add `contentEmbeddings` table
+    - Add `documentAnalyses` table
+    - Create vector similarity indexes (IVFFlat)
+    - _Requirements: 2.0_
+  
+  - [ ] 0.3.3 Implement embedding generation service
+    - Use OpenAI text-embedding-3-small (1536 dims)
+    - Chunk large documents
+    - Implement caching
+    - _Requirements: 2.0_
+  
+  - [ ] 0.3.4 Test vector operations
+    - Test embedding generation
+    - Test similarity searches
+    - Test performance at scale
+    - _Requirements: 3.2_
+
+- [ ] 0.4 Document AI Analysis Service
+  - [ ] 0.4.1 Implement document text extraction
+    - Add PDF text extraction (pdf.js or pdfkit)
+    - Add DOCX extraction (docx library)
+    - Add image OCR (Tesseract.js or cloud API)
+    - Add plain text handling
+    - _Requirements: 2.0_
+  
+  - [ ] 0.4.2 Create AIAnalysisService class
+    - Implement analyzeDocument() method
+    - Implement summarizeText() method
+    - Implement extractEntities() method
+    - Implement classifyDocument() method
+    - Implement findDuplicates() method (using embeddings)
+    - _Requirements: 2.0_
+  
+  - [ ] 0.4.3 Build document analysis background job
+    - Create job processor for document analysis
+    - Add queue-based processing
+    - Implement retry logic
+    - Add progress tracking
+    - _Requirements: 2.0_
+  
+  - [ ] 0.4.4 Write property-based tests for AI service
+    - **Property 48: AI Analysis Idempotency** - Re-running analysis produces same results
+    - **Property 49: Classification Consistency** - Same document always classified same way
+    - **Property 50: Entity Extraction Completeness** - All entities in document are found
+    - _Requirements: 2.0_
 
 ---
 
@@ -326,15 +442,226 @@ This implementation plan transforms CloudVault into an enterprise-grade file sha
     - Test permission validation
     - _Requirements: 2.6.1, 2.6.2, 2.6.3, 2.6.4, 2.6.5, 2.6.6_
 
-- [ ] 4.4 Checkpoint - Security Controls Complete
-  - Ensure all security control tests pass
-  - Verify policy enforcement works
-  - Check caching improves performance
+- [ ] 5.4 Checkpoint - Admin Dashboard Complete
+  - Ensure all admin dashboard tests pass
+  - Verify user management works
+  - Check analytics are accurate
+  - Verify compliance reporting works
   - Ask user if questions arise
 
 ---
 
-### 5. Enterprise Admin Dashboard
+### 5.5 Data Loss Prevention (DLP) - Depends on Phase 0 AI
+
+- [ ] 5.5.1 Create DLP database schema
+  - [ ] 5.5.1.1 Add dlpRules table to shared/schema.ts
+    - Define table with id, organizationId, name, pattern, patternType, severity, action, isActive
+    - Add indexes on organizationId and isActive
+    - _Requirements: 2.0.1_
+  
+  - [ ] 5.5.1.2 Add fileClassifications table to shared/schema.ts
+    - Define table with id, fileId, classification, reason, violatedRules
+    - Add indexes on fileId and classification
+    - _Requirements: 2.0.1_
+  
+  - [ ] 5.5.1.3 Add dlpViolations table to shared/schema.ts
+    - Track DLP violations for audit
+    - Include matched content and admin resolution
+    - _Requirements: 2.0.1_
+  
+  - [ ] 5.5.1.4 Run database migration
+    - Generate and apply migration
+    - Test on development database
+    - _Requirements: 2.0.1_
+
+- [ ] 5.5.2 Implement DLP Service
+  - [ ] 5.5.2.1 Create server/services/dlpService.ts
+    - Implement scanFile() method
+    - Implement matchRule() method (regex, keyword, ML-based)
+    - Implement getViolations() method
+    - Integrate AI classification from Phase 0
+    - _Requirements: 2.0.1_
+  
+  - [ ] 5.5.2.2 Write property tests for DLP
+    - **Property 51: DLP Rule Matching** - Rules consistently match sensitive patterns
+    - **Property 52: DLP Violation Logging** - All violations are recorded
+    - **Property 53: DLP Action Enforcement** - Blocked files cannot be shared
+    - _Requirements: 2.0.1_
+  
+  - [ ] 5.5.2.3 Write unit tests for DLP service
+    - Test regex pattern matching
+    - Test keyword matching
+    - Test AI-based detection
+    - Test action enforcement
+    - _Requirements: 2.0.1_
+
+- [ ] 5.5.3 Implement DLP API endpoints
+  - [ ] 5.5.3.1 Add GET /api/dlp/rules endpoint
+    - List DLP rules for organization
+    - Require admin auth
+    - _Requirements: 2.0.1_
+  
+  - [ ] 5.5.3.2 Add POST /api/dlp/rules endpoint
+    - Create new DLP rule
+    - Validate pattern syntax
+    - Require admin auth
+    - _Requirements: 2.0.1_
+  
+  - [ ] 5.5.3.3 Add GET /api/files/:fileId/classification endpoint
+    - Get file classification level
+    - Show violated rules
+    - _Requirements: 2.0.1_
+  
+  - [ ] 5.5.3.4 Add PUT /api/files/:fileId/classification endpoint
+    - Manually override classification
+    - Log classification change
+    - _Requirements: 2.0.1_
+  
+  - [ ] 5.5.3.5 Add GET /api/dlp/violations endpoint
+    - Query violations with filters
+    - Admin only
+    - Export capability
+    - _Requirements: 2.0.1_
+  
+  - [ ] 5.5.3.6 Write integration tests for DLP API
+    - Test rule creation and application
+    - Test violation detection
+    - Test classification override
+    - _Requirements: 2.0.1_
+
+- [ ] 5.5.4 Create DLP Admin UI
+  - [ ] 5.5.4.1 Create client/src/components/DLPManager.tsx
+    - Rule creation and management
+    - Violation monitoring dashboard
+    - Classification override interface
+    - _Requirements: 2.0.1_
+  
+  - [ ] 5.5.4.2 Write component tests for DLPManager
+    - Test rule creation form
+    - Test violation viewing
+    - _Requirements: 2.0.1_
+
+- [ ] 5.5.5 Checkpoint - DLP Complete
+  - Ensure all DLP tests pass
+  - Verify rules are enforced
+  - Check violations are logged
+  - Verify admin dashboard works
+  - Ask user if questions arise
+
+---
+
+### 5.6 Device Trust & Conditional Access
+
+- [ ] 5.6.1 Create device trust database schema
+  - [ ] 5.6.1.1 Add trustedDevices table to shared/schema.ts
+    - Define table with id, userId, deviceFingerprint, deviceName, osName, browserName, approvedBy, lastUsedAt, isRevoked
+    - Add indexes on userId and deviceFingerprint
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.1.2 Add conditionalAccessPolicies table to shared/schema.ts
+    - Define table with id, organizationId, name, conditions, actions, priority
+    - Add indexes on organizationId and isActive
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.1.3 Add conditionalAccessEvaluations table to shared/schema.ts
+    - Track policy evaluations for audit
+    - Include decision (allow/block/challenge) and challenge type
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.1.4 Run database migration
+    - Generate and apply migration
+    - Test on development database
+    - _Requirements: 2.0.2_
+
+- [ ] 5.6.2 Implement device fingerprinting service
+  - [ ] 5.6.2.1 Create device fingerprinting utility
+    - Extract device properties from request (User-Agent, screen resolution, timezone)
+    - Generate consistent fingerprint hash
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.2.2 Implement trusted device tracking
+    - Store fingerprints for known devices
+    - Support device approval workflow
+    - _Requirements: 2.0.2_
+
+- [ ] 5.6.3 Implement Conditional Access Service
+  - [ ] 5.6.3.1 Create server/services/conditionalAccessService.ts
+    - Implement evaluateAccess() method
+    - Implement policyMatches() method
+    - Support multiple conditions: device trust, location, time, sensitivity
+    - Support actions: require_mfa, block, require_approval
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.3.2 Write property tests for conditional access
+    - **Property 54: Conditional Access Evaluation** - Policies consistently evaluated
+    - **Property 55: Access Decision Consistency** - Same request always gets same decision
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.3.3 Write unit tests for conditional access
+    - Test device trust evaluation
+    - Test location restrictions
+    - Test time-based access
+    - Test risk-based detection
+    - _Requirements: 2.0.2_
+
+- [ ] 5.6.4 Implement Conditional Access API
+  - [ ] 5.6.4.1 Add GET /api/devices endpoint
+    - List user's trusted devices
+    - Show device details and last used time
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.4.2 Add DELETE /api/devices/:deviceId endpoint
+    - Revoke device trust
+    - Invalidate sessions for that device
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.4.3 Add GET /api/security/conditional-access endpoint
+    - List conditional access policies
+    - Admin only
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.4.4 Add POST /api/security/conditional-access endpoint
+    - Create new conditional access policy
+    - Validate policy conditions and actions
+    - Admin only
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.4.5 Write integration tests for device trust API
+    - Test device registration
+    - Test device revocation
+    - Test policy evaluation
+    - _Requirements: 2.0.2_
+
+- [ ] 5.6.5 Create device trust UI
+  - [ ] 5.6.5.1 Create client/src/components/DeviceManager.tsx
+    - List trusted devices
+    - Revoke device button
+    - Device details and last used time
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.5.2 Create conditional access policy UI
+    - Policy creation form
+    - Condition builder (device trust, location, time)
+    - Action selector (MFA, block, approval)
+    - _Requirements: 2.0.2_
+  
+  - [ ] 5.6.5.3 Write component tests for device UI
+    - Test device list rendering
+    - Test revoke functionality
+    - _Requirements: 2.0.2_
+
+- [ ] 5.6.6 Checkpoint - Device Trust Complete
+  - Ensure all device trust tests pass
+  - Verify devices are tracked correctly
+  - Check conditional access policies work
+  - Verify untrusted devices are detected
+  - Ask user if questions arise
+
+---
+
+### 3. Infrastructure Setup (Moved from 1.x)
+
+Note: Infrastructure (Redis, BullMQ, testing setup) is now in Phase 0. This section removed.
 
 - [ ] 5.1 Implement admin dashboard service
   - [ ] 5.1.1 Create server/services/adminService.ts
@@ -929,7 +1256,9 @@ This implementation plan transforms CloudVault into an enterprise-grade file sha
 
 ---
 
-### 7. Advanced Search
+### 7. Advanced Search (Enhanced with AI from Phase 0)
+
+**Dependencies**: Requires Phase 0 AI completion for semantic search using embeddings.
 
 - [ ] 7.1 Add full-text search to database
   - [ ] 7.1.1 Add search_vector column to files table
@@ -948,9 +1277,17 @@ This implementation plan transforms CloudVault into an enterprise-grade file sha
     - _Requirements: 3.2.1_
 
 
-- [ ] 7.2 Implement search service
-  - [ ] 7.2.1 Create server/services/searchService.ts
+- [ ] 7.2 Implement semantic search service (uses embeddings from Phase 0)
+  - [ ] 7.2.1 Create server/services/semanticSearchService.ts
+    - Implement search() method using vector similarity
+    - Implement hybrid search (full-text + semantic)
+    - Use embeddings generated in Phase 0
+    - Filter results by user permissions
+    - _Requirements: 3.2.1, 3.2.7, 3.2.8_
+  
+  - [ ] 7.2.2 Create server/services/searchService.ts
     - Implement search() method with PostgreSQL full-text search
+    - Combine results from semantic and full-text search
     - Implement indexFile() method
     - Implement removeFromIndex() method
     - Implement updateIndex() method
@@ -985,22 +1322,31 @@ This implementation plan transforms CloudVault into an enterprise-grade file sha
     - Test removal on file deletion
     - _Requirements: 3.2.1_
 
-- [ ] 7.4 Implement search API endpoint
+- [ ] 7.4 Implement search API endpoints
   - [ ] 7.4.1 Add GET /api/search endpoint
-    - Implement search with query parameter
-    - Add filters (type, mimeType, tags, size, date range, folder)
+    - Implement full-text search with query parameter
+    - Add filters (type, mimeType, tags, size, date range, folder, sensitivity)
     - Add pagination (limit, offset)
     - Filter results by user permissions
     - Support boolean operators (AND, OR, NOT)
     - _Requirements: 3.2.1, 3.2.2, 3.2.3, 3.2.6_
   
-  - [ ]* 7.4.2 Write integration tests for search API
-    - Test search returns matching files
+  - [ ] 7.4.2 Add GET /api/search/semantic endpoint
+    - Implement natural language semantic search
+    - Use query embeddings from Phase 0
+    - Return results ordered by relevance
+    - Support similar queries suggestions
+    - _Requirements: 3.2.7, 3.2.8_
+  
+  - [ ]* 7.4.3 Write integration tests for search API
+    - Test full-text search returns matching files
+    - Test semantic search returns relevant results
     - Test filters work correctly
     - Test folder-scoped search works
     - Test permission filtering works
     - Test boolean operators work
-    - _Requirements: 3.2.1, 3.2.2, 3.2.3, 3.2.6_
+    - Test hybrid search combines both methods
+    - _Requirements: 3.2.1, 3.2.2, 3.2.3, 3.2.6, 3.2.7, 3.2.8_
 
 
 - [ ] 7.5 Create advanced search UI component

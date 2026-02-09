@@ -388,7 +388,204 @@ export const signatureResponses = pgTable(
 )
 ```
 
-### 2.15 Workflow Definitions Table
+### 2.17 AI Content Analysis Table
+```typescript
+export const documentAnalyses = pgTable(
+  'document_analyses',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    fileId: varchar('file_id').notNull().references(() => files.id, { onDelete: 'cascade' }),
+    summary: text('summary'), // AI-generated summary
+    entities: text('entities'), // JSON array of extracted entities
+    classification: varchar('classification'), // 'public', 'internal', 'confidential', 'restricted'
+    keyTopics: text('key_topics'), // JSON array of detected topics
+    embedding: text('embedding'), // pgvector embedding for semantic search
+    confidence: numeric('confidence', { precision: 3, scale: 2 }), // 0-1 confidence score
+    modelUsed: varchar('model_used'), // 'gpt-4', 'claude', 'llama', etc.
+    processingTimeMs: integer('processing_time_ms'),
+    generatedAt: timestamp('generated_at').defaultNow(),
+    expiresAt: timestamp('expires_at'), // For cache expiration
+  },
+  table => [
+    index('idx_doc_analyses_file').on(table.fileId),
+    index('idx_doc_analyses_classification').on(table.classification),
+    index('idx_doc_analyses_generated').on(table.generatedAt),
+  ]
+)
+```
+
+**Design Notes**:
+- Async processing (don't block file upload)
+- Cache embeddings for semantic search
+- Confidence scores for uncertainty handling
+- Expiration for refreshing stale analyses
+
+### 2.18 DLP Rules and Classifications
+```typescript
+export const dlpRules = pgTable(
+  'dlp_rules',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    organizationId: varchar('organization_id'),
+    name: varchar('name').notNull(), // 'SSN Pattern', 'API Key'
+    pattern: text('pattern').notNull(), // Regex or keyword list
+    patternType: varchar('pattern_type').notNull(), // 'regex', 'keyword', 'ml'
+    severity: varchar('severity').notNull(), // 'block', 'warn', 'log'
+    action: varchar('action').notNull(), // 'block_share', 'require_approval', 'alert'
+    isActive: boolean('is_active').default(true),
+    createdBy: varchar('created_by').notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  table => [
+    index('idx_dlp_rules_org').on(table.organizationId),
+    index('idx_dlp_rules_active').on(table.isActive),
+  ]
+)
+
+export const fileClassifications = pgTable(
+  'file_classifications',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    fileId: varchar('file_id').notNull().references(() => files.id, { onDelete: 'cascade' }),
+    classification: varchar('classification').notNull(), // 'public','internal','confidential','restricted'
+    reason: varchar('reason').notNull(), // 'manual','auto_dlp','auto_ml'
+    setBy: varchar('set_by'), // user ID or 'system'
+    violatedRules: text('violated_rules'), // JSON array of DLP rule IDs that match
+    setAt: timestamp('set_at').defaultNow(),
+  },
+  table => [
+    index('idx_file_classifications_file').on(table.fileId),
+    index('idx_file_classifications_classification').on(table.classification),
+  ]
+)
+
+export const dlpViolations = pgTable(
+  'dlp_violations',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    fileId: varchar('file_id').notNull().references(() => files.id, { onDelete: 'cascade' }),
+    ruleId: varchar('rule_id').notNull().references(() => dlpRules.id),
+    userId: varchar('user_id').notNull(),
+    action: varchar('action').notNull(), // 'share_blocked', 'download_blocked', 'alert_sent'
+    matchedContent: text('matched_content'), // Snippet of matched text
+    metadata: text('metadata'), // JSON with context
+    resolvedAt: timestamp('resolved_at'), // When admin reviewed
+    resolvedBy: varchar('resolved_by'), // Admin who resolved
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  table => [
+    index('idx_dlp_violations_file').on(table.fileId),
+    index('idx_dlp_violations_rule').on(table.ruleId),
+    index('idx_dlp_violations_user').on(table.userId),
+    index('idx_dlp_violations_created').on(table.createdAt),
+  ]
+)
+```
+
+### 2.19 Device Trust and Conditional Access
+```typescript
+export const trustedDevices = pgTable(
+  'trusted_devices',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar('user_id').notNull(),
+    deviceFingerprint: varchar('device_fingerprint').notNull(), // Hash of device properties
+    deviceName: varchar('device_name'), // User-friendly name
+    deviceType: varchar('device_type'), // 'desktop', 'mobile', 'tablet'
+    osName: varchar('os_name'), // 'Windows', 'macOS', 'iOS', 'Android'
+    browserName: varchar('browser_name'), // 'Chrome', 'Safari', etc.
+    approvedBy: varchar('approved_by'), // User or admin ID
+    lastUsedAt: timestamp('last_used_at'),
+    isRevoked: boolean('is_revoked').default(false),
+    revokedAt: timestamp('revoked_at'),
+    revokedBy: varchar('revoked_by'),
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  table => [
+    index('idx_trusted_devices_user').on(table.userId),
+    index('idx_trusted_devices_fingerprint').on(table.deviceFingerprint),
+  ]
+)
+
+export const conditionalAccessPolicies = pgTable(
+  'conditional_access_policies',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    organizationId: varchar('organization_id'),
+    name: varchar('name').notNull(),
+    description: text('description'),
+    conditions: text('conditions').notNull(), // JSON: device_trust, location, time, sensitivity
+    actions: text('actions').notNull(), // JSON: require_mfa, block, require_approval
+    priority: integer('priority'), // Lower number = higher priority
+    isActive: boolean('is_active').default(true),
+    createdBy: varchar('created_by').notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  table => [
+    index('idx_cond_access_policies_org').on(table.organizationId),
+    index('idx_cond_access_policies_active').on(table.isActive),
+    index('idx_cond_access_policies_priority').on(table.priority),
+  ]
+)
+
+export const conditionalAccessEvaluations = pgTable(
+  'conditional_access_evaluations',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar('user_id').notNull(),
+    action: varchar('action').notNull(), // 'file_access', 'download', 'share'
+    resourceId: varchar('resource_id'),
+    evaluatedPolicies: text('evaluated_policies'), // JSON array of policy IDs checked
+    matchedPolicies: text('matched_policies'), // JSON array of policies that matched
+    decision: varchar('decision').notNull(), // 'allow', 'block', 'challenge'
+    challengeType: varchar('challenge_type'), // 'mfa', 'approval', null
+    metadata: text('metadata'), // JSON with context (IP, device, location, etc)
+    evaluatedAt: timestamp('evaluated_at').defaultNow(),
+  },
+  table => [
+    index('idx_cond_access_eval_user').on(table.userId),
+    index('idx_cond_access_eval_decision').on(table.decision),
+    index('idx_cond_access_eval_evaluated').on(table.evaluatedAt),
+  ]
+)
+```
+
+**Design Notes**:
+- Device fingerprinting based on browser/OS/hardware properties
+- Conditional access policies evaluated on every sensitive action
+- Challenge types: MFA (2FA required), approval (admin approval needed), block
+- Evaluation log for security auditing
+
+### 2.20 Content Embeddings for Semantic Search
+```typescript
+export const contentEmbeddings = pgTable(
+  'content_embeddings',
+  {
+    id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
+    fileId: varchar('file_id').notNull().references(() => files.id, { onDelete: 'cascade' }),
+    chunkIndex: integer('chunk_index'), // For large docs split into chunks
+    content: text('content'), // Original text chunk
+    embedding: vector('embedding', { dimensions: 1536 }), // pgvector (OpenAI: 1536 dimensions)
+    embeddingModel: varchar('embedding_model'), // 'text-embedding-3-small', etc.
+    metadata: text('metadata'), // JSON with page/section info
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  table => [
+    index('idx_content_embeddings_file').on(table.fileId),
+    index('idx_content_embeddings_embedding', 'ivfflat', { with: 'vector_cosine_ops' }), // Vector similarity index
+  ]
+)
+```
+
+**Design Notes**:
+- Split large documents into chunks for better accuracy
+- Use IVFFlat index for approximate nearest neighbor search
+- Cosine similarity for semantic matching
+- Embeddings cached and reused
+
+
 ```typescript
 export const workflowDefinitions = pgTable(
   'workflow_definitions',
@@ -1238,9 +1435,267 @@ Submit signature for document.
 }
 ```
 
-### 3.11 Integration API
+#### POST /api/files/:fileId/analyze
+Trigger AI analysis of document.
 
-#### GET /api/integrations
+**Authorization**: Authenticated user (must have 'view' permission)
+
+**Response (202)**:
+```json
+{
+  "jobId": "uuid",
+  "status": "queued",
+  "message": "Analysis started"
+}
+```
+
+#### GET /api/files/:fileId/analysis
+Get AI analysis results for document.
+
+**Authorization**: Authenticated user (must have 'view' permission)
+
+**Response (200)**:
+```json
+{
+  "summary": "This is a Q4 2025 financial report showing revenue growth...",
+  "entities": [
+    {"type": "date", "value": "2025-12-31", "confidence": 0.99},
+    {"type": "amount", "value": "$5.2M", "confidence": 0.95},
+    {"type": "person", "value": "John Smith", "confidence": 0.87}
+  ],
+  "keyTopics": ["finance", "growth", "quarterly"],
+  "classification": "internal",
+  "generatedAt": "2026-01-15T10:30:00Z"
+}
+```
+
+#### GET /api/files/:fileId/duplicates
+Find duplicate/similar files using semantic search.
+
+**Authorization**: Authenticated user
+
+**Query Parameters**:
+- `threshold`: Similarity threshold (0-1, default 0.8)
+
+**Response (200)**:
+```json
+{
+  "duplicates": [
+    {
+      "id": "uuid",
+      "name": "Q4_Report_Draft.pdf",
+      "similarity": 0.92
+    },
+    {
+      "id": "uuid",
+      "name": "Q4_Report_Final.pdf",
+      "similarity": 0.88
+    }
+  ]
+}
+```
+
+### 3.13 DLP & Content Classification API
+
+#### GET /api/dlp/rules
+List DLP rules for organization.
+
+**Authorization**: Admin only
+
+**Response (200)**:
+```json
+{
+  "rules": [
+    {
+      "id": "uuid",
+      "name": "SSN Pattern",
+      "pattern": "\\d{3}-\\d{2}-\\d{4}",
+      "severity": "block",
+      "action": "block_share",
+      "isActive": true
+    },
+    {
+      "id": "uuid",
+      "name": "API Keys",
+      "pattern": "(AKIA|ghp_)[A-Za-z0-9_]{20,}",
+      "severity": "block",
+      "action": "block_share",
+      "isActive": true
+    }
+  ]
+}
+```
+
+#### POST /api/dlp/rules
+Create new DLP rule.
+
+**Authorization**: Admin only
+
+**Request Body**:
+```json
+{
+  "name": "Credit Card Pattern",
+  "pattern": "\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}",
+  "patternType": "regex",
+  "severity": "block",
+  "action": "block_share"
+}
+```
+
+#### GET /api/files/:fileId/classification
+Get classification level for file.
+
+**Authorization**: Admin or file owner
+
+**Response (200)**:
+```json
+{
+  "classification": "confidential",
+  "reason": "auto_dlp",
+  "violatedRules": ["ssn_pattern", "financial_data"],
+  "setAt": "2026-01-15T10:30:00Z"
+}
+```
+
+#### PUT /api/files/:fileId/classification
+Manually set classification level.
+
+**Authorization**: Admin or file owner
+
+**Request Body**:
+```json
+{
+  "classification": "restricted",
+  "reason": "manual"
+}
+```
+
+#### GET /api/dlp/violations
+Get DLP violations for organization.
+
+**Authorization**: Admin only
+
+**Query Parameters**:
+- `startDate`: ISO 8601 date
+- `endDate`: ISO 8601 date
+- `resolved`: Filter by resolved status
+
+**Response (200)**:
+```json
+{
+  "violations": [
+    {
+      "id": "uuid",
+      "fileId": "uuid",
+      "fileName": "payroll.xlsx",
+      "ruleId": "ssn_rule",
+      "ruleName": "SSN Pattern",
+      "userId": "user-id",
+      "action": "share_blocked",
+      "matchedContent": "789-12-3456",
+      "createdAt": "2026-01-15T10:30:00Z",
+      "resolved": false
+    }
+  ],
+  "total": 23
+}
+```
+
+### 3.14 Device Trust & Conditional Access API
+
+#### GET /api/devices
+List user's trusted devices.
+
+**Authorization**: Authenticated user
+
+**Response (200)**:
+```json
+{
+  "devices": [
+    {
+      "id": "uuid",
+      "deviceName": "MacBook Pro",
+      "deviceType": "desktop",
+      "osName": "macOS",
+      "browserName": "Chrome",
+      "lastUsedAt": "2026-01-15T10:30:00Z",
+      "isRevoked": false
+    }
+  ]
+}
+```
+
+#### POST /api/devices/:deviceId/trust
+Mark device as trusted (after admin approval).
+
+**Authorization**: Admin approval workflow
+
+#### DELETE /api/devices/:deviceId
+Revoke device trust.
+
+**Authorization**: User or Admin
+
+#### GET /api/security/conditional-access
+List conditional access policies.
+
+**Authorization**: Admin only
+
+#### POST /api/security/conditional-access
+Create conditional access policy.
+
+**Authorization**: Admin only
+
+**Request Body**:
+```json
+{
+  "name": "Require MFA for Confidential Files",
+  "conditions": {
+    "sensitivityLevelMin": "confidential",
+    "untrustedDeviceOnly": true
+  },
+  "actions": {
+    "requireMfa": true,
+    "block": false
+  },
+  "priority": 1
+}
+```
+
+### 3.15 Semantic Search API
+
+#### GET /api/search/semantic
+Perform semantic (AI-powered) search.
+
+**Authorization**: Authenticated user
+
+**Query Parameters**:
+- `q`: Natural language query (required)
+- `type`: Filter by 'file' or 'folder'
+- `sensitivity`: Filter by classification level
+- `limit`: Max results (default: 50)
+
+**Response (200)**:
+```json
+{
+  "results": [
+    {
+      "type": "file",
+      "id": "uuid",
+      "name": "Q4_Financial_Report.pdf",
+      "path": "/Finance/Reports/Q4_Financial_Report.pdf",
+      "size": 2048000,
+      "mimeType": "application/pdf",
+      "relevance": 0.95,
+      "snippet": "...revenue increased by 15% in Q4 2025...",
+      "createdAt": "2026-01-10T09:00:00Z"
+    }
+  ],
+  "total": 12,
+  "took": 340 // milliseconds
+}
+```
+
+
 List user's integration connections.
 
 **Authorization**: Authenticated user
@@ -1371,7 +1826,262 @@ List workflow execution history.
 ```
 
 
-## 4. Component Architecture
+## 4. AI & Content Analysis Systems
+
+### 4.1 AI Document Analysis Service Architecture
+
+```typescript
+// server/services/aiAnalysisService.ts
+class AIAnalysisService {
+  private llmClient: LLMClient; // OpenAI, Anthropic, etc.
+  private embeddingModel: EmbeddingModel;
+  private cache: Redis;
+
+  async analyzeDocument(fileId: string, fileContent: Buffer, mimeType: string): Promise<DocumentAnalysis> {
+    // 1. Check cache
+    const cached = await this.cache.get(`analysis:${fileId}`);
+    if (cached) return JSON.parse(cached);
+
+    // 2. Extract text
+    const text = await this.extractText(fileContent, mimeType);
+
+    // 3. Generate embeddings
+    const embedding = await this.embeddingModel.embed(text.substring(0, 8192)); // Limit to 8K tokens
+
+    // 4. Run AI analysis (call LLM)
+    const analysis = await this.llmClient.analyzeDocument({
+      text,
+      schema: {
+        summary: string,
+        entities: Array<{type: string, value: string, confidence: number}>,
+        topics: string[],
+        classification: 'public' | 'internal' | 'confidential' | 'restricted'
+      }
+    });
+
+    // 5. Save to database
+    const result = await db.insert(documentAnalyses).values({
+      fileId,
+      summary: analysis.summary,
+      entities: JSON.stringify(analysis.entities),
+      keyTopics: JSON.stringify(analysis.topics),
+      embedding: JSON.stringify(embedding),
+      classification: analysis.classification,
+      confidence: analysis.confidence,
+      modelUsed: 'gpt-4'
+    }).returning();
+
+    // 6. Cache for 30 days
+    await this.cache.setex(`analysis:${fileId}`, 86400 * 30, JSON.stringify(result));
+
+    return result;
+  }
+
+  async extractText(buffer: Buffer, mimeType: string): Promise<string> {
+    switch (mimeType) {
+      case 'application/pdf':
+        return await pdf.getTextFromPdf(buffer);
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        return await docx.getTextFromDocx(buffer);
+      case 'image/png':
+      case 'image/jpeg':
+        return await ocr.extractTextFromImage(buffer);
+      default:
+        return buffer.toString('utf-8');
+    }
+  }
+
+  async findDuplicates(newEmbedding: number[], threshold: number = 0.95): Promise<File[]> {
+    // Use vector similarity search
+    const duplicates = await db.execute(sql`
+      SELECT * FROM content_embeddings
+      WHERE cosine_similarity(embedding, ${newEmbedding}) > ${threshold}
+      LIMIT 10
+    `);
+    return duplicates.map(e => e.fileId);
+  }
+}
+```
+
+### 4.2 DLP (Data Loss Prevention) Service
+
+```typescript
+// server/services/dlpService.ts
+class DLPService {
+  async scanFile(fileId: string, organizationId: string): Promise<DLPViolation[]> {
+    const file = await db.query.files.findFirst({ where: eq(files.id, fileId) });
+    const analysis = await db.query.documentAnalyses.findFirst({ where: eq(documentAnalyses.fileId, fileId) });
+
+    const rules = await db.query.dlpRules.findMany({
+      where: and(
+        eq(dlpRules.organizationId, organizationId),
+        eq(dlpRules.isActive, true)
+      )
+    });
+
+    const violations: DLPViolation[] = [];
+
+    for (const rule of rules) {
+      const matches = this.matchRule(rule, file, analysis);
+      if (matches.length > 0) {
+        violations.push({
+          ruleId: rule.id,
+          severity: rule.severity,
+          action: rule.action,
+          matches
+        });
+      }
+    }
+
+    // Apply action
+    if (violations.length > 0) {
+      const highestSeverity = this.getHighestSeverity(violations);
+      const action = violations[0].action;
+
+      if (action === 'block_share') {
+        // Block sharing this file
+        await db.update(files).set({ dlpBlockedUntil: new Date() }).where(eq(files.id, fileId));
+      }
+
+      if (action === 'alert') {
+        // Send alert to admins
+        await this.notifyAdmins(organizationId, violations);
+      }
+
+      // Log violation
+      await db.insert(dlpViolations).values({
+        fileId,
+        ruleId: violations[0].ruleId,
+        userId: file.uploadedBy,
+        action: action,
+        matchedContent: violations[0].matches[0].content,
+      });
+    }
+
+    return violations;
+  }
+
+  private matchRule(rule: DLPRule, file: File, analysis: DocumentAnalysis): Match[] {
+    const matches: Match[] = [];
+
+    if (rule.patternType === 'regex') {
+      const regex = new RegExp(rule.pattern, 'gi');
+      // Match against file name and analysis
+      const fileMatch = file.name.match(regex);
+      if (fileMatch) matches.push(...fileMatch);
+    } else if (rule.patternType === 'keyword') {
+      const keywords = rule.pattern.split(',').map(k => k.trim());
+      for (const keyword of keywords) {
+        if (analysis.summary?.includes(keyword)) {
+          matches.push({ content: keyword, confidence: 1.0 });
+        }
+      }
+    } else if (rule.patternType === 'ml') {
+      // Use AI to detect sensitive patterns
+      // E.g., "this looks like an API key" based on context
+    }
+
+    return matches;
+  }
+}
+```
+
+### 4.3 Conditional Access Service
+
+```typescript
+// server/services/conditionalAccessService.ts
+class ConditionalAccessService {
+  async evaluateAccess(
+    userId: string,
+    action: string,
+    resourceId: string,
+    context: AccessContext
+  ): Promise<AccessDecision> {
+    const organization = await this.getUserOrganization(userId);
+    const policies = await db.query.conditionalAccessPolicies.findMany({
+      where: and(
+        eq(conditionalAccessPolicies.organizationId, organization.id),
+        eq(conditionalAccessPolicies.isActive, true)
+      ),
+      orderBy: asc(conditionalAccessPolicies.priority)
+    });
+
+    for (const policy of policies) {
+      if (this.policyMatches(policy, context)) {
+        const decision = this.getDecision(policy);
+        
+        // Log evaluation
+        await db.insert(conditionalAccessEvaluations).values({
+          userId,
+          action,
+          resourceId,
+          matchedPolicies: JSON.stringify([policy.id]),
+          decision: decision.type,
+          challengeType: decision.challenge,
+          metadata: JSON.stringify(context)
+        });
+
+        return decision;
+      }
+    }
+
+    // Default allow
+    return { type: 'allow', challenge: null };
+  }
+
+  private policyMatches(policy: ConditionalAccessPolicy, context: AccessContext): boolean {
+    const conditions = JSON.parse(policy.conditions);
+
+    // Device trust check
+    if (conditions.requireTrustedDevice) {
+      const trusted = this.isDeviceTrusted(context.userId, context.deviceFingerprint);
+      if (!trusted) return true; // Policy matches (deny access)
+    }
+
+    // Location check (geofencing)
+    if (conditions.allowedCountries) {
+      const allowed = conditions.allowedCountries.includes(context.country);
+      if (!allowed) return true;
+    }
+
+    // Time-based check
+    if (conditions.businessHoursOnly) {
+      const hour = new Date().getHours();
+      if (hour < 9 || hour > 17) return true; // Outside business hours
+    }
+
+    // Risk-based check (impossible travel)
+    if (conditions.detectImpossibleTravel) {
+      const risky = this.isImpossibleTravel(context.userId, context.ip);
+      if (risky) return true;
+    }
+
+    // Sensitivity level check
+    if (conditions.sensitivityLevelMin) {
+      const resource = await this.getResource(context.resourceId);
+      if (resource.sensitivityLevel > conditions.sensitivityLevelMin) return true;
+    }
+
+    return false;
+  }
+
+  private getDecision(policy: ConditionalAccessPolicy): AccessDecision {
+    const actions = JSON.parse(policy.actions);
+    
+    if (actions.block) {
+      return { type: 'block', challenge: null };
+    } else if (actions.requireMfa) {
+      return { type: 'challenge', challenge: 'mfa' };
+    } else if (actions.requireApproval) {
+      return { type: 'challenge', challenge: 'approval' };
+    }
+
+    return { type: 'allow', challenge: null };
+  }
+}
+```
+
+
 
 ### 4.1 Frontend Components
 
@@ -1721,7 +2431,173 @@ class SearchService {
 ```
 
 
-## 5. Real-time Communication
+## 5. Global Scale & Performance Architecture
+
+### 5.1 Multi-Region Deployment Strategy
+
+**Architecture**:
+```
+Global Load Balancer (CloudFlare/Route53)
+  ↓
+┌─────────────────┬──────────────────┬──────────────────┐
+│ US-East Region  │ EU-West Region   │ Asia-Pacific Reg │
+└─────────────────┴──────────────────┴──────────────────┘
+   ↓                  ↓                   ↓
+  ALB              ALB              ALB
+   ↓                  ↓                   ↓
+App Servers      App Servers      App Servers
+(stateless)      (stateless)      (stateless)
+   ↓                  ↓                   ↓
+Postgres+      Postgres+        Postgres+
+Read Replicas  Read Replicas    Read Replicas
+   ↓                  ↓                   ↓
+ GCS Bucket    GCS Bucket       GCS Bucket
+ (regional)    (regional)       (regional)
+```
+
+**Implementation**:
+- Route users to nearest region based on geolocation
+- Replicate database across regions (primary-replica)
+- Regional object storage (GCS buckets per region)
+- Global CDN for static assets and public share links
+- Cross-region replication for HA
+
+### 5.2 Caching Strategy
+
+**Multi-Layer Cache**:
+```
+Browser Cache (HTTP headers)
+  ↓ Cache miss
+CDN Cache (CloudFlare)
+  ↓ Cache miss
+Application In-Memory Cache (LRU, 500MB)
+  ↓ Cache miss
+Redis Cache (distributed, 5-min TTL)
+  ↓ Cache miss
+Database (PostgreSQL)
+```
+
+**Cache Invalidation Strategy**:
+```typescript
+// server/cache/cacheManager.ts
+interface CacheInvalidationEvent {
+  type: 'file_update' | 'permission_change' | 'dlp_rule_update' | 'analysis_complete';
+  resourceId: string;
+  dependents?: string[]; // Other resources that depend on this
+}
+
+function getCacheKeysToInvalidate(event: CacheInvalidationEvent): string[] {
+  switch (event.type) {
+    case 'file_update':
+      return [
+        `file:${event.resourceId}`,
+        `file:${event.resourceId}:versions`,
+        `search:*`, // Invalidate all search results
+        `embeddings:${event.resourceId}`,
+        `analysis:${event.resourceId}`,
+      ];
+    case 'permission_change':
+      return [
+        `perm:*:file:${event.resourceId}`, // All user permissions
+        `file_access:${event.resourceId}`, // Access cache
+      ];
+    case 'dlp_rule_update':
+      return [
+        `dlp:*`, // All DLP caches
+        `file_classification:*`, // All file classifications
+      ];
+    case 'analysis_complete':
+      return [
+        `analysis:${event.resourceId}`,
+        `search:*`, // Invalidate search
+      ];
+  }
+}
+```
+
+### 5.3 Database Performance Optimization
+
+**Query Optimization**:
+1. **Materialized Views** for analytics
+   - `mv_daily_active_users` - DAU reporting
+   - `mv_top_shared_files` - Popular files
+   - `mv_user_storage_usage` - Storage analytics
+
+2. **Prepared Statements** for common queries
+   - `prepared_list_files`
+   - `prepared_check_permission`
+   - `prepared_get_versions`
+
+3. **Connection Pooling**
+   - Max pool size: 20
+   - Connection reuse: 5 minutes
+   - Idle timeout: 30 seconds
+
+4. **Query Execution Plans**
+   - Index all frequently filtered columns
+   - Use `EXPLAIN ANALYZE` for slow queries
+   - Set work_mem for large sorts
+
+### 5.4 CDN Strategy
+
+```typescript
+// server/middleware/cdn.ts
+function setCDNHeaders(res: Response, assetType: string) {
+  switch (assetType) {
+    case 'static_asset': // JS, CSS, images
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year
+      res.setHeader('CDN-Cache-Control', 'public, max-age=31536000');
+      break;
+    case 'public_share_link': // Public files
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
+      res.setHeader('CDN-Cache-Control', 'public, max-age=3600');
+      break;
+    case 'api_response': // API endpoints
+      res.setHeader('Cache-Control', 'private, max-age=300'); // 5 minutes
+      res.setHeader('Vary', 'Authorization'); // Don't cache across users
+      break;
+  }
+}
+```
+
+### 5.5 Real-time Communication Optimization
+
+**Binary Protocol for WebSocket** (reduce bandwidth):
+```typescript
+// server/realtime/binaryProtocol.ts
+interface BinaryMessage {
+  type: uint8; // 0=notification, 1=comment, 2=permission, 3=file_update
+  payload: Uint8Array; // MessagePack encoded data
+  timestamp: uint32;
+}
+
+// Text message: ~500 bytes
+// Binary message: ~50 bytes (90% reduction)
+```
+
+**Connection Optimization**:
+- Pool WebSocket connections
+- Implement heartbeat every 30 seconds
+- Reconnect with exponential backoff
+- Batch notifications (100ms window)
+
+### 5.6 Incremental Sync (Future)
+
+For offline-first capabilities:
+```typescript
+interface SyncDelta {
+  type: 'file_created' | 'file_updated' | 'file_deleted' | 'permission_changed';
+  resource: any;
+  timestamp: number;
+  hash: string; // For conflict detection
+}
+
+// Client tracks lastSyncTime
+// Server returns only changes since lastSyncTime
+// Reduces bandwidth for mobile users
+```
+
+
 
 ### 5.1 WebSocket Architecture
 
